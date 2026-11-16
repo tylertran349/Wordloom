@@ -243,6 +243,7 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+  resize: none;
 }
 
 button {
@@ -2508,7 +2509,7 @@ html[data-theme='dark'] .status-due {
   width: 100%;
   min-height: 72px;
   padding: 0.6rem 0.7rem;
-  resize: vertical;
+  resize: none;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
