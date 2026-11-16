@@ -82,6 +82,8 @@ export interface ProgressState {
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type AccentColor = 'jade' | 'indigo' | 'coral' | 'amber' | 'violet';
 export type AIProvider = 'gemini' | 'openai';
+/** 'google' uses Google Translate's free web TTS; 'browser' uses speechSynthesis. */
+export type TtsProvider = 'google' | 'browser';
 export type ThinkingLevel = 'auto' | 'none' | 'minimal' | 'low' | 'medium' | 'high';
 /** 'auto' follows the model/provider default; 'custom' sends the user's value. */
 export type TemperatureMode = 'auto' | 'custom';
@@ -108,6 +110,7 @@ export interface Settings {
   showExampleTranslations: boolean;
   showExerciseHints: boolean;
   autoplayAudio: boolean;
+  ttsProvider: TtsProvider;
   ttsRate: number;
 
   // Spaced repetition

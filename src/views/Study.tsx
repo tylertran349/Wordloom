@@ -74,7 +74,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
 
   useEffect(() => {
     if (word && settings.autoplayAudio) {
-      speakText(word.term, target.tts, settings.ttsRate);
+      void speakText(word.term, target.tts, settings.ttsRate, settings.ttsProvider);
     }
     // Only auto-play when the word changes, not when other settings change.
     // eslint-disable-next-line react-hooks/exhaustive-deps

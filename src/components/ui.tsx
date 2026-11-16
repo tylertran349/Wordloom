@@ -203,8 +203,9 @@ export function SpeakerButton({
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        const ok = speakText(text, lang, settings.ttsRate);
-        if (!ok) notify('Speech playback is not available in this browser.', 'error');
+        void speakText(text, lang, settings.ttsRate, settings.ttsProvider).then((ok) => {
+          if (!ok) notify('Speech playback is not available in this browser.', 'error');
+        });
       }}
       aria-label={label}
       title={label}

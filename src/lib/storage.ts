@@ -33,6 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showExampleTranslations: true,
   showExerciseHints: true,
   autoplayAudio: false,
+  ttsProvider: 'google',
   ttsRate: 0.9,
 
   startingEase: 2.5,
@@ -161,6 +162,7 @@ function normalizeSettings(raw: unknown): Settings {
     ),
     showExerciseHints: asBoolean(source.showExerciseHints, defaults.showExerciseHints),
     autoplayAudio: asBoolean(source.autoplayAudio, defaults.autoplayAudio),
+    ttsProvider: source.ttsProvider === 'browser' ? 'browser' : defaults.ttsProvider,
     ttsRate: asNumber(source.ttsRate, defaults.ttsRate, 0.5, 1.3),
 
     startingEase: asNumber(source.startingEase, defaults.startingEase, 1.3, 3.5),

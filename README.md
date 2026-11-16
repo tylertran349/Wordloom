@@ -137,8 +137,9 @@ work, services, and texting shortcuts. C1 and C2 are left empty by design.
 
 ## How the exercises work
 
-1. Read the word, meaning, and AI-generated examples. Optional browser text-to-speech uses the
-   target voice.
+1. Read the word, meaning, and AI-generated examples. Text-to-speech uses Google Translate's free
+   web voice by default, so the pronunciation sounds consistent on every device; you can switch to
+   your browser's built-in voice in Settings for offline use.
 2. Press **Generate with AI** on a word page to create a set of example sentences and
    native-language practice prompts. Generation is cached, so the same exercises come back on
    later visits.

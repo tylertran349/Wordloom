@@ -356,9 +356,9 @@ export function Settings() {
     setConfirmReset(null);
   }
 
-  function testVoice() {
+  async function testVoice() {
     const sample = getVoiceSample(target.code);
-    const ok = speakText(sample, target.tts, settings.ttsRate);
+    const ok = await speakText(sample, target.tts, settings.ttsRate, settings.ttsProvider);
     if (ok) {
       notify(`Playing “${sample}” in ${target.label}.`, 'info');
     } else {
@@ -663,7 +663,32 @@ export function Settings() {
                 />
               </Section>
 
-              <Section title="Audio" description="Speech uses your browser's built-in voice, so no audio files are downloaded.">
+              <Section
+                title="Audio"
+                description="Choose how words are spoken. Google Translate sounds the same on every device; browser voices work offline."
+              >
+                <Row
+                  label="Speech voice"
+                  hint="Google Translate plays short audio clips from the web. Browser voices depend on what your device provides."
+                  htmlFor="tts-provider"
+                >
+                  <div className="select-wrap">
+                    <select
+                      id="tts-provider"
+                      className="select-input select-medium"
+                      value={settings.ttsProvider}
+                      onChange={(event) =>
+                        updateSettings({
+                          ttsProvider: event.target.value as SettingsType['ttsProvider'],
+                        })
+                      }
+                    >
+                      <option value="google">Google Translate</option>
+                      <option value="browser">Browser voice</option>
+                    </select>
+                    <ChevronDown size={15} className="select-chevron" aria-hidden="true" />
+                  </div>
+                </Row>
                 <Toggle
                   label="Speak words automatically"
                   description="Play the target word when a study page opens."
