@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, Check, Copy, ExternalLink, EyeOff, Languages, Loader2 } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  Copy,
+  ExternalLink,
+  EyeOff,
+  Info,
+  Languages,
+  Loader2,
+} from 'lucide-react';
 import type { VocabWord } from '../types';
 import { useApp } from '../context/AppContext';
 import { getLanguage } from '../data/languages';
@@ -7,7 +16,7 @@ import {
   buildGoogleTranslateUrl,
   translateFree,
 } from '../lib/googleTranslate';
-import { cn } from '../lib/utils';
+import { cn, containsTerm } from '../lib/utils';
 import { SpeakerButton } from './ui';
 
 export function SolutionReveal({
@@ -33,6 +42,7 @@ export function SolutionReveal({
   const languageKey = `${native.code}>${target.code}`;
   const cacheKey = `${word.id}::${exerciseKey}::${languageKey}`;
   const solution = progress.solutions[cacheKey];
+  const solutionUsesTerm = solution ? containsTerm(solution, word.term) : true;
   const translateUrl = buildGoogleTranslateUrl(source, native.code, target.code);
 
   useEffect(() => {
@@ -173,6 +183,17 @@ export function SolutionReveal({
               {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
             </button>
           </div>
+          {!solutionUsesTerm && (
+            <div className="inline-alert is-info">
+              <Info size={15} aria-hidden="true" />
+              <span>
+                This solution does not visibly contain{' '}
+                <strong className="lang-target" lang={target.code}>{word.term}</strong>. It may
+                use a synonym or a different form, so check that your own answer uses the target
+                word.
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

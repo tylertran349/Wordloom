@@ -408,7 +408,7 @@ export async function generateExercises({
 Target vocabulary: "${word.term}" (${word.partOfSpeech ?? 'word'}) meaning "${word.definition}".
 Requirements:
 - Examples must naturally use "${word.term}" in a common, natural way.
-- Each practice sentence must naturally call for "${word.term}" in its most common ${target.label} translation.
+- Each practice sentence must be unambiguous: the only natural ${target.label} rendering must use exactly "${word.term}", never a common synonym. Add the context, collocation, or detail that rules out synonyms, because a machine translator will otherwise pick whichever wording is most frequent.
 - Match ${word.level} difficulty: vocabulary, grammar, and sentence length should fit that CEFR band.
 - Vary the grammar and context. Avoid repeating sentence openings.
 - Examples: write the sentence in ${target.label} ("target") and its natural ${native.label} translation ("native").

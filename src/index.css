@@ -2713,6 +2713,10 @@ html[data-theme='dark'] .status-due {
 .solution-reveal > .inline-alert {
   margin-top: 0.4rem;
 }
+.solution-reveal .inline-alert strong {
+  color: var(--ink);
+  font-weight: 600;
+}
 
 .ai-feedback {
   margin-top: 0.55rem;

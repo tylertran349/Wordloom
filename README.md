@@ -154,7 +154,8 @@ work, services, and texting shortcuts. C1 and C2 are left empty by design.
 3. Write your translation for each prompt. Drafts are saved automatically.
 4. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,
    play it aloud, or open the same sentence on translate.google.com. A direct link is always
-   available when the fetch fails.
+   available when the fetch fails. The reveal also checks whether the solution visibly contains
+   the studied term and notes when Google Translate picked a synonym or a different form.
 5. Optionally use **Check with AI** for specific feedback (when a provider is configured).
 6. Add the word to your review queue. Wordloom schedules its first check-in after the learning
    step (default 10 minutes).

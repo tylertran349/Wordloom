@@ -151,6 +151,30 @@ export function truncate(value: string, length: number): string {
   return `${value.slice(0, length).trimEnd()}…`;
 }
 
+const TYPOGRAPHIC_APOSTROPHES = /[\u2018\u2019\u02bc\u00b4]/g;
+
+function foldForComparison(value: string): string {
+  return value
+    .normalize('NFC')
+    .replace(TYPOGRAPHIC_APOSTROPHES, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Check whether a translation visibly uses the studied term. Comparison ignores
+ * case, spacing, and apostrophe style but keeps diacritics, so Vietnamese words
+ * such as "má" and "mà" do not collide. Inflections are only caught when they
+ * keep the term intact ("run" inside "running"), so this is a hint rather than
+ * a strict assertion.
+ */
+export function containsTerm(text: string, term: string): boolean {
+  const needle = foldForComparison(term);
+  if (!needle) return true;
+  return foldForComparison(text).includes(needle);
+}
+
 export function downloadText(filename: string, text: string, type = 'text/plain'): void {
   const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
