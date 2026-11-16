@@ -1,0 +1,56 @@
+# Fitness, nutrition, mental health, and healthy routines.
+thể chất|noun|Physical health; physique.|health,body
+tinh thần|noun|Spirit; mental state.|health,mind
+chế độ sinh hoạt|noun|Daily routine; lifestyle regimen.|health,daily life
+giấc ngủ|noun|Sleep; a sleep cycle.|health,sleep
+thói quen ăn uống|noun|Eating habits.|health,food
+cân bằng|noun|Balance.|health,daily life
+sức sống|noun|Vitality; life force; energy.|health,daily life
+sức bền|noun|Stamina; endurance.|health,fitness
+dẻo dai|adjective|Supple and resilient; flexible.|health,fitness
+vận động|verb|To move; physical activity.|health,fitness
+thể dục|noun|Exercise; physical education.|health,fitness
+thể thao|noun|Sport; sports.|health,sport
+chất béo|noun|Fat; dietary fat.|health,food
+chất đạm|noun|Protein.|health,food
+chất xơ|noun|Fibre.|health,food
+đường huyết|noun|Blood sugar.|health,medicine
+cholesterol|noun|Cholesterol.|health,medicine
+béo phì|noun|Obesity.|health,medicine
+suy dinh dưỡng|noun|Malnutrition.|health,medicine
+thiếu máu|noun|Anaemia.|health,medicine
+phòng bệnh|verb|To prevent illness.|health,medicine
+chữa bệnh|verb|To cure illness; to treat.|health,medicine
+triệu chứng|noun|Symptom.|health,medicine
+chẩn đoán|noun|Diagnosis; to diagnose.|health,medicine
+điều trị|noun|Treatment; to treat.|health,medicine
+liều lượng|noun|Dosage.|health,medicine
+tác dụng phụ|noun|Side effect.|health,medicine
+kháng sinh|noun|Antibiotic.|health,medicine
+thuốc giảm đau|noun|Painkiller.|health,medicine
+bệnh mãn tính|noun|Chronic disease.|health,medicine
+bệnh truyền nhiễm|noun|Infectious disease.|health,medicine
+lây lan|verb|To spread; to transmit.|health,medicine
+cách ly|verb|To isolate; quarantine.|health,medicine
+tiêm chủng|verb|To vaccinate; immunisation.|health,medicine
+khám định kỳ|verb|To have a regular check-up.|health,medicine
+sức khỏe tinh thần|noun|Mental health.|health,mind
+trầm cảm|noun|Depression.|health,mind
+lo âu|noun|Anxiety.|health,mind
+kiệt sức|verb|To be exhausted; burnout.|health,mind
+nghỉ dưỡng|verb|To take a restorative break; to convalesce.|health,leisure
+hít thở|verb|To breathe; to inhale.|health,body
+thở sâu|verb|To breathe deeply.|health,body
+uống đủ nước|verb|To drink enough water.|health,daily life
+đi ngủ sớm|verb|To go to bed early.|health,sleep
+giảm cân|verb|To lose weight.|health,fitness
+tăng cân|verb|To gain weight.|health,fitness
+vóc dáng|noun|Figure; body shape.|health,appearance
+thon gọn|adjective|Slim; trim.|health,appearance
+rèn luyện thể lực|verb|To build physical fitness.|health,fitness
+sức khỏe sinh sản|noun|Reproductive health.|health,medicine
+khám thai|verb|To have a prenatal check-up.|health,family
+sinh nở|verb|To give birth.|health,family
+chăm sóc sau sinh|noun|Postnatal care.|health,family
+tuổi thọ|noun|Life expectancy; lifespan.|health,life
+sống khỏe|verb|To live healthily.|health,daily life

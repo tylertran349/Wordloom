@@ -1,0 +1,56 @@
+# Daily routines, chores, renting a home, and household admin.
+dọn dẹp|verb|To tidy up; to clean.|home,chores
+rửa bát|verb|To wash the dishes.|home,chores
+đổ rác|verb|To take out the rubbish.|home,chores
+gấp quần áo|verb|To fold clothes.|home,chores
+ủi đồ|verb|To iron clothes.|home,chores
+lau nhà|verb|To mop the floor.|home,chores
+quét nhà|verb|To sweep the floor.|home,chores
+đi chợ|verb|To go to the market; to do the grocery shopping.|food,chores
+nấu cơm|verb|To cook rice; to make a meal.|food,chores
+chuẩn bị|verb|To prepare; to get ready.|daily life,work
+sắp xếp|verb|To arrange; to organise.|daily life,work
+sửa chữa|verb|To repair; to fix.|home,work
+trang trí|verb|To decorate.|home,leisure
+chuyển nhà|verb|To move house.|home,life
+thuê nhà|verb|To rent a house or flat.|home,money
+khu phố|noun|Neighbourhood; block.|home,places
+chung cư|noun|Apartment building; block of flats.|home,building
+căn hộ|noun|Flat; apartment.|home,building
+phòng trọ|noun|Rented room; lodgings.|home,money
+tiền điện|noun|Cost of electricity; the electricity charge.|home,money
+tiền nước|noun|Water bill.|home,money
+tiền nhà|noun|Rent; housing payment.|home,money
+hợp đồng|noun|Contract; agreement.|work,law
+nội quy|noun|Rules; regulations.|home,work
+ấm đun nước|noun|Electric kettle.|home,kitchen
+lò vi sóng|noun|Microwave oven.|home,kitchen
+nồi cơm điện|noun|Rice cooker.|home,kitchen
+máy hút bụi|noun|Vacuum cleaner.|home,appliance
+bàn ủi|noun|Iron; clothes iron.|home,appliance
+bồn rửa|noun|Sink; washbasin.|home,kitchen
+vòi nước|noun|Tap; faucet.|home,kitchen
+ngăn kéo|noun|Drawer.|home,furniture
+thảm|noun|Carpet; rug; mat.|home,furniture
+rèm|noun|Curtain.|home,furniture
+thức khuya|verb|To stay up late.|daily life,health
+dậy sớm|verb|To get up early.|daily life,morning
+tập thể dục|verb|To exercise; to work out.|health,sport
+đánh răng|verb|To brush one's teeth.|health,hygiene
+rửa mặt|verb|To wash one's face.|health,hygiene
+ăn sáng|verb|To have breakfast.|food,daily life
+tan làm|verb|To finish work; to clock off.|work,daily life
+nghỉ ngơi|verb|To rest; to relax.|health,daily life
+ngủ trưa|verb|To take a nap; to have a midday sleep.|daily life,health
+mặc|verb|To wear; to put on clothes.|clothing,daily life
+cởi|verb|To take off clothes.|clothing,daily life
+đội|verb|To wear something on the head, such as a hat.|clothing,daily life
+đeo|verb|To wear accessories such as glasses, jewellery, or a bag.|clothing,daily life
+bưu kiện|noun|Parcel; package.|services,shopping
+giao hàng|verb|To deliver goods.|services,shopping
+đặt hàng|verb|To place an order.|shopping,services
+nhận hàng|verb|To receive a delivery.|shopping,services
+đổi trả|verb|To exchange or return goods.|shopping,services
+bảo hành|noun|Warranty.|shopping,services
+biên lai|noun|Receipt.|shopping,money
+đồ cũ|noun|Second-hand items; old stuff.|shopping,daily life

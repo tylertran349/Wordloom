@@ -1,0 +1,80 @@
+# Pronouns, family, and the people you meet every day.
+tôi|pronoun|I; me; the neutral first-person pronoun.|people,basics
+mình|pronoun|I; me; informal, also used as 'you' between close friends.|people,daily life
+bạn|pronoun|You; friend; used with people of similar age.|people,basics
+anh|pronoun|Older brother; also 'you' to a man a little older, or 'he'.|people,family
+chị|pronoun|Older sister; also 'you' to a woman a little older, or 'she'.|people,family
+em|pronoun|Younger sibling; also 'you' to someone younger and a sweetheart term.|people,family
+ông|noun|Grandfather; also a polite title for an elderly man.|people,family
+bà|noun|Grandmother; also a polite title for an elderly woman.|people,family
+chú|noun|Uncle; a father's younger brother, or a title for a middle-aged man.|people,family
+cô|noun|Aunt; a father's younger sister, or a title for a woman or female teacher.|people,family
+bác|noun|Older uncle or aunt; also a respectful title for someone older.|people,family
+dì|noun|Aunt; the mother's sister.|people,family
+cậu|noun|Uncle; the mother's brother.|people,family
+cháu|noun|Grandchild; nephew or niece; also 'you' to a much younger person.|people,family
+con|noun|Child; also a classifier for animals and small objects.|people,family
+họ|pronoun|They; them.|people,grammar
+chúng tôi|pronoun|We; us, excluding the person spoken to.|people,grammar
+chúng ta|pronoun|We; us, including the person spoken to.|people,grammar
+mọi người|pronoun|Everyone; everybody.|people,daily life
+ai|pronoun|Who; anyone; someone.|people,grammar
+người|noun|Person; people; also a classifier for people.|people,basics
+đàn ông|noun|Man; men.|people,basics
+phụ nữ|noun|Woman; women.|people,basics
+con trai|noun|Boy; son.|people,family
+con gái|noun|Girl; daughter.|people,family
+cô gái|noun|Girl; young woman.|people,daily life
+chàng trai|noun|Young man; guy.|people,daily life
+em bé|noun|Baby; small child.|people,family
+trẻ con|noun|Children; kids.|people,family
+người lớn|noun|Adult; grown-up.|people,daily life
+người già|noun|Elderly people; the elderly.|people,daily life
+thanh niên|noun|Young people; a young person.|people,society
+bố|noun|Dad; father.|family,basics
+mẹ|noun|Mom; mother.|family,basics
+ba|noun|Dad; an affectionate word for father, common in the south.|family,daily life
+má|noun|Mom; an affectionate word for mother, common in the south.|family,daily life
+cha|noun|Father; a more formal word for dad.|family,formal
+anh trai|noun|Older brother.|family,basics
+em trai|noun|Younger brother.|family,basics
+chị gái|noun|Older sister.|family,basics
+em gái|noun|Younger sister.|family,basics
+ông nội|noun|Paternal grandfather; father's father.|family,basics
+bà nội|noun|Paternal grandmother; father's mother.|family,basics
+ông ngoại|noun|Maternal grandfather; mother's father.|family,basics
+bà ngoại|noun|Maternal grandmother; mother's mother.|family,basics
+cháu trai|noun|Grandson; nephew.|family,basics
+cháu gái|noun|Granddaughter; niece.|family,basics
+vợ|noun|Wife.|family,relationships
+chồng|noun|Husband.|family,relationships
+vợ chồng|noun|A married couple; husband and wife.|family,relationships
+bố mẹ|noun|Parents; mum and dad.|family,basics
+gia đình|noun|Family; household.|family,basics
+họ hàng|noun|Relatives; extended family.|family,society
+người thân|noun|Close family; loved ones.|family,relationships
+bạn trai|noun|Boyfriend.|relationships,daily life
+bạn gái|noun|Girlfriend.|relationships,daily life
+người yêu|noun|Partner; boyfriend or girlfriend; sweetheart.|relationships,daily life
+bạn thân|noun|Best friend; close friend.|relationships,friendship
+hàng xóm|noun|Neighbour.|people,daily life
+đồng nghiệp|noun|Colleague; coworker.|work,people
+bạn học|noun|Classmate; schoolmate.|school,people
+thầy giáo|noun|Male teacher.|school,people
+cô giáo|noun|Female teacher.|school,people
+khách|noun|Guest; customer; visitor.|people,daily life
+người lạ|noun|Stranger.|people,daily life
+người nước ngoài|noun|Foreigner; someone from another country.|people,travel
+tên|noun|Name.|basics,people
+tuổi|noun|Age; years of age.|basics,people
+đám cưới|noun|Wedding.|celebration,family
+sinh nhật|noun|Birthday.|celebration,daily life
+con dâu|noun|Daughter-in-law; a son's wife.|family,relationships
+con rể|noun|Son-in-law; a daughter's husband.|family,relationships
+anh rể|noun|Older sister's husband; brother-in-law.|family,relationships
+chị dâu|noun|Older brother's wife; sister-in-law.|family,relationships
+mẹ chồng|noun|Mother-in-law; husband's mother.|family,relationships
+bố vợ|noun|Father-in-law; wife's father.|family,relationships
+con nuôi|noun|Adopted child.|family,relationships
+sinh đôi|adjective|Twin; born as a pair.|family,description
+bạn bè|noun|Friends.|friendship,people

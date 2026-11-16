@@ -1,0 +1,71 @@
+# The adjectives you reach for when describing almost anything.
+tốt|adjective|Good; fine; kind.|description,opinion
+xấu|adjective|Bad; ugly; poor in quality.|description,opinion
+đẹp|adjective|Beautiful; pretty; nice-looking.|description,appearance
+cao|adjective|Tall; high.|description,size
+thấp|adjective|Short in height; low.|description,size
+dài|adjective|Long.|description,size
+ngắn|adjective|Short in length.|description,size
+to|adjective|Big; large; loud.|description,size
+nhỏ|adjective|Small; little.|description,size
+lớn|adjective|Big; large; grown-up.|description,size
+mới|adjective|New; fresh; just now.|description,time
+cũ|adjective|Old; used; former.|description,time
+nhanh|adjective|Fast; quick.|description,speed
+chậm|adjective|Slow.|description,speed
+dễ|adjective|Easy; simple.|description,learning
+khó|adjective|Difficult; hard.|description,learning
+vui|adjective|Happy; glad; fun.|emotion,description
+buồn|adjective|Sad; bored.|emotion,description
+tức|adjective|Angry; annoyed; upset.|emotion,description
+sợ|adjective|Afraid; scared.|emotion,description
+lo|adjective|Worried; uneasy, in casual speech.|emotion,description
+hạnh phúc|adjective|Happy; blissful.|emotion,description
+may mắn|adjective|Lucky; fortunate.|description,life
+đúng|adjective|Correct; right.|description,opinion
+sai|adjective|Wrong; incorrect.|description,opinion
+giả|adjective|Fake; false; artificial.|description,shopping
+rẻ|adjective|Cheap; inexpensive.|shopping,money
+đắt|adjective|Expensive.|shopping,money
+giàu|adjective|Rich; wealthy.|money,description
+nghèo|adjective|Poor; impoverished.|money,description
+sạch|adjective|Clean; clear.|description,home
+bẩn|adjective|Dirty; unclean.|description,home
+yên tĩnh|adjective|Quiet; peaceful.|description,places
+ồn ào|adjective|Noisy; bustling.|description,places
+đông|adjective|Crowded; many people.|description,places
+vắng|adjective|Empty; deserted; quiet.|description,places
+nặng|adjective|Heavy.|description,weight
+nhẹ|adjective|Light in weight; gentle.|description,weight
+cứng|adjective|Hard; stiff; firm.|description,texture
+mềm|adjective|Soft; tender.|description,texture
+thơm|adjective|Fragrant; delicious-smelling.|description,smell
+hôi|adjective|Smelly; stinky.|description,smell
+sáng|adjective|Bright; light-coloured.|description,light
+tối|adjective|Dark; dim.|description,light
+trẻ|adjective|Young.|description,age
+già|adjective|Old; aged.|description,age
+ốm|adjective|Sick; ill, especially in northern speech.|health,description
+bận|adjective|Busy.|work,daily life
+rảnh|adjective|Free; available; not busy.|daily life,work
+thân thiện|adjective|Friendly.|personality,description
+tốt bụng|adjective|Kind-hearted; generous.|personality,description
+thông minh|adjective|Clever; intelligent.|personality,description
+chăm chỉ|adjective|Hard-working; diligent.|personality,work
+lười|adjective|Lazy.|personality,work
+kiên nhẫn|adjective|Patient; able to wait calmly.|personality,description
+bình thường|adjective|Normal; ordinary; so-so.|description,opinion
+đặc biệt|adjective|Special; particular.|description,opinion
+quan trọng|adjective|Important.|description,opinion
+cần thiết|adjective|Necessary; needed.|description,opinion
+an toàn|adjective|Safe; secure.|description,safety
+nguy hiểm|adjective|Dangerous; risky.|description,safety
+thú vị|adjective|Interesting; enjoyable.|description,opinion
+chán|adjective|Boring; fed up.|emotion,opinion
+buồn cười|adjective|Funny; amusing.|description,humour
+đáng yêu|adjective|Cute; lovable.|description,appearance
+xinh|adjective|Pretty; beautiful, often of women or things.|description,appearance
+đẹp trai|adjective|Handsome.|description,appearance
+lạ|adjective|Strange; unfamiliar.|description,opinion
+sẵn sàng|adjective|Ready; prepared.|description,daily life
+miễn phí|adjective|Free of charge.|money,services

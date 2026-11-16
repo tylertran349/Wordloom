@@ -1,0 +1,61 @@
+# Abstract nouns for plans, risks, evidence, and outcomes.
+khả năng|noun|Ability; possibility.|thinking,potential
+tiềm lực|noun|Potential; latent capacity.|work,potential
+thế mạnh|noun|Strength; strong point.|work,character
+rào cản|noun|Barrier; obstacle.|society,limits
+thách thức|noun|Challenge.|work,life
+cơ hội|noun|Opportunity; chance.|work,life
+rủi ro|noun|Risk.|work,decisions
+bất trắc|noun|Uncertainty; misfortune.|life,risk
+hệ quả|noun|Consequence.|thinking,cause
+nguyên nhân|noun|Cause; reason.|thinking,cause
+mục đích|noun|Purpose; aim.|thinking,goals
+động cơ|noun|Motive; motivation.|psychology,thinking
+ý định|noun|Intention.|thinking,decisions
+dự định|noun|Plan; intention.|thinking,planning
+chiến lược|noun|Strategy.|work,planning
+chiến thuật|noun|Tactics.|work,planning
+tầm nhìn|noun|Vision; outlook.|work,leadership
+sứ mệnh|noun|Mission.|work,values
+định hướng|noun|Orientation; direction.|work,planning
+tiêu chí|noun|Criterion.|work,thinking
+thước đo|noun|Measure; yardstick.|thinking,statistics
+chỉ số|noun|Index; indicator.|statistics,science
+dấu hiệu|noun|Sign; indication.|thinking,health
+biểu hiện|noun|Expression; manifestation.|thinking,behaviour
+đặc điểm|noun|Characteristic; feature.|thinking,description
+thuộc tính|noun|Attribute; property.|thinking,science
+khía cạnh|noun|Aspect; angle.|thinking,communication
+phương diện|noun|Aspect; respect.|thinking,communication
+phạm vi|noun|Scope; range.|thinking,work
+quy mô|noun|Scale; size.|economy,work
+mức độ|noun|Degree; level.|thinking,statistics
+quy luật|noun|Law; regularity.|science,thinking
+nguyên lý|noun|Principle; fundamental law.|science,thinking
+nguồn lực|noun|Resources.|work,economy
+lợi thế|noun|Advantage.|work,decisions
+bất lợi|noun|Disadvantage; drawback.|work,decisions
+trở ngại|noun|Obstacle; hindrance.|life,work
+khó khăn|noun|Difficulty; hardship.|life,work
+sức ép|noun|Pressure; pressure from outside.|society,psychology
+công luận|noun|Public opinion as a collective, formal voice.|media,society
+uy tín|noun|Prestige; credibility.|work,society
+danh tiếng|noun|Reputation; fame.|media,society
+thân thế|noun|Background; personal history.|life,people
+lai lịch|noun|Origin; background history.|life,people
+xuất thân|noun|Social background; origins.|life,society
+hoàn cảnh|noun|Circumstances; situation.|life,society
+tình huống|noun|Situation; scenario.|life,work
+tình trạng|noun|Condition; state of affairs.|life,work
+hiện trạng|noun|Current state; status quo.|work,society
+viễn cảnh|noun|Outlook; future scenario.|thinking,future
+kịch bản|noun|Scenario; script.|thinking,media
+giải pháp|noun|Solution.|thinking,work
+biện pháp|noun|Measure; remedy.|thinking,work
+cách thức|noun|Way; method.|thinking,work
+phương thức|noun|Method; mode.|thinking,work
+tính khả thi|noun|Feasibility.|thinking,planning
+hiệu lực|noun|Effect; validity.|law,work
+hệ lụy|noun|Repercussion; negative consequence.|thinking,cause
+hậu quả|noun|Consequence; aftermath.|thinking,cause
+thành tựu|noun|Achievement; accomplishment.|work,achievement

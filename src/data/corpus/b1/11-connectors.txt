@@ -1,0 +1,61 @@
+# Discourse markers and the casual phrases that make speech sound natural.
+nhìn chung|adverb|Overall; generally.|connectors,opinion
+về cơ bản|adverb|Basically; fundamentally.|connectors,opinion
+trên thực tế|adverb|In reality; in practice.|connectors,opinion
+đáng lẽ|adverb|Should have; ought to have.|connectors,regret
+lẽ ra|adverb|Should have; ideally.|connectors,regret
+may mắn thay|adverb|Fortunately; luckily.|connectors,emotion
+thật không may|adverb|Unfortunately.|connectors,emotion
+không những|conjunction|Not only.|connectors,grammar
+càng ngày càng|adverb|More and more; increasingly.|connectors,change
+dần dần|adverb|Gradually; little by little.|time,change
+đột nhiên|adverb|Suddenly.|time,change
+bỗng nhiên|adverb|All of a sudden.|time,change
+ngay lập tức|adverb|Immediately; at once.|time,action
+từ từ|adverb|Slowly; take your time.|time,daily life
+sớm muộn|adverb|Sooner or later.|time,future
+rốt cuộc|adverb|In the end; after all.|time,connectors
+xét cho cùng|adverb|After all; all things considered.|connectors,opinion
+có gì đâu|phrase|It's nothing; no trouble at all.|daily life,politeness
+đầu tiên|adverb|Firstly; first of all.|connectors,ordering
+tiếp đến|adverb|Secondly; next.|connectors,ordering
+mặt khác|adverb|On the other hand.|connectors,opinion
+ngược lại|adverb|Conversely; on the contrary.|connectors,opinion
+trái lại|adverb|On the contrary.|connectors,opinion
+đồng thời|adverb|At the same time; also.|connectors,time
+trong khi đó|adverb|Meanwhile.|connectors,time
+bên cạnh đó|adverb|Besides that; in addition.|connectors,opinion
+vì thế|adverb|Therefore; for that reason.|connectors,cause
+cho nên|conjunction|So; therefore.|connectors,cause
+bởi vì|conjunction|Because.|connectors,cause
+cho dù|conjunction|Even if; regardless.|connectors,grammar
+chắc là|adverb|Probably; I think so.|opinion,grammar
+có khả năng|phrase|It is possible; likely.|opinion,grammar
+tất nhiên|adverb|Of course; naturally.|opinion,grammar
+đương nhiên|adverb|Naturally; obviously.|opinion,grammar
+đúng vậy|phrase|That's right; exactly.|agreement,daily life
+sai rồi|phrase|That's wrong.|disagreement,daily life
+để xem đã|phrase|Let me see first; hold on.|daily life,slang
+thôi được rồi|phrase|Fine, okay then; never mind.|daily life,slang
+chuyện nhỏ|phrase|No big deal; it's nothing.|daily life,slang
+đúng là|phrase|Truly; indeed; that's really…|daily life,slang
+thật á|phrase|Really?; for real?|daily life,slang
+vậy hả|phrase|Oh really?; is that so?|daily life,slang
+chứ sao|phrase|Of course; obviously.|daily life,slang
+biết đâu đấy|phrase|Who knows; maybe.|daily life,slang
+không đùa đâu|phrase|I'm not joking.|daily life,slang
+đùa thôi|phrase|Just kidding.|daily life,slang
+hết hồn|phrase|That scared me; phew.|daily life,slang
+tuyệt vời|adjective|Wonderful; excellent.|opinion,daily life
+quá đã|phrase|Awesome; so satisfying.|slang,opinion
+nói cách khác|adverb|In other words.|connectors,communication
+nói tóm lại|adverb|To put it briefly; in summary.|connectors,communication
+ví dụ như|phrase|For example; such as.|connectors,communication
+đặc biệt là|adverb|Especially; in particular.|connectors,opinion
+nhất là|adverb|Especially; above all.|connectors,opinion
+không ngờ|phrase|Unexpectedly; who would have thought.|emotion,daily life
+hóa ra|verb|It turns out; to turn out.|thinking,daily life
+vốn dĩ|adverb|Originally; inherently.|time,opinion
+từ đầu|adverb|From the beginning.|time,daily life
+trước mắt|adverb|For now; in the immediate future.|time,planning
+suýt nữa|adverb|Almost; nearly did something.|time,regret

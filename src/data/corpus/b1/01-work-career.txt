@@ -1,0 +1,76 @@
+# Careers, meetings, contracts, and the vocabulary of a workplace.
+sự nghiệp|noun|Career; professional life.|work,career
+nghề|noun|Trade; occupation; profession.|work,career
+chuyên ngành|noun|Specialisation; major field of study.|work,school
+vị trí|noun|Position; location.|work,career
+chức vụ|noun|Job title; post.|work,career
+trách nhiệm|noun|Responsibility.|work,character
+quyền hạn|noun|Authority; powers.|work,law
+năng lực|noun|Competence; ability.|work,career
+trình độ|noun|Level of education or skill.|work,school
+mục tiêu|noun|Goal; target.|work,planning
+chỉ tiêu|noun|Quota; target.|work,business
+kế hoạch|noun|Plan.|work,planning
+tiến độ|noun|Progress; schedule.|work,planning
+hiệu quả|noun|Effectiveness; efficiency.|work,opinion
+năng suất|noun|Productivity.|work,economy
+chất lượng|noun|Quality.|work,opinion
+doanh thu|noun|Revenue; turnover.|business,money
+lợi nhuận|noun|Profit.|business,money
+chi phí|noun|Cost; expense.|business,money
+ngân sách|noun|Budget.|business,money
+đàm phán|noun|Negotiation; to negotiate.|work,communication
+thương lượng|noun|Bargaining; negotiation.|work,communication
+thỏa thuận|noun|Agreement; deal.|work,business
+cam kết|noun|Commitment; pledge.|work,business
+điều khoản|noun|Term; clause.|law,work
+bản thảo|noun|Draft.|work,writing
+giấy tờ|noun|Papers; documents.|work,admin
+thủ tục|noun|Procedure; paperwork.|work,admin
+quy trình|noun|Process; procedure.|work,business
+chính sách|noun|Policy.|work,society
+quy định|noun|Rule; regulation.|work,law
+phòng ban|noun|Department; section.|work,office
+bộ phận|noun|Part; department.|work,office
+chi nhánh|noun|Branch.|work,business
+tập đoàn|noun|Corporation; group.|work,business
+doanh nghiệp|noun|Enterprise; business.|work,business
+startup|noun|Startup company.|work,business
+cơ quan|noun|Agency; office; organ.|work,government
+ứng viên|noun|Candidate; applicant.|work,career
+thử việc|noun|Probation; trial period.|work,career
+đào tạo|noun|Training.|work,school
+hướng dẫn|noun|Guidance; instructions; to guide.|work,learning
+đánh giá|noun|Evaluation; assessment.|work,opinion
+nhận xét|noun|Comment; feedback.|work,opinion
+phê duyệt|noun|Approval.|work,business
+biên bản|noun|Minutes; written record.|work,office
+lịch họp|noun|Meeting schedule.|work,office
+khối lượng|noun|Volume; workload; mass.|work,science
+cấp trên|noun|Superior; boss.|work,people
+cấp dưới|noun|Subordinate.|work,people
+nhà cung cấp|noun|Supplier; provider.|work,business
+cổ đông|noun|Shareholder.|work,business
+nhà đầu tư|noun|Investor.|work,money
+lãnh đạo|noun|Leader; leadership.|work,people
+nghỉ hưu|verb|To retire.|work,life
+nghỉ thai sản|noun|Maternity leave.|work,family
+bảo hiểm|noun|Insurance.|work,money
+hợp đồng lao động|noun|Employment contract.|work,law
+thưởng|noun|Bonus; reward.|work,money
+phụ cấp|noun|Allowance.|work,money
+làm thêm|verb|To do extra work; to moonlight.|work,money
+bán thời gian|adjective|Part-time.|work,time
+toàn thời gian|adjective|Full-time.|work,time
+thăng tiến|verb|To advance in one's career.|work,career
+chuyển việc|verb|To change jobs.|work,career
+từ chức|verb|To resign.|work,career
+hiệu suất|noun|Performance; efficiency rate.|work,business
+triển vọng|noun|Prospect; outlook.|work,career
+thâm niên|noun|Seniority; length of service.|work,career
+công đoàn|noun|Trade union.|work,society
+thư xin việc|noun|Cover letter.|work,career
+quản trị|noun|Management; administration.|work,business
+điều hành|noun|Operation; to run a business.|work,business
+giám sát|noun|Supervision; to supervise.|work,management
+phân công|noun|Assignment; allocation of tasks.|work,management

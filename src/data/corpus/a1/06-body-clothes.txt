@@ -1,0 +1,63 @@
+# Body, basic health, clothing, and colours.
+cơ thể|noun|The body.|body,health
+đầu|noun|Head.|body,basics
+tóc|noun|Hair.|body,appearance
+mặt|noun|Face.|body,basics
+mắt|noun|Eye.|body,basics
+mũi|noun|Nose.|body,basics
+miệng|noun|Mouth.|body,basics
+răng|noun|Tooth; teeth.|body,basics
+tai|noun|Ear.|body,basics
+cổ|noun|Neck; throat.|body,basics
+vai|noun|Shoulder.|body,basics
+tay|noun|Arm; hand.|body,basics
+ngón tay|noun|Finger.|body,basics
+bụng|noun|Belly; stomach.|body,basics
+lưng|noun|Back.|body,basics
+chân|noun|Leg; foot.|body,basics
+đầu gối|noun|Knee.|body,basics
+da|noun|Skin; leather.|body,appearance
+sức khỏe|noun|Health.|health,daily life
+bệnh|noun|Illness; disease.|health,body
+đau|verb|To hurt; to be in pain; painful.|health,body
+sốt|noun|Fever.|health,body
+ho|verb|To cough; a cough.|health,body
+cảm|noun|A cold; to catch a cold.|health,body
+đau đầu|noun|Headache.|health,body
+thuốc|noun|Medicine; medication.|health,pharmacy
+bác sĩ|noun|Doctor.|health,people
+y tá|noun|Nurse.|health,people
+bệnh viện|noun|Hospital.|health,places
+khỏe|adjective|Healthy; well; strong.|health,daily life
+mệt|adjective|Tired; exhausted.|health,daily life
+đói|adjective|Hungry.|health,food
+khát|adjective|Thirsty.|health,drink
+no|adjective|Full; not hungry.|health,food
+quần áo|noun|Clothes; clothing.|clothing,daily life
+áo|noun|Shirt; top; jacket.|clothing,daily life
+áo sơ mi|noun|Shirt; button-down shirt.|clothing,work
+áo thun|noun|T-shirt.|clothing,casual
+áo khoác|noun|Jacket; coat.|clothing,weather
+quần|noun|Trousers; pants.|clothing,daily life
+quần jeans|noun|Jeans.|clothing,casual
+váy|noun|Skirt; dress.|clothing,daily life
+giày|noun|Shoe; shoes.|clothing,daily life
+dép|noun|Sandal; flip-flop.|clothing,daily life
+tất|noun|Sock; socks.|clothing,daily life
+thắt lưng|noun|Belt.|clothing,accessories
+khẩu trang|noun|Face mask.|clothing,health
+găng tay|noun|Gloves.|clothing,accessories
+khăn quàng cổ|noun|Scarf.|clothing,accessories
+màu|noun|Colour.|colours,description
+đỏ|adjective|Red.|colours,description
+xanh|adjective|Blue or green; the general word for both.|colours,description
+xanh dương|adjective|Blue.|colours,description
+xanh lá|adjective|Green; leaf-green.|colours,description
+vàng|adjective|Yellow; gold.|colours,description
+màu cam|adjective|Orange; the colour.|colours,description
+tím|adjective|Purple; violet.|colours,description
+hồng|adjective|Pink.|colours,description
+nâu|adjective|Brown.|colours,description
+đen|adjective|Black.|colours,description
+trắng|adjective|White.|colours,description
+xám|adjective|Grey.|colours,description

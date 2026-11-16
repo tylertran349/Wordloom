@@ -1,0 +1,46 @@
+# Frequency, time, opinion, and the connectors that make longer sentences.
+thường xuyên|adverb|Often; regularly.|frequency,time
+thỉnh thoảng|adverb|Sometimes; now and then.|frequency,time
+hiếm khi|adverb|Rarely; seldom.|frequency,time
+luôn luôn|adverb|Always.|frequency,time
+không bao giờ|adverb|Never.|frequency,time
+đôi khi|adverb|Sometimes.|frequency,time
+hàng tuần|adverb|Weekly; every week.|frequency,time
+gần đây|adverb|Recently; lately.|time,recent
+trước đây|adverb|Previously; before.|time,past
+hiện tại|noun|The present; currently.|time,now
+tương lai|noun|The future.|time,future
+quá khứ|noun|The past.|time,past
+sắp|adverb|Soon; about to.|time,future
+chỉ|adverb|Only; just.|grammar,limitation
+thậm chí|adverb|Even; so much as.|connectors,grammar
+tuy nhiên|adverb|However; nevertheless.|connectors,grammar
+vì vậy|adverb|Therefore; so.|connectors,grammar
+do đó|adverb|Therefore; as a result.|connectors,grammar
+ngoài ra|adverb|Besides; in addition.|connectors,grammar
+hơn nữa|adverb|Moreover; furthermore.|connectors,grammar
+mặc dù|conjunction|Although; even though.|connectors,grammar
+dù sao|adverb|Anyway; in any case.|connectors,daily life
+tóm lại|adverb|In short; to sum up, used to conclude.|connectors,grammar
+ví dụ|adverb|For example.|connectors,grammar
+thực ra|adverb|Actually; in fact.|connectors,grammar
+chắc chắn|adverb|Certainly; definitely.|opinion,grammar
+có lẽ|adverb|Probably; perhaps.|opinion,grammar
+hình như|adverb|It seems; apparently.|opinion,grammar
+nói chung|adverb|Generally speaking; overall.|connectors,opinion
+cuối cùng|adverb|Finally; in the end.|time,connectors
+tiếp theo|adverb|Next; following.|time,connectors
+sau đó|adverb|Afterwards; then.|time,connectors
+khá|adverb|Quite; fairly.|degree,description
+hơi|adverb|A bit; slightly.|degree,description
+quá|adverb|Too; very; excessively.|degree,description
+lắm|adverb|Very; a lot, placed after the adjective.|degree,description
+thật sự|adverb|Really; truly.|degree,opinion
+gần như|adverb|Almost; nearly.|degree,approximation
+hầu như|adverb|Almost; practically.|degree,approximation
+chủ yếu|adverb|Mainly; chiefly.|connectors,grammar
+cùng nhau|adverb|Together.|action,relationships
+một mình|adverb|Alone; by oneself.|action,daily life
+luôn|adverb|Always; constantly.|frequency,time
+mãi|adverb|Forever; continuously.|time,frequency
+thường|adverb|Usually; often.|frequency,time

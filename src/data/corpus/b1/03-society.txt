@@ -1,0 +1,66 @@
+# Society, community, customs, and how people treat one another.
+xã hội|noun|Society.|society,people
+cộng đồng|noun|Community.|society,people
+cư dân|noun|Resident; inhabitant.|society,people
+công dân|noun|Citizen.|society,law
+dân số|noun|Population.|society,statistics
+thế hệ|noun|Generation.|society,family
+giới tính|noun|Gender; sex.|society,identity
+bình đẳng giới|noun|Gender equality.|society,rights
+phong tục|noun|Custom; tradition.|society,culture
+tập quán|noun|Custom; habitual practice.|society,culture
+văn hóa|noun|Culture.|society,culture
+lễ nghi|noun|Ritual; formal ceremony.|society,culture
+tín ngưỡng|noun|Belief; folk religion.|society,religion
+tôn giáo|noun|Religion.|society,religion
+ứng xử|noun|Behaviour; conduct towards others.|society,communication
+giao tiếp|noun|Communication.|society,communication
+quan hệ|noun|Relations; relationship.|society,relationships
+láng giềng|noun|Neighbour; neighbouring.|society,relationships
+hôn nhân|noun|Marriage.|society,family
+ly thân|verb|To separate; to live apart.|society,family
+con cái|noun|Children; offspring.|family,society
+nuôi dạy con|verb|To raise a child.|family,society
+bạo lực gia đình|noun|Domestic violence.|society,family
+bình đẳng|noun|Equality.|society,rights
+phân biệt đối xử|noun|Discrimination.|society,rights
+kỳ thị|noun|Stigma; prejudice.|society,rights
+nghèo đói|noun|Poverty.|society,economy
+an sinh xã hội|noun|Social security; the social safety net.|society,government
+phúc lợi|noun|Welfare; benefits.|society,government
+từ thiện|noun|Charity.|society,community
+tình nguyện|verb|To volunteer.|society,community
+quyên góp|verb|To donate; to fundraise.|society,community
+giúp đỡ|verb|To help out; to provide assistance over time.|society,relationships
+đoàn kết|verb|To unite; solidarity.|society,community
+lễ phép|adjective|Polite and respectful, especially to elders.|society,politeness
+phép tắc|noun|Rules of proper behaviour.|society,culture
+danh dự|noun|Honour.|society,character
+nhân phẩm|noun|Dignity; human worth.|society,rights
+đạo đức|noun|Morality; ethics.|society,character
+lối sống|noun|Lifestyle; way of life.|society,daily life
+nếp sống|noun|Way of living; daily habits.|society,daily life
+thói quen|noun|Habit.|society,daily life
+xu hướng|noun|Trend; tendency.|society,analysis
+phong trào|noun|Movement; campaign.|society,politics
+dư luận|noun|Public opinion; what people generally think.|society,media
+định kiến|noun|Prejudice; stereotype.|society,psychology
+áp lực|noun|Pressure.|society,psychology
+áp lực đồng trang lứa|noun|Peer pressure.|society,psychology
+vai trò|noun|Role.|society,work
+địa vị|noun|Status; social position.|society,class
+quan hệ xã hội|noun|Social relations.|society,relationships
+mạng lưới|noun|Network; web.|society,technology
+tổ chức xã hội|noun|Social organisation.|society,community
+hội nhóm|noun|Club; association; group.|society,community
+câu lạc bộ|noun|Club.|society,leisure
+tình nguyện viên|noun|Volunteer.|society,people
+người cao tuổi|noun|Elderly person; senior citizen.|society,people
+thanh thiếu niên|noun|Teenagers; youth.|society,people
+vị thành niên|noun|Minor; adolescent.|society,law
+người khuyết tật|noun|Person with a disability.|society,people
+người nhập cư|noun|Immigrant.|society,people
+người vô gia cư|noun|Homeless person.|society,people
+dân tộc|noun|Ethnic group; nation.|society,culture
+sắc tộc|noun|Ethnicity; race.|society,culture
+hòa nhập|verb|To integrate; to fit in.|society,community

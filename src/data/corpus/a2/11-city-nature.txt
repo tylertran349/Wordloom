@@ -1,0 +1,41 @@
+# City life, transport problems, weather hazards, and the environment.
+thành thị|noun|Urban area; city life as opposed to the countryside.|places,society
+nông thôn|noun|Countryside; rural area.|places,society
+ngoại ô|noun|Suburbs; outskirts.|places,city
+trung tâm|noun|Centre; city centre.|places,city
+khu dân cư|noun|Residential area.|places,city
+khu công nghiệp|noun|Industrial zone.|places,work
+đường cao tốc|noun|Motorway; expressway.|transport,places
+đường một chiều|noun|One-way street.|transport,places
+vỉa hè|noun|Pavement; sidewalk.|places,city
+làn đường|noun|Traffic lane.|transport,places
+biển báo|noun|Road sign; sign.|transport,transport
+đèn đỏ|noun|Red light.|transport,traffic
+đèn xanh|noun|Green light.|transport,traffic
+tắc đường|noun|Traffic jam.|transport,daily life
+tai nạn|noun|Accident.|transport,safety
+mũ bảo hiểm|noun|Helmet.|transport,safety
+xăng|noun|Petrol; gasoline.|transport,fuel
+trạm xăng|noun|Petrol station; gas station.|transport,places
+bãi đỗ xe|noun|Car park; parking lot.|transport,places
+rác|noun|Rubbish; garbage.|environment,daily life
+ô nhiễm|noun|Pollution; to pollute.|environment,health
+không khí|noun|Air; atmosphere.|environment,nature
+tiếng ồn|noun|Noise.|environment,city
+cây xanh|noun|Greenery; trees.|environment,city
+kênh|noun|Canal.|environment,places
+mương|noun|Ditch; small canal.|environment,places
+cống|noun|Drain; sewer.|environment,city
+bụi|noun|Dust.|environment,city
+khói|noun|Smoke.|environment,city
+ánh sáng|noun|Light; lighting.|environment,description
+nhiệt độ|noun|Temperature.|weather,science
+độ ẩm|noun|Humidity.|weather,science
+dự báo thời tiết|noun|Weather forecast.|weather,media
+lũ lụt|noun|Flood.|weather,environment
+hạn hán|noun|Drought.|weather,environment
+động đất|noun|Earthquake.|weather,environment
+sóng thần|noun|Tsunami.|weather,environment
+thiên tai|noun|Natural disaster.|weather,environment
+khí hậu|noun|Climate.|environment,weather
+môi trường|noun|Environment; surroundings.|environment,society

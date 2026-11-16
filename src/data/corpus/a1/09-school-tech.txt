@@ -1,0 +1,39 @@
+# School, basic work words, and everyday technology.
+lớp|noun|Class; grade; classroom.|school,learning
+bài học|noun|Lesson.|school,learning
+bài tập|noun|Exercise; homework.|school,learning
+giáo viên|noun|Teacher.|school,people
+học sinh|noun|Pupil; school student.|school,people
+sinh viên|noun|University student.|school,people
+sách|noun|Book.|school,objects
+vở|noun|Notebook; exercise book.|school,objects
+bút|noun|Pen.|school,objects
+bút chì|noun|Pencil.|school,objects
+thước|noun|Ruler.|school,objects
+tẩy|noun|Eraser; rubber.|school,objects
+cặp sách|noun|Schoolbag; satchel.|school,objects
+bảng|noun|Board; blackboard.|school,objects
+thi|verb|To sit an exam; an exam.|school,study
+điểm|noun|Point; mark; grade; spot.|school,study
+tiếng Anh|noun|English; the English language.|school,languages
+toán|noun|Mathematics; maths.|school,subjects
+học|verb|To study; to learn.|school,learning
+dạy|verb|To teach.|school,work
+việc|noun|Work; job; matter.|work,daily life
+công việc|noun|Job; work; task.|work,daily life
+làm việc|verb|To work.|work,daily life
+công ty|noun|Company; firm.|work,business
+văn phòng|noun|Office.|work,places
+lương|noun|Salary; wages.|work,money
+điện thoại|noun|Telephone; mobile phone.|technology,daily life
+máy tính|noun|Computer.|technology,work
+mạng|noun|Network; the internet.|technology,daily life
+wifi|noun|Wi-Fi; wireless internet.|technology,daily life
+mật khẩu|noun|Password.|technology,security
+tài khoản|noun|Account.|technology,security
+tin nhắn|noun|Message; text message.|technology,communication
+email|noun|Email.|technology,work
+ứng dụng|noun|Application; app.|technology,daily life
+hình ảnh|noun|Picture; image.|technology,media
+video|noun|Video.|technology,media
+sạc|verb|To charge a device; a charger.|technology,daily life

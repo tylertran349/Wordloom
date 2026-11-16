@@ -1,0 +1,46 @@
+# Clinics, healthy habits, and common health complaints.
+phòng khám|noun|Clinic.|health,places
+nha sĩ|noun|Dentist.|health,people
+dược sĩ|noun|Pharmacist.|health,people
+đơn thuốc|noun|Prescription.|health,pharmacy
+viên thuốc|noun|Pill; tablet.|health,pharmacy
+vắc-xin|noun|Vaccine.|health,medicine
+tiêm phòng|verb|To vaccinate; to get a vaccination.|health,medicine
+khám sức khỏe|verb|To have a health check-up.|health,medicine
+xét nghiệm|noun|Test; laboratory test.|health,medicine
+huyết áp|noun|Blood pressure.|health,body
+nhịp tim|noun|Heart rate; heartbeat.|health,body
+cân nặng|noun|Weight.|health,body
+chiều cao|noun|Height.|health,body
+chế độ ăn|noun|Diet; eating plan.|health,food
+dinh dưỡng|noun|Nutrition.|health,food
+vitamin|noun|Vitamin.|health,food
+trái cây|noun|Fruit.|food,health
+ngủ đủ giấc|verb|To get enough sleep.|health,sleep
+tập luyện|verb|To train; to exercise regularly.|health,sport
+chạy bộ|verb|To jog.|health,sport
+yoga|noun|Yoga.|health,sport
+thiền|verb|To meditate; meditation.|health,mindfulness
+căng thẳng|adjective|Stressed; tense; stress.|health,emotion
+mất ngủ|verb|To have insomnia; to be unable to sleep.|health,sleep
+đau lưng|noun|Backache; back pain.|health,body
+đau bụng|noun|Stomach ache.|health,body
+đau răng|noun|Toothache.|health,body
+cảm cúm|noun|Flu; influenza.|health,illness
+thương tích|noun|Injury.|health,injury
+băng bó|verb|To bandage.|health,first aid
+sơ cứu|noun|First aid.|health,first aid
+cấp cứu|noun|Emergency; emergency care.|health,emergency
+xe cứu thương|noun|Ambulance.|health,emergency
+phẫu thuật|noun|Surgery; operation.|health,medicine
+hồi phục|verb|To recover; recovery.|health,medicine
+khỏi bệnh|verb|To recover from illness; to get well.|health,medicine
+tái khám|verb|To have a follow-up appointment.|health,medicine
+uống thuốc|verb|To take medicine.|health,medicine
+nhập viện|verb|To be admitted to hospital.|health,hospital
+xuất viện|verb|To be discharged from hospital.|health,hospital
+sức đề kháng|noun|Immune resistance; immunity.|health,body
+miễn dịch|noun|Immunity.|health,medicine
+vệ sinh|noun|Hygiene; sanitation; clean.|health,daily life
+khử trùng|verb|To disinfect; to sterilise.|health,hygiene
+bác sĩ tâm lý|noun|Psychologist; therapist.|health,people

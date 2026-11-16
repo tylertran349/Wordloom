@@ -453,9 +453,9 @@ export function Settings() {
                   <div className="inline-alert is-info">
                     <AlertCircle size={15} aria-hidden="true" />
                     <span>
-                      The seed vocabulary is Vietnamese with English definitions. Your language
-                      pair controls Google Translate and speech; add another content set in{' '}
-                      <code>src/data/vocabulary.ts</code> for a different target.
+                      The built-in vocabulary is Vietnamese with English definitions. Your language
+                      pair controls Google Translate and speech; add another content set under{' '}
+                      <code>src/data/corpus/</code> for a different target.
                     </span>
                   </div>
                 )}
@@ -1294,7 +1294,10 @@ export function Settings() {
                   <div><span>Version</span><strong>1.0.0</strong></div>
                   <div><span>Target language</span><strong>{target.label}</strong></div>
                   <div><span>Native language</span><strong>{native.label}</strong></div>
-                  <div><span>Content file</span><strong>src/data/vocabulary.ts</strong></div>
+                  <div>
+                    <span>Vocabulary</span>
+                    <strong>{ALL_WORDS.length.toLocaleString()} words · A1–B2</strong>
+                  </div>
                 </div>
                 <div className="about-links">
                   <AppLink to={{ name: 'level', level: 'A1' }} className="text-link">

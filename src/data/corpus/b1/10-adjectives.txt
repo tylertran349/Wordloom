@@ -1,0 +1,76 @@
+# Nuanced adjectives for judging ideas, situations, and people.
+hữu hiệu|adjective|Effective; efficacious.|description,opinion
+thích hợp|adjective|Suitable; appropriate.|description,opinion
+thiết yếu|adjective|Essential; indispensable.|description,opinion
+trọng yếu|adjective|Crucial; important.|description,opinion
+thịnh hành|adjective|Popular; in fashion.|description,society
+nổi bật|adjective|Outstanding; prominent.|description,opinion
+rõ ràng|adjective|Clear; obvious.|description,communication
+mơ hồ|adjective|Vague; ambiguous.|description,communication
+phức tạp|adjective|Complex; complicated.|description,thinking
+đơn giản|adjective|Simple; straightforward.|description,thinking
+cụ thể|adjective|Specific; concrete.|description,thinking
+trừu tượng|adjective|Abstract.|description,thinking
+khách quan|adjective|Objective.|description,thinking
+chủ quan|adjective|Subjective.|description,thinking
+bất hợp lý|adjective|Unreasonable; illogical.|description,opinion
+đáng kể|adjective|Considerable; notable.|description,statistics
+đáng chú ý|adjective|Noteworthy; worth noting.|description,opinion
+đáng lo ngại|adjective|Worrying; concerning.|description,opinion
+nghiêm trọng|adjective|Serious; severe.|description,opinion
+cấp bách|adjective|Urgent; requiring immediate action.|description,time
+lâu dài|adjective|Long-term; lasting.|description,time
+tạm thời|adjective|Temporary.|description,time
+vĩnh viễn|adjective|Permanent; forever.|description,time
+bền vững|adjective|Sustainable; durable.|environment,description
+ổn định|adjective|Stable; steady.|description,life
+biến động|adjective|Volatile; fluctuating.|description,economy
+linh hoạt|adjective|Flexible; adaptable.|description,personality
+cứng nhắc|adjective|Rigid; inflexible.|description,personality
+chủ động|adjective|Proactive; taking initiative.|description,work
+bị động|adjective|Passive; reactive.|description,work
+tích cực|adjective|Positive; active.|description,emotion
+tiêu cực|adjective|Negative.|description,emotion
+lạc quan|adjective|Optimistic.|description,emotion
+bi quan|adjective|Pessimistic.|description,emotion
+hấp dẫn|adjective|Attractive; appealing.|description,opinion
+nhàm chán|adjective|Boring; dull.|description,opinion
+hài lòng|adjective|Satisfied; pleased.|emotion,opinion
+mãn nguyện|adjective|Content; fulfilled.|emotion,opinion
+tự hào|adjective|Proud.|emotion,character
+xấu hổ|adjective|Ashamed; embarrassed.|emotion,character
+ngượng ngùng|adjective|Awkward; embarrassed.|emotion,behaviour
+bối rối|adjective|Confused; flustered.|emotion,thinking
+hoang mang|adjective|Bewildered; uneasy.|emotion,thinking
+bình thản|adjective|Calm; unruffled.|emotion,personality
+nóng vội|adjective|Hasty; impatient.|personality,behaviour
+thận trọng|adjective|Cautious; prudent.|personality,behaviour
+liều lĩnh|adjective|Reckless; daring.|personality,behaviour
+quyết đoán|adjective|Decisive.|personality,work
+do dự|adjective|Hesitant; indecisive.|personality,behaviour
+kiên định|adjective|Firm; steadfast.|personality,character
+trung thành|adjective|Loyal; faithful.|personality,relationships
+đáng kính|adjective|Respectable; worthy of respect.|personality,opinion
+đáng nể|adjective|Impressive; admirable.|personality,opinion
+tài năng|adjective|Talented; gifted.|personality,work
+xuất sắc|adjective|Excellent; outstanding.|description,opinion
+ưu tú|adjective|Elite; outstanding.|description,opinion
+vượt trội|adjective|Superior; exceptional.|description,opinion
+yếu kém|adjective|Weak; poor.|description,opinion
+trung bình|adjective|Average; mediocre.|description,statistics
+khiêm nhường|adjective|Modest; unassuming.|personality,character
+rộng lượng|adjective|Generous; forgiving.|personality,character
+bao dung|adjective|Tolerant; forgiving.|personality,character
+tinh tế|adjective|Subtle; refined.|description,personality
+thô thiển|adjective|Crude; tasteless.|description,personality
+giản dị|adjective|Simple; unpretentious.|description,personality
+sang trọng|adjective|Luxurious; elegant.|description,appearance
+lộng lẫy|adjective|Gorgeous; splendid.|description,appearance
+ấm cúng|adjective|Cosy; homely.|description,home
+ngăn nắp|adjective|Tidy; orderly.|description,home
+bừa bãi|adjective|Messy; disorderly.|description,home
+thoáng mát|adjective|Airy; breezy.|description,home
+chật chội|adjective|Cramped; crowded.|description,space
+đông đúc|adjective|Crowded; busy.|description,places
+vắng vẻ|adjective|Quiet; deserted.|description,places
+thuận tiện|adjective|Convenient; handy.|description,daily life

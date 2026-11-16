@@ -1,0 +1,46 @@
+# Medicine, public health, and clinical language.
+y học|noun|Medicine; medical science.|health,medicine
+y khoa|noun|Medical science; clinical medicine.|health,medicine
+y tế|noun|Healthcare; medical services.|health,medicine
+chăm sóc sức khỏe|noun|Healthcare; health care.|health,medicine
+hệ miễn dịch|noun|Immune system.|health,body
+kháng thể|noun|Antibody.|health,medicine
+vi-rút|noun|Virus.|health,medicine
+đại dịch|noun|Pandemic.|health,medicine
+dịch bệnh|noun|Epidemic; disease outbreak.|health,medicine
+ổ dịch|noun|Outbreak cluster.|health,medicine
+ca bệnh|noun|Case; patient case.|health,medicine
+tử vong|verb|To die; mortality.|health,medicine
+tỷ lệ tử vong|noun|Mortality rate.|health,statistics
+tỷ lệ mắc bệnh|noun|Morbidity rate; incidence.|health,statistics
+biến chứng|noun|Complication.|health,medicine
+di chứng|noun|After-effect; sequela.|health,medicine
+hồi sức|verb|To resuscitate; intensive care.|health,medicine
+hồi sức tích cực|noun|Intensive care.|health,medicine
+gây mê|verb|To anaesthetise; general anaesthesia.|health,medicine
+gây tê|verb|To apply local anaesthesia.|health,medicine
+ghép tạng|verb|To transplant an organ.|health,medicine
+hiến tạng|verb|To donate an organ.|health,medicine
+ung thư|noun|Cancer.|health,medicine
+khối u|noun|Tumour.|health,medicine
+hóa trị|noun|Chemotherapy.|health,medicine
+xạ trị|noun|Radiotherapy.|health,medicine
+miễn dịch cộng đồng|noun|Herd immunity.|health,medicine
+sàng lọc|verb|To screen; screening.|health,medicine
+chẩn đoán hình ảnh|noun|Diagnostic imaging.|health,medicine
+siêu âm|noun|Ultrasound.|health,medicine
+chụp X-quang|noun|X-ray.|health,medicine
+nội soi|noun|Endoscopy.|health,medicine
+sinh thiết|noun|Biopsy.|health,medicine
+kê đơn|verb|To prescribe medicine.|health,medicine
+kháng thuốc|noun|Drug resistance.|health,medicine
+tiêm nhắc lại|noun|Booster injection.|health,medicine
+sức khỏe cộng đồng|noun|Public health.|health,society
+y đức|noun|Medical ethics.|health,ethics
+bệnh nhân|noun|Patient; a person receiving medical care.|health,people
+chăm sóc giảm nhẹ|noun|Palliative care.|health,medicine
+phục hồi chức năng|noun|Rehabilitation.|health,medicine
+vật lý trị liệu|noun|Physiotherapy.|health,medicine
+liệu pháp tâm lý|noun|Psychotherapy.|health,mind
+dinh dưỡng lâm sàng|noun|Clinical nutrition.|health,medicine
+an toàn thực phẩm|noun|Food safety.|health,food

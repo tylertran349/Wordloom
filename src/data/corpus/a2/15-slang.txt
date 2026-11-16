@@ -1,0 +1,41 @@
+# Youth slang and chat spellings you will see in messages and comments.
+chất|adjective|Cool; excellent; stylish.|slang,opinion
+ngầu|adjective|Cool; badass.|slang,description
+xịn|adjective|Fancy; high-quality; great.|slang,shopping
+dở|adjective|Bad; poor in quality.|slang,opinion
+cà khịa|verb|To tease; to provoke playfully.|slang,communication
+bóc phốt|verb|To expose someone publicly; to call out.|slang,social media
+thả thính|verb|To flirt; to drop hints to attract someone.|slang,dating
+thính|noun|Flirty attention; bait in dating slang.|slang,dating
+gấu|noun|Partner; boyfriend or girlfriend, in slang.|slang,relationships
+ny|abbreviation|Chat short form of 'người yêu' — partner.|texting,relationships
+ex|noun|Ex; former boyfriend or girlfriend.|slang,relationships
+bồ|noun|Lover; partner, often informal.|slang,relationships
+cưa|verb|To court; to try to win someone over.|slang,dating
+tán|verb|To chat someone up; to flirt with.|slang,dating
+tym|noun|A like on social media; a heart.|slang,social media
+seen|verb|To have seen a message; read receipt.|slang,texting
+hóng|verb|To wait eagerly for news or drama.|slang,social media
+drama|noun|Online drama; gossip and conflict.|slang,social media
+flex|verb|To show off.|slang,social media
+sống ảo|verb|To live for social media; to post curated fake life.|slang,social media
+ảo|adjective|Fake; unreal; over the top.|slang,description
+gét|verb|Chat spelling of 'ghét' — to hate.|texting,slang
+thik|verb|Chat spelling of 'thích' — to like.|texting,slang
+iu|verb|Chat spelling of 'yêu' — to love.|texting,slang
+hông|adverb|Chat spelling of 'không' — no, not.|texting,slang
+hem|adverb|Playful chat spelling of 'không' — no, not.|texting,slang
+chời|interjection|Chat spelling of 'trời' — oh my god; geez.|texting,slang
+zui|adjective|Chat spelling of 'vui' — fun, happy.|texting,slang
+bùn|adjective|Chat spelling of 'buồn' — sad.|texting,slang
+trc|abbreviation|Chat short form of 'trước' — before.|texting,slang
+đg|abbreviation|Chat short form of 'đang' — currently doing.|texting,slang
+r|particle|Chat short form of 'rồi' — already, done.|texting,slang
+ng|abbreviation|Chat short form of 'người' — person.|texting,slang
+ck|abbreviation|Chat short form of 'chồng' or 'chuyển khoản'.|texting,slang
+vk|abbreviation|Chat short form of 'vợ' — wife.|texting,slang
+ox|abbreviation|Chat short form of 'ông xã' — husband.|texting,slang
+e|pronoun|Chat short form of 'em' — I, you, younger sibling.|texting,slang
+a|pronoun|Chat short form of 'anh' — older brother, you.|texting,slang
+cj|abbreviation|Chat short form of 'chị' — older sister, you.|texting,slang
+ae|abbreviation|Chat short form of 'anh em' — friends, everyone.|texting,slang

@@ -1,0 +1,46 @@
+# Ecosystems, resources, climate change, and protecting the planet.
+hệ sinh thái|noun|Ecosystem.|environment,science
+đa dạng sinh học|noun|Biodiversity.|environment,science
+tài nguyên|noun|Resource.|environment,economy
+tài nguyên thiên nhiên|noun|Natural resources.|environment,nature
+khoáng sản|noun|Mineral resources.|environment,economy
+năng lượng|noun|Energy.|environment,science
+năng lượng tái tạo|noun|Renewable energy.|environment,science
+năng lượng mặt trời|noun|Solar energy.|environment,science
+năng lượng gió|noun|Wind energy.|environment,science
+biến đổi khí hậu|noun|Climate change.|environment,science
+hiệu ứng nhà kính|noun|Greenhouse effect.|environment,science
+khí thải|noun|Emissions; exhaust gas.|environment,pollution
+carbon|noun|Carbon.|environment,science
+dấu chân carbon|noun|Carbon footprint.|environment,science
+tái chế|verb|To recycle; recycling.|environment,daily life
+phân loại rác|verb|To sort rubbish.|environment,daily life
+rác thải nhựa|noun|Plastic waste.|environment,pollution
+túi ni lông|noun|Plastic bag.|environment,shopping
+ô nhiễm không khí|noun|Air pollution.|environment,pollution
+ô nhiễm nước|noun|Water pollution.|environment,pollution
+ô nhiễm tiếng ồn|noun|Noise pollution.|environment,city
+nước sạch|noun|Clean water.|environment,health
+nước thải|noun|Waste water.|environment,pollution
+xử lý rác thải|verb|To treat waste; waste processing.|environment,daily life
+chặt phá rừng|verb|To clear-cut forests; deforestation.|environment,nature
+trồng rừng|verb|To plant forests; reforestation.|environment,nature
+bảo tồn|verb|To conserve; conservation.|environment,nature
+bảo vệ môi trường|verb|To protect the environment.|environment,daily life
+động vật hoang dã|noun|Wildlife.|environment,animals
+loài quý hiếm|noun|Rare species.|environment,animals
+tuyệt chủng|verb|To become extinct; extinction.|environment,animals
+sinh vật|noun|Living organism.|environment,science
+thực vật|noun|Plant; vegetation.|environment,nature
+động vật|noun|Animal; fauna, especially in scientific writing.|environment,animals
+vi khuẩn|noun|Bacteria; germ.|environment,science
+núi lửa|noun|Volcano.|environment,nature
+đại dương|noun|Ocean.|environment,nature
+lục địa|noun|Continent.|environment,nature
+bán đảo|noun|Peninsula.|environment,nature
+địa hình|noun|Terrain; topography.|environment,nature
+thời tiết cực đoan|noun|Extreme weather.|environment,weather
+sa mạc|noun|Desert.|environment,nature
+băng tan|verb|To melt; ice melting.|environment,climate
+mực nước biển|noun|Sea level.|environment,climate
+mưa axit|noun|Acid rain.|environment,pollution

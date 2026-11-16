@@ -31,8 +31,9 @@ configured with `base: './'` so subpath deployments work too.
 
 ## What is included
 
-- **CEFR decks** split into A1, A2, B1, B2, C1, and C2.
-- **Word pages** with pronunciation, part of speech, a native-language definition, an optional
+- **CEFR decks** for A1, A2, B1, and B2 — 3,000 Vietnamese words in total (800 / 800 /
+  750 / 650). The C1 and C2 decks are present but intentionally empty.
+- **Word pages** with audio pronunciation, part of speech, a native-language definition, an optional
   target-language definition, and AI-generated examples with native-language translations.
 - **Translation exercises generated with AI** — example sentences and practice prompts are created
   for each word on demand, with free-text inputs, saved drafts, and a **Reveal with Google
@@ -54,7 +55,8 @@ configured with `base: './'` so subpath deployments work too.
 ```
 src/
   data/
-    vocabulary.ts      ← your CEFR word arrays live here
+    corpus/            ← compact source text for the 3,000-word Vietnamese deck
+    vocabulary.ts      ← generated word arrays (do not edit directly)
     levels.ts          ← CEFR names and descriptions
     languages.ts       ← language pair options and TTS locales
   views/
@@ -79,33 +81,51 @@ src/
   index.css
 ```
 
-## Adding vocabulary
+## Editing vocabulary
 
-Open `src/data/vocabulary.ts`. Each CEFR level is an array of words. Add entries using this shape:
+The deck is generated from plain-text corpus files in `src/data/corpus/` — one folder and one
+line per word. Edit or add a line, then rebuild:
+
+```bash
+npm run vocab:build
+```
+
+```text
+term|part of speech|definition|tag, tag
+thủ tục hành chính|noun|Administrative procedure; paperwork.|admin,government
+```
+
+The build slugs the term into a stable id, checks that all 3,000 lines are unique, and writes
+`src/data/vocabulary.ts`. Add or remove files freely; they are read in filename order. Keep the
+totals in `scripts/build-vocabulary.mjs` in sync if you deliberately change the deck size.
+
+Generated entries use this shape:
 
 ```ts
 {
-  id: 'unique-slug',              // used in the URL and saved progress — keep it stable
-  term: 'xin chào',               // word in the language being learned
-  pronunciation: 'sin chow',      // optional
-  partOfSpeech: 'greeting',       // optional
-  definition: 'Hello…',           // meaning in the learner's native language
-  definitionTarget: 'Lời chào…',  // optional meaning in the target language
-  tags: ['greetings', 'basics']   // optional
+  id: 'thu-tuc-hanh-chinh',       // used in the URL and saved progress
+  term: 'thủ tục hành chính',     // word in the language being learned
+  partOfSpeech: 'noun',
+  definition: 'Administrative procedure; paperwork.', // meaning in the native language
+  tags: ['admin', 'government']
 }
 ```
 
-The arrays contain vocabulary only. Example sentences and translation exercises are not stored
-in the data file: they are generated with AI the first time you ask for exercises on a word page,
-then cached in your browser's progress. A word you have never generated content for simply shows
-a **Generate with AI** button.
+`pronunciation` and `definitionTarget` remain optional in the type, but the generated deck omits
+them to keep the corpus compact. Every word page has a text-to-speech button, and the English
+definition is the primary gloss.
 
-The seed decks contain three Vietnamese words per level (18 words) so every screen has something
-to explore immediately. Add as many words as you like.
+The decks are vocabulary only. Example sentences and translation exercises are not stored in the
+data file: they are generated with AI the first time you ask for exercises on a word page, then
+cached in your browser's progress. A word you have never generated content for simply shows a
+**Generate with AI** button.
+
+The built-in deck covers A1–B2 everyday Vietnamese, with extra weight on conversation, work,
+services, and texting shortcuts. C1 and C2 are left empty by design.
 
 > Changing the language pair in Settings changes translation direction, speech, and exercise
-> labels. It does **not** translate the vocabulary content. The seed content is Vietnamese with
-> English definitions. Add a separate content set if you want another target language.
+> labels. It does **not** translate the vocabulary content. The built-in content is Vietnamese
+> with English definitions. Add a separate content set if you want another target language.
 
 ## How the exercises work
 
@@ -196,6 +216,7 @@ computer.
 | `npm run dev` | Start the Vite dev server |
 | `npm run build` | Type-check with TypeScript and build for production |
 | `npm run preview` | Preview the production build |
+| `npm run vocab:build` | Rebuild `src/data/vocabulary.ts` from `src/data/corpus/` |
 
 ## Tech
 
@@ -205,4 +226,5 @@ client-side.
 
 ---
 
-Built to be filled with words. Add your own decks in `src/data/vocabulary.ts`.
+Built to be filled with words. Add your own decks in `src/data/corpus/` and run
+`npm run vocab:build`.

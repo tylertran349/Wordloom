@@ -1,0 +1,66 @@
+# Sociology, inequality, migration, religion, and education policy.
+xã hội học|noun|Sociology.|society,science
+nhân học|noun|Anthropology.|society,science
+triết học|noun|Philosophy.|society,science
+đạo đức học|noun|Ethics.|society,philosophy
+chuẩn mực|noun|Norm; standard.|society,values
+giá trị xã hội|noun|Social values.|society,values
+cấu trúc xã hội|noun|Social structure.|society,science
+phân tầng xã hội|noun|Social stratification.|society,science
+giai cấp|noun|Social class.|society,science
+khoảng cách giàu nghèo|noun|Wealth gap.|society,economy
+bất bình đẳng|noun|Inequality.|society,rights
+công bằng|noun|Fairness; equity.|society,values
+công bằng xã hội|noun|Social justice.|society,rights
+đặc quyền|noun|Privilege.|society,rights
+thiên kiến|noun|Bias.|society,psychology
+thành kiến|noun|Prejudice.|society,psychology
+khuôn mẫu|noun|Stereotype; template.|society,psychology
+vai trò giới|noun|Gender role.|society,identity
+nhân quyền|noun|Human rights.|society,law
+tự do ngôn luận|noun|Freedom of speech.|society,rights
+tự do báo chí|noun|Press freedom.|society,media
+tham nhũng|noun|Corruption.|society,government
+hối lộ|verb|To bribe; bribery.|society,law
+minh bạch|noun|Transparency.|society,government
+trách nhiệm giải trình|noun|Accountability.|society,government
+pháp chế|noun|Rule of law; legality.|society,law
+nhà nước pháp quyền|noun|Rule-of-law state.|society,government
+xã hội dân sự|noun|Civil society.|society,government
+vốn xã hội|noun|Social capital.|society,science
+gắn kết xã hội|noun|Social cohesion.|society,community
+biến đổi xã hội|noun|Social change.|society,science
+hiện đại hóa|noun|Modernisation.|society,economy
+đô thị hóa|noun|Urbanisation.|society,economy
+già hóa dân số|noun|Population ageing.|society,demography
+bùng nổ dân số|noun|Population explosion.|society,demography
+kế hoạch hóa gia đình|noun|Family planning.|society,family
+di cư|verb|To migrate; migration.|society,migration
+nhập cư|verb|To immigrate; immigration.|society,migration
+tị nạn|verb|To seek asylum.|society,migration
+người tị nạn|noun|Refugee.|society,people
+hội nhập văn hóa|noun|Cultural integration.|society,culture
+đa văn hóa|noun|Multiculturalism.|society,culture
+bản sắc|noun|Identity.|society,culture
+bản sắc văn hóa|noun|Cultural identity.|society,culture
+toàn cầu hóa|noun|Globalisation.|society,economy
+chủ nghĩa tiêu dùng|noun|Consumerism.|society,economy
+chất lượng cuộc sống|noun|Quality of life.|society,health
+chỉ số hạnh phúc|noun|Happiness index.|society,statistics
+phúc lợi xã hội|noun|Social welfare; public benefits and services.|society,government
+an ninh lương thực|noun|Food security.|society,environment
+bất ổn|noun|Instability; unrest.|society,politics
+khủng hoảng|noun|Crisis.|society,economy
+hòa hợp|noun|Harmony.|society,relationships
+tín đồ|noun|Believer; follower of a religion.|society,religion
+tâm linh|noun|Spirituality.|society,religion
+mê tín|noun|Superstition.|society,culture
+phong thủy|noun|Feng shui.|society,culture
+nghi lễ|noun|Ritual; ceremony.|society,culture
+cải cách giáo dục|noun|Education reform.|society,school
+giáo dục đại học|noun|Higher education.|society,school
+giáo dục nghề nghiệp|noun|Vocational education.|society,school
+học tập suốt đời|noun|Lifelong learning.|society,school
+công bằng giáo dục|noun|Educational equity.|society,school
+bạo lực học đường|noun|School bullying; school violence.|society,school
+kỹ năng sống|noun|Life skills.|society,school

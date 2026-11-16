@@ -1,0 +1,46 @@
+# Paperwork, public services, insurance, and household admin.
+thủ tục hành chính|noun|Administrative procedure; paperwork.|admin,government
+giấy khai sinh|noun|Birth certificate.|admin,documents
+sổ hộ khẩu|noun|Household registration book.|admin,documents
+căn cước công dân|noun|Citizen identity card.|admin,documents
+giấy phép lái xe|noun|Driving licence.|admin,documents
+thị thực|noun|Visa; entry permit.|admin,travel
+khai báo|verb|To declare; to report.|admin,documents
+đăng ký tạm trú|verb|To register temporary residence.|admin,documents
+tạm trú|noun|Temporary residence.|admin,documents
+tạm vắng|noun|Temporary absence.|admin,documents
+chứng thực|verb|To certify; certification.|admin,law
+công chứng|verb|To notarise; notarisation.|admin,law
+sao y|verb|To certify a copy.|admin,documents
+bản gốc|noun|Original document.|admin,documents
+bản sao|noun|Copy; duplicate.|admin,documents
+mẫu đơn|noun|Application form; form template.|admin,documents
+tờ khai|noun|Declaration form.|admin,documents
+nộp hồ sơ|verb|To submit an application.|admin,documents
+xét duyệt|verb|To review and approve.|admin,government
+gia hạn|verb|To extend; renewal.|admin,documents
+chuyển nhượng|verb|To transfer ownership.|admin,law
+sang tên|verb|To transfer a title; to change ownership.|admin,law
+đăng kiểm|verb|To inspect a vehicle; vehicle inspection.|admin,transport
+bảo hiểm xe|noun|Vehicle insurance.|admin,insurance
+bảo hiểm y tế|noun|Health insurance.|admin,insurance
+bảo hiểm xã hội|noun|Social insurance.|admin,insurance
+lương hưu|noun|Pension.|admin,money
+trợ cấp|noun|Allowance; benefit payment.|admin,money
+hộ nghèo|noun|Poor household; low-income household.|admin,society
+sổ tiết kiệm|noun|Savings passbook.|admin,money
+hợp đồng thuê nhà|noun|House rental contract.|admin,home
+tiền đặt cọc|noun|Deposit; security deposit.|admin,money
+hóa đơn điện|noun|Electricity bill; the utility statement itself.|admin,home
+đồng hồ điện|noun|Electricity meter.|admin,home
+đồng hồ nước|noun|Water meter.|admin,home
+sửa ống nước|verb|To fix the plumbing.|admin,home
+thợ điện|noun|Electrician.|admin,work
+thợ sửa khóa|noun|Locksmith.|admin,work
+dịch vụ công|noun|Public service.|admin,government
+trung tâm hành chính|noun|Administrative centre.|admin,government
+ủy ban nhân dân|noun|People's Committee; local authority.|admin,government
+công an phường|noun|Ward police office.|admin,government
+phường|noun|Ward; urban sub-district.|admin,places
+quận|noun|Urban district.|admin,places
+tỉnh|noun|Province.|admin,places

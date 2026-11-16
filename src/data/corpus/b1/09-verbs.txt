@@ -1,0 +1,111 @@
+# Intermediate verbs for opinions, planning, business, and making things happen.
+nếm trải|verb|To experience; to go through.|life,travel
+tìm hiểu|verb|To find out about; to explore.|learning,communication
+tận hưởng|verb|To enjoy fully; to savour.|leisure,emotion
+thưởng thức|verb|To savour; to appreciate food or art.|food,leisure
+chiêm ngưỡng|verb|To admire; to gaze at with wonder.|leisure,emotion
+quan sát|verb|To observe; to watch carefully.|perception,thinking
+chú ý|verb|To pay attention; to notice.|thinking,daily life
+để ý|verb|To notice; to keep an eye on.|perception,daily life
+lĩnh hội|verb|To grasp; to absorb knowledge.|learning,thinking
+lưu tâm|verb|To keep in mind; to pay heed.|thinking,memory
+phản ánh|verb|To reflect; to report a situation.|thinking,communication
+bày tỏ|verb|To express; to voice.|communication,emotion
+thể hiện|verb|To express; to demonstrate.|communication,emotion
+diễn đạt|verb|To express in words; to phrase.|communication,languages
+truyền tải|verb|To convey; to carry a message.|communication,media
+thuyết phục|verb|To persuade; to convince.|communication,debate
+ảnh hưởng|verb|To influence; to affect.|society,cause
+tác động|verb|To impact; to act on.|society,cause
+biến đổi|verb|To transform; to change.|science,change
+phát triển|verb|To develop; to grow.|growth,economy
+mở rộng|verb|To expand; to widen.|growth,business
+thu hẹp|verb|To narrow; to shrink.|change,business
+gia tăng|verb|To increase.|change,statistics
+giảm bớt|verb|To reduce; to ease.|change,health
+duy trì|verb|To maintain; to keep up.|action,daily life
+đảm bảo|verb|To ensure; to guarantee.|work,quality
+đáp ứng|verb|To meet; to satisfy a need.|work,services
+phù hợp|verb|To suit; to be suitable.|opinion,work
+thích nghi|verb|To adapt.|change,life
+hòa đồng|verb|To get along; to blend in socially.|society,people
+hội nhập|verb|To integrate, especially internationally.|society,economy
+tham khảo|verb|To consult; to refer to.|learning,work
+tra cứu|verb|To look up information.|learning,technology
+phân tích|verb|To analyse.|thinking,science
+tổng hợp|verb|To synthesise; to summarise.|thinking,science
+kết luận|verb|To conclude; a conclusion.|thinking,communication
+chứng minh|verb|To prove; to demonstrate.|thinking,science
+lập luận|verb|To argue; to reason.|thinking,debate
+tranh biện|verb|To debate formally.|debate,school
+phản biện|verb|To counter-argue; to critique.|debate,work
+đặt vấn đề|verb|To raise an issue.|communication,work
+làm rõ|verb|To clarify.|communication,work
+nhấn mạnh|verb|To emphasise.|communication,work
+đề cập|verb|To mention.|communication,work
+bổ sung|verb|To add; to supplement.|action,work
+điều chỉnh|verb|To adjust.|change,work
+sửa đổi|verb|To amend; to revise.|change,law
+cải cách|verb|To reform.|society,politics
+làm mới|verb|To renew; to refresh.|change,home
+phát minh|verb|To invent; an invention.|science,technology
+thiết lập|verb|To establish; to set up.|work,technology
+xây dựng|verb|To build; to develop.|work,society
+triển khai|verb|To deploy; to roll out.|work,planning
+thực hiện|verb|To carry out; to implement.|work,action
+hoàn thành|verb|To complete.|work,action
+hoàn thiện|verb|To perfect; to finish refining.|work,action
+điều phối|verb|To coordinate.|work,management
+chỉ đạo|verb|To direct; to lead an operation.|work,management
+thanh tra|verb|To inspect; to audit officially.|work,law
+kiểm soát|verb|To control; to keep in check.|work,management
+kiểm toán|verb|To audit accounts.|work,money
+dự toán|verb|To estimate a budget.|work,money
+phân bổ|verb|To allocate.|work,planning
+huy động|verb|To mobilise; to raise resources.|work,society
+tận dụng|verb|To make the most of; to utilise.|work,action
+khai thác|verb|To exploit; to tap a resource.|environment,economy
+tích lũy|verb|To accumulate.|money,work
+chi trả|verb|To disburse; to pay out.|money,work
+bồi thường|verb|To compensate; compensation.|law,money
+cho thuê|verb|To rent out; to lease.|money,home
+cho vay|verb|To lend money.|money,banking
+mua lại|verb|To buy back; to acquire.|business,shopping
+sáp nhập|verb|To merge, as companies.|business,work
+hợp nhất|verb|To consolidate; to unite.|business,work
+cạnh tranh|verb|To compete; competition.|business,work
+liên kết|verb|To link; to connect.|business,technology
+phát hành|verb|To issue; to release.|business,media
+phân phối|verb|To distribute.|business,services
+cung cấp|verb|To supply; to provide.|business,services
+tiêu thụ|verb|To consume; to sell through.|business,economy
+sản xuất|verb|To produce; to manufacture.|business,work
+gia công|verb|To process; to do contract manufacturing.|business,work
+chế tạo|verb|To manufacture; to fabricate.|business,technology
+lắp ráp|verb|To assemble.|business,technology
+vận hành|verb|To operate; to run a machine.|technology,work
+bảo trì|verb|To maintain; servicing.|technology,work
+tái thiết|verb|To rebuild; to reconstruct.|society,building
+tái sử dụng|verb|To reuse.|environment,daily life
+giảm thiểu|verb|To minimise.|environment,change
+khắc phục|verb|To overcome; to remedy.|action,work
+đối phó|verb|To deal with; to cope with.|action,work
+chịu đựng|verb|To endure; to put up with.|emotion,life
+vượt qua|verb|To overcome; to get past.|action,life
+đương đầu|verb|To face head-on; to confront.|action,life
+né tránh|verb|To evade; to dodge.|action,behaviour
+trì hoãn|verb|To postpone; to delay.|time,habits
+thúc đẩy|verb|To push forward; to promote.|work,change
+kìm hãm|verb|To restrain; to hold back.|action,change
+can thiệp|verb|To intervene; intervention.|society,action
+phối hợp|verb|To coordinate; to work together.|work,relationships
+tham mưu|verb|To advise; to act as an adviser.|work,communication
+tư vấn|verb|To advise; to consult.|work,services
+tổng kết|verb|To sum up; to review a period.|work,communication
+phê bình|verb|To criticise constructively.|communication,opinion
+khen ngợi|verb|To praise; to commend.|communication,relationships
+chỉ trích|verb|To criticise; to condemn.|communication,opinion
+bảo vệ|verb|To protect; to defend.|society,safety
+gìn giữ|verb|To preserve; to safeguard.|culture,environment
+phát huy|verb|To bring into play; to build on a strength.|work,culture
+kế thừa|verb|To inherit; to carry forward.|culture,family

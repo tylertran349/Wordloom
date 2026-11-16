@@ -1,0 +1,51 @@
+# Shopping, prices, payment methods, and money in the bank.
+mua sắm|verb|To shop; to go shopping.|shopping,daily life
+trung tâm thương mại|noun|Shopping mall.|shopping,places
+chợ đêm|noun|Night market.|shopping,places
+cửa hàng tiện lợi|noun|Convenience store.|shopping,places
+cửa hàng quần áo|noun|Clothing shop.|shopping,clothing
+mua online|verb|To shop online.|shopping,technology
+người bán|noun|Seller; vendor.|shopping,people
+người mua|noun|Buyer; customer.|shopping,people
+khách hàng|noun|Customer; client.|shopping,business
+giá|noun|Price.|shopping,money
+giá cả|noun|Prices; the price level.|shopping,money
+giá gốc|noun|Original price.|shopping,money
+giảm giá|verb|To discount; a discount.|shopping,money
+khuyến mãi|noun|Promotion; special offer.|shopping,money
+mã giảm giá|noun|Discount code; voucher.|shopping,texting
+phiếu quà tặng|noun|Gift voucher.|shopping,gifts
+tiền mặt|noun|Cash.|money,shopping
+thẻ|noun|Card.|money,shopping
+thẻ tín dụng|noun|Credit card.|money,banking
+thẻ ghi nợ|noun|Debit card.|money,banking
+chuyển khoản|verb|To transfer money; bank transfer.|money,banking
+ví điện tử|noun|E-wallet.|money,technology
+mã QR|noun|QR code.|money,technology
+tiền lẻ|noun|Small change; loose change.|money,shopping
+tiền xu|noun|Coins.|money,shopping
+tiền giấy|noun|Banknotes; paper money.|money,shopping
+tiền thưởng|noun|Bonus.|work,money
+tiền tiết kiệm|noun|Savings.|money,banking
+tài khoản ngân hàng|noun|Bank account.|money,banking
+số dư|noun|Balance; account balance.|money,banking
+phí|noun|Fee; charge.|money,services
+nợ|noun|Debt; to owe.|money,banking
+trả góp|verb|To pay in instalments.|money,shopping
+đặt cọc|verb|To pay a deposit.|money,shopping
+hoàn tiền|verb|To refund; a refund.|money,shopping
+phí vận chuyển|noun|Delivery fee; shipping fee.|shopping,services
+mua một tặng một|phrase|Buy one, get one free.|shopping,promotions
+hàng hiệu|noun|Designer goods; branded products.|shopping,clothing
+hàng giả|noun|Counterfeit goods; fakes.|shopping,law
+hàng cũ|noun|Used goods.|shopping,daily life
+mặc cả|verb|To haggle; to bargain.|shopping,money
+trả giá|verb|To bargain; to offer a price.|shopping,money
+đắt đỏ|adjective|Pricey; expensive.|shopping,money
+hợp lý|adjective|Reasonable; sensible.|shopping,opinion
+xứng đáng|adjective|Worth it; deserving.|shopping,opinion
+quầy thu ngân|noun|Checkout counter; cashier's desk.|shopping,places
+nhân viên bán hàng|noun|Shop assistant; salesperson.|shopping,work
+túi giấy|noun|Paper bag.|shopping,objects
+thẻ thành viên|noun|Membership card.|shopping,loyalty
+điểm thưởng|noun|Reward points.|shopping,loyalty

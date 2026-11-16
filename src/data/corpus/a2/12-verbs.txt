@@ -1,0 +1,111 @@
+# Practical verbs for errands, plans, money, and getting things done.
+chuyển|verb|To move; to transfer; to shift.|action,daily life
+giao|verb|To hand over; to deliver.|action,services
+buộc|verb|To tie; to fasten; to force.|action,objects
+khóa|verb|To lock; a lock.|home,daily life
+mở khóa|verb|To unlock.|home,technology
+cài đặt|verb|To install; to set up; settings.|technology,computer
+cập nhật|verb|To update.|technology,daily life
+lưu|verb|To save; to store.|technology,computer
+chép|verb|To copy; to write down.|technology,school
+dán|verb|To paste; to stick; to glue.|technology,objects
+di chuyển|verb|To move; to travel from place to place.|movement,travel
+xếp hàng|verb|To queue; to line up.|daily life,shopping
+cúi|verb|To bend down; to bow.|movement,daily life
+ngã|verb|To fall; to fall over.|movement,accidents
+trượt|verb|To slip; to slide; to fail an exam.|movement,school
+va chạm|verb|To collide; a collision.|movement,accidents
+nâng|verb|To lift; to raise.|movement,objects
+hạ|verb|To lower; to bring down.|movement,action
+xoay|verb|To turn; to rotate.|movement,objects
+gắn|verb|To attach; to stick on.|objects,action
+tháo|verb|To remove; to take apart.|objects,action
+lắp|verb|To install; to fit.|objects,technology
+xem xét|verb|To consider; to examine.|thinking,work
+đo|verb|To measure.|health,science
+đếm|verb|To count.|numbers,daily life
+tính|verb|To calculate; to count as.|numbers,work
+so sánh|verb|To compare.|thinking,work
+quyết định|verb|To decide; a decision.|decisions,work
+giải thích|verb|To explain.|communication,learning
+thảo luận|verb|To discuss; a discussion.|communication,work
+tranh luận|verb|To debate; to argue a case.|communication,society
+đồng ý|verb|To agree.|communication,decisions
+từ chối|verb|To refuse; to decline.|communication,decisions
+chấp nhận|verb|To accept; to agree to.|communication,decisions
+hứa|verb|To promise.|communication,relationships
+khuyên|verb|To advise; to recommend.|communication,advice
+cảnh báo|verb|To warn; a warning.|communication,safety
+nhắc|verb|To remind; to mention.|communication,memory
+lặp lại|verb|To repeat.|communication,learning
+đề nghị|verb|To suggest; to request; a proposal.|communication,work
+yêu cầu|verb|To request; to require; a requirement.|communication,work
+cho phép|verb|To allow; to permit.|communication,law
+cấm|verb|To forbid; to ban.|law,communication
+bắt buộc|verb|To require; compulsory.|law,work
+khuyến khích|verb|To encourage; to incentivise.|communication,society
+động viên|verb|To encourage emotionally; to cheer on.|relationships,communication
+khen|verb|To praise; to compliment.|communication,relationships
+phàn nàn|verb|To complain.|communication,services
+chúc|verb|To wish someone well.|communication,celebration
+mời|verb|To invite; to offer.|communication,politeness
+đón|verb|To pick someone up; to welcome.|travel,relationships
+thăm|verb|To visit.|relationships,travel
+ghé|verb|To stop by; to drop in.|movement,daily life
+tới|verb|To arrive; to reach.|movement,travel
+đi qua|verb|To pass by; to go through.|movement,daily life
+vượt|verb|To overtake; to surpass.|movement,transport
+xuất phát|verb|To set off; to start a journey.|travel,movement
+cất cánh|verb|To take off, as a plane.|travel,transport
+hạ cánh|verb|To land, as a plane.|travel,transport
+lái|verb|To drive; to steer.|transport,work
+chở|verb|To carry; to transport people or goods.|transport,daily life
+đóng gói|verb|To pack; to package.|shopping,services
+bảo quản|verb|To preserve; to store carefully.|food,daily life
+cất|verb|To put away; to store.|home,daily life
+lấy lại|verb|To get back; to retrieve.|action,daily life
+trả lại|verb|To return something; to give back.|action,shopping
+thanh toán|verb|To pay; to settle a bill.|money,shopping
+rút tiền|verb|To withdraw money.|money,banking
+gửi tiền|verb|To deposit money; to send money.|money,banking
+trả nợ|verb|To pay off a debt.|money,banking
+đầu tư|verb|To invest; investment.|money,business
+kiếm tiền|verb|To earn money.|money,work
+chi tiêu|verb|To spend on living costs; household expenditure.|money,daily life
+tiêu tiền|verb|To spend money, in casual everyday speech.|money,daily life
+vẽ|verb|To draw; to paint.|art,hobby
+sơn|verb|To paint a surface; paint.|home,hobby
+may|verb|To sew.|clothing,hobby
+lắp đặt|verb|To install; to fit equipment.|home,technology
+thay thế|verb|To replace; to substitute.|action,work
+nhặt|verb|To pick up; to gather.|action,daily life
+ném|verb|To throw.|movement,sport
+thả|verb|To release; to drop; to let go.|action,daily life
+giấu|verb|To hide; to conceal.|action,daily life
+phát hiện|verb|To discover; to detect.|thinking,science
+nhận ra|verb|To realise; to recognise.|thinking,daily life
+suy nghĩ|verb|To think over; to ponder.|thinking,daily life
+tưởng tượng|verb|To imagine.|thinking,creative
+mơ|verb|To dream; to hope for.|sleep,thinking
+ước|verb|To wish; to wish for.|desires,emotion
+mong đợi|verb|To expect; to look forward to.|thinking,emotion
+cố gắng|verb|To try hard; to make an effort.|work,learning
+nỗ lực|verb|To strive; to make an effort.|work,personal growth
+đạt được|verb|To achieve; to attain.|work,achievement
+rèn luyện|verb|To train; to practise and improve.|health,learning
+tiến bộ|verb|To improve; to make progress.|learning,personal growth
+cải thiện|verb|To improve; to better.|work,personal growth
+tránh|verb|To avoid; to evade.|action,daily life
+đối mặt|verb|To face; to confront.|action,emotion
+giải quyết|verb|To solve; to resolve.|work,thinking
+xử lý|verb|To handle; to process.|work,technology
+lên kế hoạch|verb|To make a plan.|work,planning
+tổ chức|verb|To organise; an organisation.|work,society
+tham gia|verb|To join; to take part.|society,leisure
+tham dự|verb|To attend; to be present at.|work,society
+đóng góp|verb|To contribute; a contribution.|society,work
+hỗ trợ|verb|To support; to assist.|work,relationships
+hợp tác|verb|To cooperate; to collaborate.|work,business
+truyền đạt|verb|To convey; to communicate information.|communication,work
+liên hệ|verb|To contact; to get in touch.|communication,work
+phản hồi|verb|To respond; feedback.|communication,work

@@ -1,0 +1,56 @@
+# Hobbies, sport, films, music, and free-time plans.
+sở thích|noun|Hobby; interest.|leisure,daily life
+thời gian rảnh|noun|Free time.|leisure,time
+giải trí|noun|Entertainment; recreation.|leisure,media
+âm nhạc|noun|Music.|music,leisure
+bài hát|noun|Song.|music,leisure
+ban nhạc|noun|Band; music group.|music,leisure
+buổi hòa nhạc|noun|Concert.|music,leisure
+phim|noun|Film; movie.|media,leisure
+bộ phim|noun|A film; movie.|media,leisure
+nhân vật|noun|Character; figure.|media,storytelling
+cốt truyện|noun|Plot; storyline.|media,storytelling
+bóng đá|noun|Football; soccer.|sport,leisure
+cầu thủ|noun|Footballer; player.|sport,people
+đội bóng|noun|Football team; team.|sport,leisure
+trận đấu|noun|Match; game.|sport,leisure
+đội tuyển|noun|National team; squad.|sport,leisure
+cầu lông|noun|Badminton.|sport,leisure
+bóng bàn|noun|Table tennis.|sport,leisure
+bóng rổ|noun|Basketball.|sport,leisure
+bơi lội|noun|Swimming.|sport,leisure
+gym|noun|Gym; fitness centre.|sport,leisure
+câu cá|verb|To fish; to go fishing.|leisure,outdoors
+đọc sách|verb|To read books.|leisure,learning
+tiểu thuyết|noun|Novel.|media,books
+truyện tranh|noun|Comic; manga.|media,books
+tạp chí|noun|Magazine.|media,books
+báo|noun|Newspaper; the press.|media,news
+tin tức|noun|News.|media,news
+chương trình|noun|Programme; show.|media,leisure
+kênh truyền hình|noun|Television channel.|media,leisure
+người dẫn chương trình|noun|TV host; presenter.|media,people
+khán giả|noun|Audience; spectator.|media,people
+trò chơi điện tử|noun|Video game.|games,leisure
+cờ vua|noun|Chess.|games,leisure
+dã ngoại|noun|Outing; picnic.|leisure,outdoors
+chụp ảnh|verb|To take photos; photography.|leisure,hobby
+vẽ tranh|verb|To paint; to draw pictures.|leisure,art
+đánh đàn|verb|To play a musical instrument with strings or keys.|music,hobby
+karaoke|noun|Karaoke.|music,leisure
+khiêu vũ|verb|To dance; ballroom dancing.|music,leisure
+sưu tầm|verb|To collect; to build a collection.|hobby,leisure
+đọc truyện|verb|To read stories.|leisure,books
+xem phim|verb|To watch a film.|leisure,media
+nghe nhạc|verb|To listen to music.|leisure,music
+thư giãn|verb|To relax; to unwind.|health,leisure
+giải đấu|noun|Tournament; league.|sport,leisure
+huy chương|noun|Medal.|sport,achievement
+vô địch|noun|Champion; championship.|sport,achievement
+cổ vũ|verb|To cheer; to support a team.|sport,leisure
+marathon|noun|Marathon.|sport,leisure
+truyện|noun|Story; tale.|books,media
+nhạc cụ|noun|Musical instrument.|music,hobby
+vé xem phim|noun|Cinema ticket.|media,leisure
+triển lãm|noun|Exhibition.|art,leisure
+lễ hội|noun|Festival.|culture,leisure

@@ -1,0 +1,101 @@
+# Abstract verbs for argument, power, reform, and public life.
+khẳng định|verb|To affirm; to assert.|communication,debate
+phủ định|verb|To negate; to deny.|communication,debate
+bác bỏ|verb|To refute; to reject an argument.|debate,thinking
+phản đối|verb|To oppose; to object.|debate,society
+ủng hộ|verb|To support; to back.|debate,relationships
+tán thành|verb|To approve; to agree with.|debate,opinion
+đồng tình|verb|To share the same view; to agree.|debate,opinion
+chất vấn|verb|To question; to interrogate.|debate,politics
+đặt giả thuyết|verb|To hypothesise.|science,thinking
+giả sử|verb|To suppose; to assume.|thinking,grammar
+suy luận|verb|To reason; to infer.|thinking,science
+luận giải|verb|To explicate; to interpret.|thinking,communication
+minh chứng|verb|To demonstrate; to substantiate.|debate,thinking
+xác nhận|verb|To confirm.|communication,work
+phản bác|verb|To rebut.|debate,communication
+phủ nhận|verb|To deny.|communication,debate
+thừa nhận|verb|To acknowledge; to admit.|communication,thinking
+thú nhận|verb|To confess.|communication,law
+tiết lộ|verb|To reveal; to disclose.|communication,media
+công khai|verb|To make public; to disclose.|communication,society
+che giấu|verb|To conceal; to cover up.|communication,behaviour
+bóp méo|verb|To distort.|media,communication
+xuyên tạc|verb|To twist facts; to misrepresent.|media,communication
+phóng đại|verb|To exaggerate.|communication,media
+đánh tráo|verb|To swap fraudulently; to substitute.|law,communication
+ngụy tạo|verb|To fabricate; to forge.|law,communication
+thao túng|verb|To manipulate.|society,psychology
+lợi dụng|verb|To exploit; to take advantage of.|society,behaviour
+lạm dụng|verb|To abuse; misuse.|society,law
+ép buộc|verb|To coerce; to force.|society,law
+đe dọa|verb|To threaten.|society,behaviour
+dụ dỗ|verb|To lure; to entice.|society,behaviour
+mua chuộc|verb|To bribe; to buy someone's loyalty.|society,law
+thỏa hiệp|verb|To compromise.|politics,communication
+nhượng bộ|verb|To make concessions.|politics,communication
+trung gian|verb|To mediate; intermediary.|politics,communication
+dàn xếp|verb|To arrange; to broker a deal.|politics,work
+thống nhất|verb|To unify; to reach agreement.|politics,society
+phân hóa|verb|To polarise; to divide.|society,politics
+chia rẽ|verb|To divide; to split.|society,politics
+kích động|verb|To incite; to provoke.|society,politics
+xúi giục|verb|To instigate; to egg on.|society,law
+kêu gọi|verb|To call on; to appeal.|society,media
+tuyên truyền|verb|To propagate; propaganda.|society,media
+cổ động|verb|To campaign; to rally support.|society,politics
+đấu tranh|verb|To struggle; to fight for.|society,politics
+phản kháng|verb|To resist; to protest.|society,politics
+biểu tình|verb|To demonstrate; a protest.|society,politics
+đình công|verb|To strike; a labour strike.|society,work
+tuần hành|verb|To march; a march.|society,politics
+đảo chính|noun|Coup; coup d'état.|politics,history
+lật đổ|verb|To overthrow.|politics,history
+nổi dậy|verb|To rise up; to revolt.|politics,history
+đàn áp|verb|To suppress; to crack down.|politics,law
+trấn áp|verb|To repress; to put down.|politics,law
+kiềm chế|verb|To restrain; to curb.|politics,behaviour
+giải phóng|verb|To liberate; liberation.|politics,history
+giành lại|verb|To win back; to reclaim.|politics,action
+củng cố|verb|To consolidate; to reinforce.|politics,work
+tăng cường|verb|To strengthen; to step up.|action,work
+cắt giảm|verb|To cut; to reduce sharply.|economy,work
+thắt chặt|verb|To tighten.|economy,policy
+nới lỏng|verb|To loosen; to relax restrictions.|economy,policy
+thích ứng|verb|To adapt; adaptation.|change,society
+ứng phó|verb|To respond to; to cope with.|change,society
+chống chọi|verb|To struggle against; to withstand.|change,health
+phục hồi|verb|To recover; to rebound.|economy,health
+tái phát|verb|To relapse; to recur.|health,change
+suy yếu|verb|To weaken.|change,health
+sụp đổ|verb|To collapse.|change,society
+tan rã|verb|To disintegrate; to dissolve.|change,society
+dung hòa|verb|To reconcile; to harmonise.|society,communication
+gắn kết|verb|To connect; to bond.|society,relationships
+lan tỏa|verb|To spread; to radiate.|society,media
+truyền cảm hứng|verb|To inspire.|emotion,communication
+khơi dậy|verb|To awaken; to stir up.|emotion,communication
+gợi ý|verb|To suggest; to hint.|communication,thinking
+ám chỉ|verb|To allude; to insinuate.|communication,language
+ngụ ý|verb|To imply.|communication,language
+đúc kết|verb|To distil; to draw conclusions.|thinking,communication
+khái quát|verb|To generalise; to summarise broadly.|thinking,communication
+hệ thống hóa|verb|To systematise.|thinking,work
+chuẩn hóa|verb|To standardise.|work,technology
+tối ưu hóa|verb|To optimise.|work,technology
+số hóa|verb|To digitise.|technology,economy
+công nghiệp hóa|verb|To industrialise.|economy,society
+thương mại hóa|verb|To commercialise.|economy,business
+tư nhân hóa|verb|To privatise.|economy,politics
+quốc hữu hóa|verb|To nationalise.|economy,politics
+tự do hóa|verb|To liberalise.|economy,politics
+hợp pháp hóa|verb|To legalise.|law,politics
+thể chế hóa|verb|To institutionalise.|politics,society
+cụ thể hóa|verb|To make concrete; to specify.|thinking,work
+lượng hóa|verb|To quantify.|science,statistics
+đánh đổi|verb|To trade off; to sacrifice for something.|decisions,life
+cân nhắc|verb|To weigh up; to consider carefully.|decisions,thinking
+ưu tiên|verb|To prioritise; a priority.|decisions,work
+đặt cược|verb|To bet; to stake.|decisions,risk
+mạo hiểm|verb|To take a risk; to venture.|decisions,risk
+chấp nhận rủi ro|verb|To accept risk.|decisions,risk

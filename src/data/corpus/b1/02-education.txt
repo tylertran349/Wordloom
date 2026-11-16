@@ -1,0 +1,51 @@
+# Education systems, study skills, and academic life.
+giáo dục|noun|Education.|school,society
+hệ thống giáo dục|noun|Education system.|school,society
+chương trình học|noun|Curriculum; study programme.|school,education
+phương pháp|noun|Method; approach.|school,thinking
+kỹ năng mềm|noun|Soft skills.|school,career
+tư duy|noun|Thinking; mindset.|school,thinking
+kiến thức|noun|Knowledge.|school,learning
+hiểu biết|noun|Understanding; knowledge.|school,learning
+buổi học|noun|Class session; lesson.|school,learning
+tiết học|noun|Period; class hour.|school,learning
+giảng viên|noun|Lecturer; instructor.|school,people
+trợ giảng|noun|Teaching assistant.|school,people
+học viên|noun|Learner; trainee.|school,people
+khóa học|noun|Course.|school,learning
+lớp học|noun|Class; classroom.|school,learning
+bài tập nhóm|noun|Group assignment.|school,learning
+đồ án|noun|Project; design project.|school,study
+luận văn|noun|Thesis; dissertation.|school,study
+hội thảo|noun|Seminar; conference.|school,work
+tọa đàm|noun|Discussion panel; talk.|school,communication
+diễn giả|noun|Speaker; guest lecturer.|school,people
+thảo luận nhóm|noun|Group discussion.|school,communication
+thực hành|noun|Practice; practical session.|school,learning
+lý thuyết|noun|Theory.|school,learning
+ghi nhớ|verb|To memorise; to remember.|school,memory
+ôn thi|verb|To revise for an exam.|school,study
+điểm số|noun|Score; grade.|school,study
+học lực|noun|Academic performance.|school,study
+xếp loại|verb|To grade; to classify.|school,study
+bằng tốt nghiệp|noun|Graduation certificate; diploma.|school,education
+chứng nhận|noun|Certificate; certification.|school,work
+du học|verb|To study abroad.|school,travel
+trao đổi sinh viên|noun|Student exchange.|school,travel
+học phí|noun|Tuition fee.|school,money
+trường tư thục|noun|Private school.|school,education
+trường công lập|noun|Public school.|school,education
+cơ sở vật chất|noun|Facilities; infrastructure.|school,education
+phòng thí nghiệm|noun|Laboratory.|school,science
+giáo trình|noun|Textbook; coursebook.|school,books
+tài liệu tham khảo|noun|Reference material.|school,books
+mượn sách|verb|To borrow books.|school,library
+đọc hiểu|verb|To read for comprehension.|school,learning
+viết luận|verb|To write an essay.|school,writing
+phát biểu|verb|To speak up; to make a statement.|school,communication
+đặt câu hỏi|verb|To ask a question.|school,communication
+giải bài tập|verb|To solve exercises.|school,learning
+tự học|verb|To self-study.|school,learning
+nâng cao|verb|To improve; to enhance.|school,learning
+trau dồi|verb|To cultivate; to hone a skill.|school,learning
+thành tích|noun|Achievement; results.|school,achievement

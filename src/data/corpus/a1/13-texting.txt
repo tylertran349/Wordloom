@@ -1,0 +1,27 @@
+# Vietnamese texting and chat abbreviations. Written without tones, as online.
+ko|abbreviation|Texting short form of 'không' — no, not.|texting,slang
+k|abbreviation|Ultra-short chat form of 'không' — no, not.|texting,slang
+hok|abbreviation|Playful texting form of 'không' — no, not.|texting,slang
+dc|abbreviation|Texting short form of 'được' — okay, can, got it.|texting,slang
+đc|abbreviation|Alternative chat spelling of 'được' — okay, can, got it.|texting,slang
+mn|abbreviation|Texting short form of 'mọi người' — everyone, guys.|texting,slang
+ns|abbreviation|Texting short form of 'nói' — to say.|texting,slang
+nc|abbreviation|Texting short form of 'nói chuyện' — to chat.|texting,slang
+ib|abbreviation|Texting short form of 'inbox' — send me a private message.|texting,slang
+rep|abbreviation|Texting short form of 'reply' — to reply.|texting,slang
+stt|abbreviation|Texting short form of 'status' — a social-media post.|texting,slang
+avt|abbreviation|Texting short form of 'avatar' — profile picture.|texting,slang
+cmt|abbreviation|Texting short form of 'comment' — to comment.|texting,slang
+like|verb|To like a post; used as-is in Vietnamese chat.|texting,social media
+share|verb|To share a post; used as-is in Vietnamese chat.|texting,social media
+fl|abbreviation|Texting short form of 'follow' — to follow an account.|texting,slang
+acc|abbreviation|Texting short form of 'account' — a user account.|texting,slang
+pass|abbreviation|Texting short form of 'password'.|texting,slang
+sđt|abbreviation|Texting short form of 'số điện thoại' — phone number.|texting,slang
+vn|abbreviation|Texting short form of 'Việt Nam' — Vietnam.|texting,slang
+u|pronoun|Chat spelling of 'you' or 'mày' — you, used with friends.|texting,slang
+mik|pronoun|Chat spelling of 'mình' — I, me.|texting,slang
+pn|abbreviation|Chat short form of 'bạn' — you, friend.|texting,slang
+z|particle|Chat spelling of 'vậy' — so, like that.|texting,slang
+bit|abbreviation|Chat spelling of 'biết' — to know.|texting,slang
+cx|abbreviation|Chat short form of 'cũng' — also, too.|texting,slang

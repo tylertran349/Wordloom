@@ -1,0 +1,51 @@
+# Rhetoric, literature, art, and the mass media.
+ngôn từ|noun|Wording; language; words.|media,rhetoric
+tu từ|noun|Rhetoric; figurative language.|media,rhetoric
+ẩn dụ|noun|Metaphor.|media,rhetoric
+hoán dụ|noun|Metonymy.|media,rhetoric
+nghị luận|noun|Argumentative writing; essay.|media,rhetoric
+lập trường|noun|Position; stance.|media,opinion
+luận điểm|noun|Argument; key point.|media,rhetoric
+luận cứ|noun|Grounds for an argument; evidence.|media,rhetoric
+dẫn chứng|noun|Evidence; supporting example.|media,rhetoric
+sức thuyết phục|noun|Persuasiveness.|media,rhetoric
+ngụy biện|noun|Fallacy; sophistry.|media,rhetoric
+ngôn ngữ cơ thể|noun|Body language.|media,communication
+giọng điệu|noun|Tone of voice; tone.|media,rhetoric
+sắc thái|noun|Nuance; shade of meaning.|media,language
+hàm ý|noun|Implication; implied meaning.|media,language
+nghĩa bóng|noun|Figurative meaning.|media,language
+nghĩa đen|noun|Literal meaning.|media,language
+thành ngữ|noun|Idiom.|media,language
+tục ngữ|noun|Proverb.|media,culture
+ca dao|noun|Folk verse; traditional folk poem.|media,culture
+văn học|noun|Literature.|media,culture
+thi ca|noun|Poetry.|media,literature
+truyện ngắn|noun|Short story.|media,literature
+hồi ký|noun|Memoir.|media,literature
+phê bình văn học|noun|Literary criticism.|media,literature
+tác giả|noun|Author.|media,people
+tác phẩm|noun|Work; piece of art or literature.|media,culture
+bối cảnh|noun|Context; setting.|media,literature
+chủ đề|noun|Theme; topic.|media,culture
+thông điệp|noun|Message.|media,communication
+ấn tượng|noun|Impression.|media,opinion
+cảm hứng|noun|Inspiration.|media,emotion
+thẩm mỹ|noun|Aesthetics; aesthetic sense.|media,culture
+nghệ thuật|noun|Art.|media,culture
+hội họa|noun|Painting; fine art.|media,art
+điêu khắc|noun|Sculpture.|media,art
+sân khấu|noun|Theatre; stage.|media,art
+kịch|noun|Play; drama.|media,art
+điện ảnh|noun|Cinema; film industry.|media,film
+phim tài liệu|noun|Documentary film.|media,film
+truyền thông đại chúng|noun|Mass media.|media,society
+phương tiện truyền thông|noun|Media outlet; medium.|media,society
+định hướng dư luận|verb|To shape public opinion.|media,society
+kiểm duyệt|verb|To censor; censorship.|media,law
+đa phương tiện|noun|Multimedia.|media,technology
+podcast|noun|Podcast.|media,internet
+báo mạng|noun|Online newspaper.|media,internet
+phóng sự|noun|Feature report; documentary piece.|media,journalism
+phim ngắn|noun|Short film.|media,film
+diễn đàn|noun|Forum; discussion platform.|media,internet

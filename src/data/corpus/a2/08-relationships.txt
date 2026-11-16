@@ -1,0 +1,51 @@
+# Dating, close relationships, and the feelings that come with them.
+tình bạn|noun|Friendship.|relationships,emotion
+tình yêu|noun|Love; romantic love.|relationships,emotion
+tình cảm|noun|Feelings; affection.|relationships,emotion
+cảm xúc|noun|Emotion; feelings.|emotion,psychology
+hẹn hò|verb|To date; to go on a date.|relationships,dating
+tỏ tình|verb|To confess one's love.|relationships,dating
+chia tay|verb|To break up.|relationships,dating
+ly hôn|verb|To divorce.|relationships,family
+kết hôn|verb|To get married.|relationships,family
+đính hôn|verb|To get engaged.|relationships,family
+ghen|verb|To be jealous in love.|emotion,relationships
+tin tưởng|verb|To trust; to believe in.|relationships,emotion
+tôn trọng|verb|To respect.|relationships,emotion
+thấu hiểu|verb|To understand deeply; to empathise.|relationships,emotion
+quan tâm|verb|To care about; to pay attention to.|relationships,emotion
+chăm sóc|verb|To look after; to care for.|relationships,health
+dỗi|verb|To sulk; to be quietly upset.|emotion,relationships
+tha thứ|verb|To forgive.|relationships,emotion
+tranh cãi|verb|To argue; to dispute.|relationships,communication
+cãi nhau|verb|To argue with each other.|relationships,communication
+hòa giải|verb|To reconcile.|relationships,communication
+thất vọng|adjective|Disappointed; disappointment.|emotion,description
+hy vọng|noun|Hope; to hope.|emotion,optimism
+tự tin|adjective|Confident; self-assured.|personality,emotion
+tự ti|adjective|Insecure; self-conscious.|personality,emotion
+ghen tị|adjective|Envious; jealous of others.|emotion,personality
+cô đơn|adjective|Lonely.|emotion,description
+buồn bã|adjective|Sad; gloomy.|emotion,description
+vui vẻ|adjective|Cheerful; happy.|emotion,description
+phấn khích|adjective|Excited; thrilled.|emotion,description
+hào hứng|adjective|Eager; enthusiastic.|emotion,description
+bình tĩnh|adjective|Calm; composed.|emotion,personality
+lo lắng|adjective|Anxious; worried about something specific.|emotion,description
+sợ hãi|adjective|Frightened; fearful.|emotion,description
+ngạc nhiên|adjective|Surprised.|emotion,description
+xúc động|adjective|Moved emotionally; touched.|emotion,description
+cảm động|adjective|Touched; emotionally moved.|emotion,description
+biết ơn|adjective|Grateful; thankful.|emotion,politeness
+thân thiết|adjective|Close; intimate.|relationships,description
+xa cách|adjective|Distant; estranged.|relationships,description
+hiểu lầm|noun|Misunderstanding.|relationships,communication
+lời hứa|noun|Promise.|relationships,communication
+giữ lời|verb|To keep one's word.|relationships,character
+thất hứa|verb|To break a promise.|relationships,character
+tình thân|noun|Family bond; close family feeling.|family,emotion
+mối quan hệ|noun|Relationship.|relationships,society
+kết bạn|verb|To make friends; to add as a friend.|relationships,social media
+đồng cảm|verb|To sympathise; to relate to.|emotion,communication
+yêu thương|verb|To love and cherish.|emotion,relationships
+nhớ nhung|verb|To long for; to miss deeply.|emotion,relationships

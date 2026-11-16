@@ -1,0 +1,66 @@
+# The economy, markets, corporate finance, and trade.
+kinh tế|noun|Economy; economics.|economy,society
+kinh tế vĩ mô|noun|Macroeconomics.|economy,science
+kinh tế vi mô|noun|Microeconomics.|economy,science
+thị trường|noun|Market; the economic market for goods or services.|economy,business
+thị phần|noun|Market share.|economy,business
+cung cầu|noun|Supply and demand.|economy,market
+năng lực cạnh tranh|noun|Competitiveness.|economy,business
+lạm phát|noun|Inflation.|economy,money
+giảm phát|noun|Deflation.|economy,money
+suy thoái|noun|Recession; downturn.|economy,business
+tăng trưởng|noun|Growth; economic growth.|economy,statistics
+tổng sản phẩm quốc nội|noun|Gross domestic product; GDP.|economy,statistics
+thu nhập bình quân|noun|Average income.|economy,money
+thu nhập|noun|Income.|economy,money
+chi tiêu công|noun|Public spending.|economy,government
+đầu tư công|noun|Public investment.|economy,government
+đầu tư nước ngoài|noun|Foreign investment.|economy,business
+vốn|noun|Capital; funds.|economy,money
+cổ phiếu|noun|Share; stock.|economy,finance
+trái phiếu|noun|Bond.|economy,finance
+chứng khoán|noun|Securities; stocks.|economy,finance
+thị trường chứng khoán|noun|Stock market.|economy,finance
+sàn giao dịch|noun|Trading floor; exchange.|economy,finance
+cổ tức|noun|Dividend.|economy,finance
+lãi suất|noun|Interest rate.|economy,banking
+tỷ lệ|noun|Rate; ratio.|economy,statistics
+lợi tức|noun|Return; yield.|economy,finance
+chiết khấu|noun|Discount; discount rate.|economy,money
+thuế|noun|Tax.|economy,government
+thuế thu nhập|noun|Income tax.|economy,government
+thuế giá trị gia tăng|noun|Value-added tax; VAT.|economy,government
+trốn thuế|verb|To evade tax.|economy,law
+ngân sách nhà nước|noun|State budget.|economy,government
+nợ công|noun|Public debt.|economy,government
+thâm hụt|noun|Deficit.|economy,money
+thặng dư|noun|Surplus.|economy,money
+dự trữ ngoại hối|noun|Foreign exchange reserves.|economy,banking
+tín dụng|noun|Credit.|economy,banking
+thế chấp|verb|To mortgage; collateral.|economy,banking
+bảo lãnh|verb|To guarantee; to underwrite.|economy,banking
+phá sản|verb|To go bankrupt; bankruptcy.|economy,business
+giải thể|verb|To dissolve an organisation.|economy,business
+niêm yết|verb|To list on a stock exchange.|economy,finance
+thương vụ|noun|Business deal; acquisition.|economy,business
+chuỗi cung ứng|noun|Supply chain.|economy,business
+logistics|noun|Logistics.|economy,business
+nhượng quyền|verb|To franchise; a franchise.|economy,business
+khởi nghiệp|verb|To start a business; entrepreneurship.|economy,career
+đổi mới sáng tạo|noun|Innovation.|economy,technology
+chuyển đổi số|noun|Digital transformation.|economy,technology
+thương mại điện tử|noun|E-commerce.|economy,technology
+xuất khẩu|verb|To export; exports.|economy,trade
+nhập khẩu|verb|To import; imports.|economy,trade
+hàng rào thuế quan|noun|Tariff barrier.|economy,trade
+hiệp định thương mại|noun|Trade agreement.|economy,international
+khu chế xuất|noun|Export processing zone.|economy,business
+đặc khu kinh tế|noun|Special economic zone.|economy,business
+lợi nhuận ròng|noun|Net profit.|economy,finance
+biên lợi nhuận|noun|Profit margin.|economy,finance
+dòng tiền|noun|Cash flow.|economy,finance
+bảng cân đối kế toán|noun|Balance sheet.|economy,finance
+báo cáo tài chính|noun|Financial statement.|economy,finance
+quỹ đầu tư|noun|Investment fund.|economy,finance
+vốn điều lệ|noun|Charter capital.|economy,business
+chi phí cơ hội|noun|Opportunity cost.|economy,thinking

@@ -1,0 +1,55 @@
+# The home, furniture, and everyday household objects.
+nhà|noun|House; home.|home,daily life
+bếp|noun|Kitchen; stove.|home,daily life
+phòng khách|noun|Living room.|home,rooms
+phòng ngủ|noun|Bedroom.|home,rooms
+phòng tắm|noun|Bathroom.|home,rooms
+phòng vệ sinh|noun|Toilet; restroom.|home,rooms
+sân|noun|Yard; courtyard.|home,outdoors
+vườn|noun|Garden.|home,outdoors
+cửa|noun|Door; doorway.|home,daily life
+cửa sổ|noun|Window.|home,daily life
+tường|noun|Wall.|home,daily life
+sàn nhà|noun|Floor.|home,daily life
+mái nhà|noun|Roof.|home,daily life
+cầu thang|noun|Stairs; staircase.|home,building
+thang máy|noun|Lift; elevator.|home,building
+ban công|noun|Balcony.|home,building
+giường|noun|Bed.|home,furniture
+gối|noun|Pillow.|home,furniture
+chăn|noun|Blanket; duvet.|home,furniture
+đệm|noun|Mattress; cushion.|home,furniture
+ga giường|noun|Bedsheet.|home,furniture
+tủ|noun|Cupboard; wardrobe; cabinet.|home,furniture
+tủ lạnh|noun|Refrigerator; fridge.|home,appliance
+bàn|noun|Table; desk.|home,furniture
+ghế|noun|Chair.|home,furniture
+đèn|noun|Lamp; light.|home,daily life
+quạt|noun|Fan.|home,appliance
+điều hòa|noun|Air conditioner.|home,appliance
+tivi|noun|Television; TV.|home,appliance
+máy giặt|noun|Washing machine.|home,appliance
+nồi|noun|Pot; cooking pot.|home,kitchen
+chảo|noun|Frying pan; wok.|home,kitchen
+đĩa|noun|Plate; dish.|home,kitchen
+chìa khóa|noun|Key.|home,daily life
+ổ khóa|noun|Lock.|home,daily life
+gương|noun|Mirror.|home,daily life
+khăn|noun|Towel; cloth; scarf.|home,daily life
+khăn tắm|noun|Bath towel.|home,daily life
+xà phòng|noun|Soap.|home,daily life
+dầu gội|noun|Shampoo.|home,daily life
+bàn chải|noun|Brush; toothbrush.|home,daily life
+kem đánh răng|noun|Toothpaste.|home,daily life
+giấy vệ sinh|noun|Toilet paper.|home,daily life
+thùng rác|noun|Rubbish bin; trash can.|home,daily life
+ổ cắm|noun|Power socket; outlet.|home,appliance
+pin|noun|Battery.|home,appliance
+nến|noun|Candle.|home,daily life
+bật lửa|noun|Lighter.|home,daily life
+túi|noun|Bag.|daily life,objects
+ví|noun|Wallet; purse.|daily life,objects
+ô|noun|Umbrella.|daily life,weather
+mũ|noun|Hat; cap.|clothing,daily life
+kính|noun|Glasses; spectacles.|clothing,daily life
+đồng hồ|noun|Clock; watch.|daily life,objects

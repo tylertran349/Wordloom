@@ -1,0 +1,56 @@
+# Media, advertising, digital platforms, and online safety.
+truyền thông|noun|Media; communications.|media,society
+báo chí|noun|The press; journalism.|media,news
+truyền hình|noun|Television; TV broadcasting.|media,news
+phát thanh|noun|Radio broadcasting.|media,news
+quảng cáo|noun|Advertising; an advertisement.|media,business
+tiếp thị|noun|Marketing.|media,business
+thương hiệu|noun|Brand.|media,business
+người nổi tiếng|noun|Celebrity.|media,people
+người ảnh hưởng|noun|Influencer.|media,social media
+nội dung|noun|Content.|media,internet
+nội dung số|noun|Digital content.|media,technology
+lan truyền|verb|To spread; to go viral.|media,internet
+viral|adjective|Viral; widely shared online.|media,slang
+tương tác|noun|Interaction; to interact.|media,internet
+lượt xem|noun|View; view count.|media,internet
+lượt chia sẻ|noun|Share; share count.|media,internet
+bình luận tiêu cực|noun|Negative comment; online criticism.|media,social media
+tin đồn|noun|Rumour.|media,society
+thông tin sai lệch|noun|Misinformation; false information.|media,society
+kiểm chứng|verb|To fact-check; to verify.|media,research
+nguồn tin|noun|News source.|media,news
+phóng viên|noun|Reporter; correspondent.|media,people
+bài phỏng vấn|noun|Interview article.|media,writing
+tiêu đề|noun|Headline; title.|media,writing
+bài viết|noun|Article; written piece.|media,writing
+ấn phẩm|noun|Publication.|media,books
+xuất bản|verb|To publish; publication.|media,books
+bản quyền|noun|Copyright.|media,law
+đạo văn|noun|Plagiarism.|media,law
+trí tuệ nhân tạo|noun|Artificial intelligence.|technology,science
+dữ liệu lớn|noun|Big data.|technology,science
+thuật toán|noun|Algorithm.|technology,science
+tự động hóa|noun|Automation.|technology,work
+robot|noun|Robot.|technology,science
+thiết bị|noun|Device; equipment.|technology,objects
+công nghệ|noun|Technology.|technology,science
+đổi mới|noun|Innovation; renewal.|technology,business
+sáng chế|noun|Invention; patent.|technology,science
+nền tảng|noun|Platform; foundation.|technology,internet
+giao diện|noun|Interface.|technology,computer
+trải nghiệm người dùng|noun|User experience.|technology,design
+bảo mật|noun|Security; confidentiality.|technology,security
+mã độc|noun|Malware; malicious code.|technology,security
+lừa đảo|noun|Scam; fraud.|technology,society
+đánh cắp|verb|To steal; to hack and steal data.|technology,law
+bảo vệ dữ liệu|verb|To protect data.|technology,security
+xác thực hai lớp|noun|Two-factor authentication.|technology,security
+trực tuyến|adjective|Online.|technology,internet
+ngoại tuyến|adjective|Offline.|technology,internet
+đường truyền|noun|Connection line; transmission channel.|technology,internet
+tốc độ mạng|noun|Internet speed.|technology,internet
+nhà mạng|noun|Network provider; telecom company.|technology,internet
+cước phí|noun|Service charge; data fee.|technology,money
+thư thoại|noun|Voicemail.|technology,communication
+hộp thư đến|noun|Inbox.|technology,communication

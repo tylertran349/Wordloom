@@ -1,0 +1,71 @@
+# Abstract adjectives for evidence, consistency, and judgement.
+khả thi|adjective|Feasible; viable.|description,planning
+bất khả thi|adjective|Infeasible; impossible to carry out.|description,planning
+hiện thực|adjective|Realistic; real.|description,thinking
+phi thực tế|adjective|Unrealistic; impractical.|description,thinking
+hợp pháp|adjective|Legal; lawful.|law,description
+bất hợp pháp|adjective|Illegal; unlawful.|law,description
+chính đáng|adjective|Legitimate; justified.|description,law
+vô căn cứ|adjective|Unfounded; baseless.|description,thinking
+có căn cứ|adjective|Grounded; based on evidence.|description,thinking
+xác đáng|adjective|Valid; well-founded.|description,thinking
+đanh thép|adjective|Forceful; trenchant.|description,rhetoric
+sắc bén|adjective|Sharp; incisive.|description,thinking
+sâu sắc|adjective|Profound; deep.|description,thinking
+nông cạn|adjective|Shallow; superficial.|description,thinking
+toàn diện|adjective|Comprehensive; all-round.|description,thinking
+phiến diện|adjective|One-sided; biased.|description,thinking
+nhất quán|adjective|Consistent; coherent.|description,thinking
+mâu thuẫn|adjective|Contradictory; conflicting.|description,thinking
+tương thích|adjective|Compatible.|description,technology
+tương phản|adjective|Contrasting.|description,art
+đồng nhất|adjective|Uniform; identical.|description,thinking
+dị biệt|adjective|Distinct; divergent.|description,thinking
+phổ quát|adjective|Universal.|description,society
+đặc thù|adjective|Specific; particular.|description,society
+tiêu biểu|adjective|Typical; representative.|description,opinion
+điển hình|adjective|Typical; quintessential.|description,opinion
+cá biệt|adjective|Exceptional; isolated.|description,statistics
+rộng rãi|adjective|Broad; spacious; widely.|description,space
+hạn chế|adjective|Limited; restricted.|description,limits
+dồi dào|adjective|Abundant; plentiful.|description,quantity
+khan hiếm|adjective|Scarce; rare.|description,quantity
+cấp thiết|adjective|Pressing; essential and urgent at the same time.|description,time
+trọng đại|adjective|Momentous; of great importance.|description,opinion
+vụn vặt|adjective|Trivial; petty.|description,opinion
+phù phiếm|adjective|Frivolous; superficial.|description,opinion
+hào nhoáng|adjective|Flashy; glamorous on the surface.|description,appearance
+giả tạo|adjective|Artificial; fake.|description,behaviour
+chân thật|adjective|Genuine; truthful.|description,personality
+trong sáng|adjective|Transparent; pure; clear.|description,character
+mập mờ|adjective|Ambiguous; murky.|description,communication
+rành mạch|adjective|Clear and coherent.|description,communication
+chặt chẽ|adjective|Rigorous; tight; well-structured.|description,thinking
+lỏng lẻo|adjective|Loose; sloppy.|description,thinking
+triệt để|adjective|Thorough; radical.|description,action
+nửa vời|adjective|Half-hearted; incomplete.|description,action
+tuyệt đối|adjective|Absolute.|description,thinking
+tương đối|adjective|Relative.|description,thinking
+vô điều kiện|adjective|Unconditional.|description,relationships
+có điều kiện|adjective|Conditional.|description,thinking
+công tâm|adjective|Impartial; fair-minded.|description,character
+thiên vị|adjective|Biased; partial.|description,character
+vô tư|adjective|Impartial; carefree.|description,character
+tận tâm|adjective|Dedicated; devoted.|description,work
+tận tụy|adjective|Devoted; conscientious.|description,work
+lương thiện|adjective|Honest and decent.|description,character
+gian dối|adjective|Deceitful; fraudulent.|description,character
+ngay thẳng|adjective|Upright; straightforward.|description,character
+cứng cỏi|adjective|Tough; resilient.|description,character
+mềm mỏng|adjective|Gentle and tactful.|description,communication
+quyết liệt|adjective|Resolute; fierce.|description,action
+dứt khoát|adjective|Decisive; definite.|description,action
+êm dịu|adjective|Mild; soothing.|description,feeling
+gay gắt|adjective|Harsh; acrimonious.|description,communication
+khốc liệt|adjective|Brutal; fierce.|description,conflict
+nhẹ nhàng|adjective|Gentle; light.|description,feeling
+thảm khốc|adjective|Catastrophic; tragic.|description,disaster
+viển vông|adjective|Far-fetched; unrealistic.|description,thinking
+thiết thực|adjective|Practical; down-to-earth.|description,thinking
+hữu ích|adjective|Useful.|description,opinion
+vô ích|adjective|Useless; futile.|description,opinion

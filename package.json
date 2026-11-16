@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "vocab:build": "node scripts/build-vocabulary.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.73.0",

@@ -1,0 +1,64 @@
+# Places around town, transport, and directions.
+thành phố|noun|City.|places,travel
+thị trấn|noun|Town.|places,travel
+làng|noun|Village.|places,travel
+quê|noun|Hometown; countryside; home village.|places,family
+con đường|noun|Road; street; way; route.|places,travel
+phố|noun|Street; city street.|places,travel
+cầu|noun|Bridge.|places,travel
+công viên|noun|Park.|places,leisure
+trường học|noun|School.|places,school
+chợ|noun|Market; the physical market where people buy and sell.|places,shopping
+siêu thị|noun|Supermarket.|places,shopping
+cửa hàng|noun|Shop; store.|places,shopping
+quán cà phê|noun|Café; coffee shop.|places,food
+nhà hàng|noun|Restaurant.|places,food
+khách sạn|noun|Hotel.|places,travel
+ngân hàng|noun|Bank.|places,money
+bưu điện|noun|Post office.|places,services
+bến xe|noun|Bus station; coach station.|places,travel
+sân bay|noun|Airport.|places,travel
+nhà ga|noun|Train station.|places,travel
+rạp chiếu phim|noun|Cinema; movie theatre.|places,leisure
+thư viện|noun|Library.|places,school
+bảo tàng|noun|Museum.|places,leisure
+hiệu thuốc|noun|Pharmacy; chemist.|places,health
+chùa|noun|Buddhist temple; pagoda.|places,culture
+bãi biển|noun|Beach.|places,travel
+xe|noun|Vehicle; car.|transport,travel
+xe đạp|noun|Bicycle.|transport,travel
+xe máy|noun|Motorbike; scooter.|transport,travel
+ô tô|noun|Car; automobile.|transport,travel
+xe buýt|noun|Bus.|transport,travel
+tàu hỏa|noun|Train.|transport,travel
+máy bay|noun|Aeroplane; plane.|transport,travel
+thuyền|noun|Boat.|transport,travel
+phà|noun|Ferry.|transport,travel
+taxi|noun|Taxi; cab.|transport,travel
+xe tải|noun|Truck; lorry.|transport,work
+đi bộ|verb|To walk; to go on foot.|transport,daily life
+lái xe|verb|To drive; to drive a vehicle.|transport,daily life
+vé|noun|Ticket.|transport,travel
+tài xế|noun|Driver.|transport,people
+bến|noun|Wharf; station; terminal.|transport,places
+trái|noun|Left side; also means fruit.|directions,basics
+phải|noun|Right side; also means 'must' or 'correct'.|directions,basics
+thẳng|adjective|Straight; direct.|directions,description
+trước|preposition|Before; in front of.|directions,time
+sau|preposition|After; behind.|directions,time
+trên|preposition|On; above; over.|directions,position
+dưới|preposition|Under; below; beneath.|directions,position
+trong|preposition|In; inside.|directions,position
+ngoài|preposition|Outside; out of.|directions,position
+gần|adjective|Near; close.|directions,distance
+xa|adjective|Far; distant.|directions,distance
+bên cạnh|preposition|Next to; beside.|directions,position
+giữa|preposition|Between; in the middle of.|directions,position
+đối diện|adjective|Opposite; facing.|directions,position
+đi thẳng|verb|To go straight ahead.|directions,travel
+rẽ trái|verb|To turn left.|directions,travel
+rẽ phải|verb|To turn right.|directions,travel
+bản đồ|noun|Map.|directions,travel
+địa chỉ|noun|Address.|directions,daily life
+giao thông|noun|Traffic; transport.|directions,travel
+ngã tư|noun|Crossroads; four-way junction.|directions,travel

@@ -1,0 +1,121 @@
+# The everyday verbs that carry most conversations.
+ăn|verb|To eat; to consume food.|food,daily life
+uống|verb|To drink.|food,daily life
+ngủ|verb|To sleep.|daily life,health
+thức dậy|verb|To wake up; to get up.|daily life,morning
+tắm|verb|To bathe; to shower.|daily life,hygiene
+rửa|verb|To wash; to rinse.|daily life,hygiene
+giặt|verb|To wash clothes; to do laundry.|daily life,home
+lau|verb|To wipe; to mop.|daily life,home
+quét|verb|To sweep.|daily life,home
+đi|verb|To go; to leave.|movement,basics
+đến|verb|To arrive; to come to.|movement,basics
+về|verb|To return home; to go back.|movement,basics
+ra|verb|To go out; to exit.|movement,basics
+vào|verb|To enter; to go in.|movement,basics
+lên|verb|To go up; to get on.|movement,basics
+xuống|verb|To go down; to get off.|movement,basics
+chạy|verb|To run.|movement,sport
+đứng|verb|To stand.|movement,basics
+ngồi|verb|To sit.|movement,basics
+nằm|verb|To lie down.|movement,basics
+mở|verb|To open; to turn on.|daily life,basics
+đóng|verb|To close; to shut.|daily life,basics
+bật|verb|To switch on; to turn on.|daily life,technology
+tắt|verb|To switch off; to turn off.|daily life,technology
+mua|verb|To buy; to purchase.|shopping,money
+bán|verb|To sell.|shopping,money
+trả|verb|To pay; to return something.|shopping,money
+đổi|verb|To change; to exchange.|shopping,daily life
+tìm|verb|To look for; to search.|daily life,work
+thấy|verb|To see; to find; to feel.|perception,daily life
+nhìn|verb|To look at; to watch.|perception,daily life
+xem|verb|To watch; to view; to check.|perception,media
+nghe|verb|To hear; to listen.|perception,communication
+nói|verb|To speak; to say; to talk.|communication,basics
+nói chuyện|verb|To talk; to have a conversation.|communication,friendship
+gọi|verb|To call; to order.|communication,daily life
+hỏi|verb|To ask; to inquire.|communication,daily life
+trả lời|verb|To answer; to reply.|communication,daily life
+kể|verb|To tell; to narrate.|communication,storytelling
+cười|verb|To laugh; to smile.|emotion,communication
+khóc|verb|To cry.|emotion,daily life
+hát|verb|To sing.|music,leisure
+nhảy|verb|To jump; to dance.|movement,leisure
+chơi|verb|To play; to hang out.|leisure,daily life
+thích|verb|To like; to enjoy.|emotion,preferences
+yêu|verb|To love.|emotion,relationships
+ghét|verb|To hate; to dislike.|emotion,preferences
+muốn|verb|To want.|desires,basics
+cần|verb|To need.|desires,basics
+biết|verb|To know a fact or skill.|learning,communication
+hiểu|verb|To understand.|learning,communication
+nghĩ|verb|To think.|thinking,communication
+nhớ|verb|To remember; to miss someone.|memory,emotion
+quên|verb|To forget.|memory,daily life
+đọc|verb|To read.|learning,media
+viết|verb|To write.|learning,communication
+dịch|verb|To translate.|languages,communication
+làm|verb|To do; to make; to work.|work,daily life
+giúp|verb|To help someone; to give a hand.|daily life,relationships
+gặp|verb|To meet; to see someone.|relationships,daily life
+chờ|verb|To wait; to wait for.|daily life,time
+mang|verb|To carry; to bring; to wear.|movement,daily life
+đưa|verb|To hand; to give; to take someone somewhere.|movement,daily life
+lấy|verb|To take; to pick up; to get.|daily life,objects
+cầm|verb|To hold in the hand.|daily life,objects
+cho|verb|To give; to let; also the preposition 'for'.|daily life,grammar
+nhận|verb|To receive; to accept.|daily life,communication
+gửi|verb|To send; to deposit.|communication,services
+đặt|verb|To place; to put; to order food.|food,daily life
+tiết kiệm|verb|To save money; economical.|money,daily life
+vay|verb|To borrow money; to take a loan.|money,work
+mượn|verb|To borrow an object.|daily life,objects
+thuê|verb|To rent; to hire.|money,home
+sửa|verb|To repair; to fix; to edit.|home,work
+xây|verb|To build; to construct.|home,work
+cắt|verb|To cut; to chop.|daily life,food
+gấp|verb|To fold; also means urgent or double.|daily life,objects
+phơi|verb|To dry in the sun; to hang out washing.|home,weather
+dọn|verb|To tidy; to clear away.|home,daily life
+nuôi|verb|To raise; to keep animals.|animals,family
+trồng|verb|To plant; to grow.|nature,garden
+bắt|verb|To catch; to grab; to arrest.|daily life,law
+đánh|verb|To hit; to beat; to brush teeth.|daily life,health
+bơi|verb|To swim.|sport,leisure
+đạp xe|verb|To cycle; to ride a bicycle.|transport,sport
+bay|verb|To fly.|transport,movement
+rơi|verb|To fall; to drop.|movement,daily life
+rời đi|verb|To leave; to depart.|movement,travel
+trở lại|verb|To return; to come back.|movement,travel
+lớn lên|verb|To grow up.|family,life
+sinh ra|verb|To be born.|life,family
+chết|verb|To die.|life,health
+sống|verb|To live; to be alive.|life,daily life
+cưới|verb|To marry; to wed.|relationships,family
+bắt đầu|verb|To begin; to start.|time,action
+kết thúc|verb|To finish; to end.|time,action
+tiếp tục|verb|To continue; to keep going.|action,time
+dừng|verb|To stop; to halt.|movement,action
+nghỉ|verb|To rest; to take a break.|health,work
+thử|verb|To try; to test.|action,learning
+chọn|verb|To choose; to pick.|action,decisions
+thay đổi|verb|To change; to alter.|action,life
+giữ|verb|To keep; to hold; to maintain.|action,objects
+bỏ|verb|To drop; to quit; to leave behind.|action,daily life
+mất|verb|To lose; to be lost; also used for time taken.|action,daily life
+để|verb|To put; to leave; also 'in order to'.|action,grammar
+treo|verb|To hang; to suspend.|home,objects
+kéo|verb|To pull; to drag.|movement,objects
+đẩy|verb|To push.|movement,objects
+bấm|verb|To press; to click.|technology,daily life
+gõ|verb|To type; to knock.|technology,work
+quay|verb|To turn; to film.|movement,media
+chụp|verb|To take a photo; to snap.|technology,media
+in|verb|To print.|technology,work
+tải|verb|To download; to load.|technology,daily life
+đăng|verb|To post; to publish.|technology,media
+xóa|verb|To delete; to erase.|technology,daily life
+chia sẻ|verb|To share.|technology,communication
+nhắn tin|verb|To text; to send a message.|technology,communication
+gọi điện|verb|To make a phone call.|technology,communication

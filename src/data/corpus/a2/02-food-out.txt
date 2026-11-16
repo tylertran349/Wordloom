@@ -1,0 +1,51 @@
+# Eating out, Vietnamese dishes, ingredients, and ordering politely.
+quán ăn|noun|Eatery; small restaurant.|food,restaurant
+quán nhậu|noun|Beer garden; casual drinking spot.|food,leisure
+quán trà sữa|noun|Bubble-tea shop.|food,drink
+đồ uống|noun|Drinks; beverages.|food,drink
+món chính|noun|Main course; main dish.|food,restaurant
+món tráng miệng|noun|Dessert.|food,dessert
+món khai vị|noun|Starter; appetiser.|food,restaurant
+gia vị|noun|Spices; seasoning.|food,ingredients
+nước chấm|noun|Dipping sauce.|food,ingredients
+tương ớt|noun|Chilli sauce.|food,ingredients
+bơ|noun|Butter; avocado.|food,ingredients
+phô mai|noun|Cheese.|food,ingredients
+sữa chua|noun|Yoghurt.|food,dairy
+bánh kem|noun|Cake with cream; birthday cake.|food,dessert
+bánh quy|noun|Biscuit; cookie.|food,dessert
+sô-cô-la|noun|Chocolate.|food,dessert
+mật ong|noun|Honey.|food,ingredients
+đậu xanh|noun|Mung beans.|food,ingredients
+rau muống|noun|Water spinach; morning glory.|food,vegetables
+rau cải|noun|Leafy greens; cabbage greens.|food,vegetables
+bắp cải|noun|Cabbage.|food,vegetables
+bí đỏ|noun|Pumpkin.|food,vegetables
+cà tím|noun|Aubergine; eggplant.|food,vegetables
+nấm|noun|Mushroom.|food,vegetables
+giá đỗ|noun|Bean sprouts.|food,ingredients
+miến|noun|Glass noodles.|food,ingredients
+bánh cuốn|noun|Steamed rice rolls with pork and mushroom.|food,dishes
+bánh xèo|noun|Crispy Vietnamese pancake.|food,dishes
+bánh chưng|noun|Square sticky-rice cake, traditional at Tet.|food,dishes
+nem rán|noun|Fried spring rolls.|food,dishes
+bún chả|noun|Grilled pork with noodles, a Hanoi speciality.|food,dishes
+cơm tấm|noun|Broken rice with grilled pork, a southern dish.|food,dishes
+cơm rang|noun|Fried rice.|food,dishes
+canh|noun|Soup; broth, usually served with rice.|food,dishes
+lẩu|noun|Hotpot.|food,dishes
+hấp|verb|To steam.|food,cooking
+kho|verb|To braise; to simmer in a savoury sauce.|food,cooking
+rim|verb|To simmer until glazed; to caramelise.|food,cooking
+trộn|verb|To mix; to toss.|food,cooking
+gọi món|verb|To order food.|food,restaurant
+ăn chay|verb|To eat vegetarian food.|food,diet
+ăn kiêng|verb|To diet; to eat according to a diet.|food,health
+dị ứng|verb|To be allergic; an allergy.|health,food
+đồ ăn nhanh|noun|Fast food.|food,daily life
+đồ ăn vặt|noun|Snacks; junk food.|food,daily life
+mang về|phrase|Takeaway; to take food away.|food,restaurant
+ăn tại đây|phrase|To eat in; dine in.|food,restaurant
+chia hóa đơn|phrase|To split the bill.|food,money
+ít đá|phrase|A little ice, please.|food,drink
+không đường|phrase|No sugar, please.|food,drink

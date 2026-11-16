@@ -1,0 +1,70 @@
+# Food, drink, ingredients, and the words used at the table.
+cơm|noun|Cooked rice; also a meal.|food,daily life
+gạo|noun|Uncooked rice; raw rice grains.|food,shopping
+bánh mì|noun|Bread; a Vietnamese baguette sandwich.|food,daily life
+phở|noun|Pho; Vietnamese noodle soup with beef or chicken.|food,dishes
+bún|noun|Rice vermicelli noodles.|food,dishes
+mì|noun|Wheat noodles; instant noodles.|food,dishes
+cháo|noun|Rice porridge; congee.|food,dishes
+xôi|noun|Sticky rice, often served with toppings.|food,dishes
+bánh|noun|Cake; a general word for baked or steamed snacks.|food,daily life
+bánh bao|noun|Steamed bun with meat or sweet filling.|food,dishes
+thịt|noun|Meat.|food,daily life
+thịt lợn|noun|Pork.|food,meat
+thịt bò|noun|Beef.|food,meat
+thịt gà|noun|Chicken meat.|food,meat
+cá|noun|Fish.|food,animals
+tôm|noun|Shrimp; prawn.|food,seafood
+trứng|noun|Egg.|food,daily life
+đậu phụ|noun|Tofu; bean curd.|food,daily life
+rau|noun|Vegetables; greens.|food,daily life
+cà rốt|noun|Carrot.|food,vegetables
+cà chua|noun|Tomato.|food,vegetables
+khoai tây|noun|Potato.|food,vegetables
+hành|noun|Onion; spring onion.|food,ingredients
+tỏi|noun|Garlic.|food,ingredients
+ớt|noun|Chilli; pepper.|food,ingredients
+muối|noun|Salt.|food,ingredients
+đường|noun|Sugar; road.|food,ingredients
+nước mắm|noun|Fish sauce; a staple Vietnamese condiment.|food,ingredients
+dầu ăn|noun|Cooking oil.|food,ingredients
+tiêu|noun|Black pepper.|food,ingredients
+chanh|noun|Lime; lemon.|food,fruit
+cam|noun|Orange.|food,fruit
+chuối|noun|Banana.|food,fruit
+táo|noun|Apple.|food,fruit
+xoài|noun|Mango.|food,fruit
+dưa hấu|noun|Watermelon.|food,fruit
+nước|noun|Water; liquid.|food,drink
+sữa|noun|Milk.|food,drink
+cà phê|noun|Coffee.|food,drink
+trà|noun|Tea.|food,drink
+bia|noun|Beer.|food,drink
+rượu|noun|Alcohol; rice wine or spirits.|food,drink
+nước ngọt|noun|Soft drink; soda.|food,drink
+đá|noun|Ice.|food,drink
+kem|noun|Ice cream.|food,dessert
+đồ ăn|noun|Food; something to eat.|food,daily life
+món ăn|noun|Dish; a prepared food item.|food,daily life
+bữa ăn|noun|Meal.|food,daily life
+bữa sáng|noun|Breakfast.|food,daily life
+bữa trưa|noun|Lunch.|food,daily life
+bữa tối|noun|Dinner; evening meal.|food,daily life
+thực đơn|noun|Menu.|food,restaurant
+đũa|noun|Chopsticks.|food,tableware
+thìa|noun|Spoon.|food,tableware
+dao|noun|Knife.|food,tableware
+bát|noun|Bowl.|food,tableware
+cốc|noun|Glass; cup.|food,tableware
+ngon|adjective|Delicious; tasty.|food,opinion
+cay|adjective|Spicy; hot from chilli.|food,taste
+ngọt|adjective|Sweet.|food,taste
+mặn|adjective|Salty; savoury.|food,taste
+chua|adjective|Sour.|food,taste
+đắng|adjective|Bitter.|food,taste
+nóng|adjective|Hot; warm.|food,weather
+lạnh|adjective|Cold; chilled.|food,weather
+nấu|verb|To cook; to prepare food.|food,cooking
+nướng|verb|To grill; to bake; to roast.|food,cooking
+chiên|verb|To fry in oil.|food,cooking
+xào|verb|To stir-fry.|food,cooking

@@ -1,0 +1,56 @@
+# Phones, apps, account settings, and social media.
+điện thoại thông minh|noun|Smartphone.|technology,daily life
+máy tính bảng|noun|Tablet computer.|technology,daily life
+tai nghe|noun|Headphones; earphones.|technology,objects
+loa|noun|Speaker; loudspeaker.|technology,objects
+sạc dự phòng|noun|Power bank.|technology,objects
+cáp sạc|noun|Charging cable.|technology,objects
+ốp lưng|noun|Phone case.|technology,objects
+sim|noun|SIM card.|technology,phone
+thẻ nhớ|noun|Memory card.|technology,phone
+dữ liệu|noun|Data.|technology,phone
+dung lượng|noun|Storage capacity.|technology,phone
+màn hình|noun|Screen; display.|technology,phone
+bàn phím|noun|Keyboard.|technology,computer
+chuột máy tính|noun|Computer mouse.|technology,computer
+camera|noun|Camera.|technology,phone
+USB|noun|USB drive; USB connection.|technology,computer
+phần mềm|noun|Software.|technology,computer
+trang web|noun|Website.|technology,internet
+đường link|noun|Link; URL.|technology,internet
+trình duyệt|noun|Browser.|technology,internet
+tìm kiếm|verb|To search; a search.|technology,internet
+đăng nhập|verb|To log in.|technology,security
+đăng xuất|verb|To log out.|technology,security
+đăng ký|verb|To register; to subscribe.|technology,services
+đổi mật khẩu|verb|To change a password.|technology,security
+quên mật khẩu|verb|To forget a password.|technology,security
+xác minh|verb|To verify.|technology,security
+thông báo|noun|Notification; announcement.|technology,communication
+cuộc gọi|noun|Phone call.|technology,communication
+lịch sử cuộc gọi|noun|Call history.|technology,phone
+danh bạ|noun|Contacts; address book.|technology,phone
+liên lạc|verb|To contact; to keep in touch.|technology,communication
+kết nối|verb|To connect; a connection.|technology,internet
+ngắt kết nối|verb|To disconnect.|technology,internet
+mạng xã hội|noun|Social media; social network.|technology,internet
+trang cá nhân|noun|Personal profile page.|technology,social media
+bài đăng|noun|Post; published post.|technology,social media
+bình luận|noun|Comment; to comment.|technology,social media
+lượt thích|noun|Like; a like on social media.|technology,social media
+người theo dõi|noun|Follower.|technology,social media
+theo dõi|verb|To follow an account.|technology,social media
+hủy kết bạn|verb|To unfriend.|technology,social media
+chặn|verb|To block; to bar.|technology,social media
+báo cáo vi phạm|verb|To report a violation.|technology,social media
+ảnh đại diện|noun|Profile picture; avatar.|technology,social media
+ảnh nền|noun|Cover photo; background image.|technology,social media
+phát trực tiếp|verb|To livestream.|technology,social media
+chỉnh sửa|verb|To edit; to adjust.|technology,media
+tải xuống|verb|To download.|technology,internet
+tải lên|verb|To upload.|technology,internet
+đồng bộ|verb|To sync; to synchronise.|technology,internet
+sao lưu|verb|To back up; a backup.|technology,security
+thông tin cá nhân|noun|Personal information.|technology,privacy
+quyền riêng tư|noun|Privacy.|technology,privacy
+tin giả|noun|Fake news.|media,society

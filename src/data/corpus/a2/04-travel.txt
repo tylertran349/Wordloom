@@ -1,0 +1,61 @@
+# Travel plans, hotels, transport, and finding your way.
+du lịch|noun|Travel; tourism; to travel.|travel,leisure
+chuyến đi|noun|Trip; journey.|travel,leisure
+kỳ nghỉ|noun|Holiday; vacation.|travel,leisure
+đi phượt|verb|To go backpacking; to travel independently.|travel,slang
+khách du lịch|noun|Tourist.|travel,people
+hướng dẫn viên|noun|Tour guide.|travel,work
+công ty du lịch|noun|Travel agency; tour company.|travel,business
+đặt vé|verb|To book a ticket.|travel,services
+đặt phòng|verb|To book a room.|travel,services
+nhận phòng|verb|To check in at a hotel.|travel,hotel
+trả phòng|verb|To check out of a hotel.|travel,hotel
+hộ chiếu|noun|Passport.|travel,documents
+visa|noun|Visa.|travel,documents
+hành lý|noun|Luggage; baggage.|travel,objects
+vali|noun|Suitcase.|travel,objects
+ba lô|noun|Backpack.|travel,objects
+túi xách|noun|Handbag; shoulder bag.|travel,objects
+vé máy bay|noun|Plane ticket; airfare.|travel,transport
+vé tàu|noun|Train ticket.|travel,transport
+chuyến bay|noun|Flight.|travel,transport
+giờ bay|noun|Departure time of a flight.|travel,transport
+trễ chuyến|verb|To miss or be delayed on a trip.|travel,transport
+đúng giờ|adjective|On time; punctual.|travel,daily life
+ga tàu|noun|Railway station.|travel,places
+bến tàu|noun|Boat pier; ferry terminal.|travel,places
+nhà nghỉ|noun|Guesthouse; budget inn.|travel,hotel
+homestay|noun|Homestay; a local guesthouse.|travel,hotel
+resort|noun|Resort.|travel,hotel
+phòng đơn|noun|Single room.|travel,hotel
+phòng đôi|noun|Double room.|travel,hotel
+tiện nghi|noun|Amenities; comfort.|travel,hotel
+nước nóng|noun|Hot water.|travel,hotel
+dịch vụ|noun|Service.|travel,business
+lễ tân|noun|Reception; receptionist.|travel,hotel
+điểm đến|noun|Destination.|travel,places
+danh lam thắng cảnh|noun|Scenic spot; famous sight.|travel,culture
+di tích|noun|Historical site; relic.|travel,culture
+đảo|noun|Island.|travel,nature
+vịnh|noun|Bay; gulf.|travel,nature
+hang động|noun|Cave; grotto.|travel,nature
+thác nước|noun|Waterfall.|travel,nature
+bãi tắm|noun|Swimming beach.|travel,beach
+lặn biển|verb|To scuba dive; to dive in the sea.|travel,sport
+lướt ván|verb|To surf; to windsurf.|travel,sport
+cắm trại|verb|To camp.|travel,leisure
+leo núi|verb|To climb a mountain; to hike.|travel,sport
+đi thuyền|verb|To go by boat; to take a boat trip.|travel,transport
+đi bộ đường dài|verb|To hike; to trek.|travel,sport
+mua vé|verb|To buy a ticket.|travel,services
+khởi hành|verb|To depart; to set off.|travel,transport
+điểm dừng|noun|Stop; stopping point.|travel,transport
+lạc đường|verb|To get lost.|travel,daily life
+hỏi đường|verb|To ask for directions.|travel,daily life
+chỉ đường|verb|To give directions.|travel,daily life
+khoảng cách|noun|Distance.|travel,measurement
+tuyến xe|noun|Bus route; transport line.|travel,transport
+chuyến tàu|noun|Train journey; train service.|travel,transport
+hành trình|noun|Journey; itinerary.|travel,leisure
+nước ngoài|noun|Abroad; a foreign country.|travel,society
+hành khách|noun|Passenger.|travel,transport

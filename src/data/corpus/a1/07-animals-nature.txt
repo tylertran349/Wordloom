@@ -1,0 +1,53 @@
+# Animals, nature, and the weather.
+con vật|noun|Animal; a living creature, in everyday speech.|animals,basics
+chó|noun|Dog.|animals,pets
+mèo|noun|Cat.|animals,pets
+gà|noun|Chicken; hen.|animals,farm
+vịt|noun|Duck.|animals,farm
+lợn|noun|Pig.|animals,farm
+bò|noun|Cow; cattle.|animals,farm
+trâu|noun|Water buffalo.|animals,farm
+ngựa|noun|Horse.|animals,farm
+dê|noun|Goat.|animals,farm
+thỏ|noun|Rabbit.|animals,pets
+chuột|noun|Mouse; rat.|animals,pests
+chim|noun|Bird.|animals,nature
+cua|noun|Crab.|animals,seafood
+ếch|noun|Frog.|animals,nature
+rắn|noun|Snake.|animals,nature
+muỗi|noun|Mosquito.|animals,pests
+kiến|noun|Ant.|animals,nature
+ong|noun|Bee.|animals,nature
+bướm|noun|Butterfly.|animals,nature
+hổ|noun|Tiger.|animals,wild
+voi|noun|Elephant.|animals,wild
+khỉ|noun|Monkey.|animals,wild
+rùa|noun|Turtle; tortoise.|animals,wild
+cây|noun|Tree; plant.|nature,plants
+hoa|noun|Flower.|nature,plants
+lá|noun|Leaf.|nature,plants
+cỏ|noun|Grass.|nature,plants
+rừng|noun|Forest; jungle.|nature,places
+núi|noun|Mountain.|nature,places
+sông|noun|River.|nature,places
+biển|noun|Sea; ocean.|nature,places
+hồ|noun|Lake.|nature,places
+đất|noun|Soil; land; earth.|nature,environment
+hòn đá|noun|Rock; stone.|nature,objects
+cát|noun|Sand.|nature,beach
+lửa|noun|Fire.|nature,daily life
+mặt trời|noun|The sun.|nature,weather
+mặt trăng|noun|The moon.|nature,weather
+ngôi sao|noun|Star.|nature,weather
+thời tiết|noun|Weather.|weather,daily life
+ấm|adjective|Warm.|weather,description
+mát|adjective|Cool; pleasant and fresh.|weather,description
+ẩm|adjective|Humid; damp.|weather,description
+khô|adjective|Dry.|weather,description
+mưa|noun|Rain; to rain.|weather,daily life
+nắng|noun|Sunshine; sunny weather.|weather,daily life
+gió|noun|Wind.|weather,daily life
+bão|noun|Storm; typhoon.|weather,daily life
+tuyết|noun|Snow.|weather,nature
+mây|noun|Cloud.|weather,nature
+cầu vồng|noun|Rainbow.|weather,nature

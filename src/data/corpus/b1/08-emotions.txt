@@ -1,0 +1,66 @@
+# Feelings, motivation, character, and the inner life.
+cảm giác|noun|Feeling; sensation.|emotion,psychology
+cảm nhận|noun|Impression; perception; to feel.|emotion,thinking
+nhận thức|noun|Awareness; cognition.|thinking,psychology
+ý thức|noun|Consciousness; awareness.|thinking,psychology
+tâm trạng|noun|Mood.|emotion,psychology
+niềm vui|noun|Joy; happiness.|emotion,positive
+nỗi buồn|noun|Sadness; sorrow.|emotion,negative
+nỗi sợ|noun|Fear.|emotion,negative
+sự lo lắng|noun|Worry; anxiety.|emotion,negative
+sự tự hào|noun|Pride.|emotion,positive
+lòng tự trọng|noun|Self-esteem; self-respect.|emotion,character
+sự thấu hiểu|noun|Deep understanding; empathy.|emotion,relationships
+lòng biết ơn|noun|Gratitude.|emotion,positive
+sự bao dung|noun|Forgiveness; tolerance.|emotion,character
+niềm tin|noun|Faith; belief; trust.|emotion,relationships
+ước mơ|noun|Dream; aspiration.|emotion,goals
+hoài bão|noun|Ambition; aspiration.|emotion,goals
+khát vọng|noun|Aspiration; yearning.|emotion,goals
+động lực|noun|Motivation; driving force.|emotion,work
+đam mê|noun|Passion.|emotion,leisure
+sở trường|noun|Strength; forte.|character,work
+điểm mạnh|noun|Strength; advantage.|character,work
+điểm yếu|noun|Weakness; shortcoming.|character,work
+giới hạn|noun|Limit; boundary.|character,life
+tiềm năng|noun|Potential.|character,work
+cá tính|noun|Personality; individuality.|character,psychology
+tính cách|noun|Personality; character.|character,psychology
+bản chất|noun|Nature; essence.|character,psychology
+thái độ|noun|Attitude.|character,behaviour
+quan điểm|noun|Point of view; opinion.|thinking,communication
+góc nhìn|noun|Perspective; viewpoint.|thinking,communication
+tư tưởng|noun|Thought; ideology.|thinking,society
+lý tưởng|noun|Ideal.|thinking,values
+giá trị|noun|Value; worth.|values,society
+nguyên tắc|noun|Principle.|values,character
+lòng trung thành|noun|Loyalty.|character,relationships
+sự trung thực|noun|Honesty.|character,values
+lòng nhân ái|noun|Compassion; kindness.|character,values
+tình yêu thương|noun|Love and affection.|emotion,relationships
+sự chăm sóc|noun|Care; looking after.|emotion,relationships
+sự cô lập|noun|Isolation.|emotion,psychology
+sự mất mát|noun|Loss.|emotion,life
+nỗi đau|noun|Pain; suffering.|emotion,health
+tổn thương|noun|Trauma; emotional injury.|emotion,psychology
+vết thương|noun|Wound; injury.|health,body
+lời xin lỗi|noun|Apology.|communication,relationships
+sự hối hận|noun|Regret.|emotion,negative
+nỗi nhớ|noun|Longing; missing someone.|emotion,relationships
+sự ghen tuông|noun|Jealousy.|emotion,relationships
+cơn giận|noun|Anger; a fit of anger.|emotion,negative
+sự bình yên|noun|Peace; calm.|emotion,positive
+an nhiên|adjective|Serene; at peace.|emotion,positive
+sự viên mãn|noun|Fulfilment; completeness.|emotion,positive
+sự mãn nguyện|noun|Contentment.|emotion,positive
+nỗi thất vọng|noun|Disappointment.|emotion,negative
+sự quyết tâm|noun|Determination.|character,goals
+lòng dũng cảm|noun|Courage.|character,values
+sự rụt rè|noun|Shyness; timidity.|character,emotion
+sự lạc quan|noun|Optimism.|emotion,positive
+sự bi quan|noun|Pessimism.|emotion,negative
+sự thờ ơ|noun|Indifference; apathy.|emotion,negative
+sự ích kỷ|noun|Selfishness.|character,negative
+lòng vị tha|noun|Altruism; selflessness.|character,values
+sự giản dị|noun|Simplicity.|character,values
+lòng kiêu hãnh|noun|Pride; a sense of dignity.|character,emotion

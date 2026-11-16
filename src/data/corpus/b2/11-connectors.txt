@@ -1,0 +1,31 @@
+# Advanced connectors for structured argument and nuanced speech.
+tuy vậy|adverb|Even so; nevertheless.|connectors,grammar
+song|conjunction|Yet; however, in formal writing.|connectors,formal
+ấy vậy mà|phrase|And yet; despite that.|connectors,daily life
+thế mà|phrase|Yet; but in fact.|connectors,daily life
+không chỉ vậy|phrase|Not only that.|connectors,communication
+chưa kể|phrase|Not to mention; let alone.|connectors,communication
+thêm vào đó|phrase|On top of that; additionally.|connectors,communication
+một mặt|adverb|On the one hand.|connectors,debate
+khác với|preposition|Unlike; different from.|connectors,comparison
+trái ngược với|preposition|In contrast to; contrary to.|connectors,comparison
+tương tự như|preposition|Similar to; just like.|connectors,comparison
+cũng như|conjunction|As well as; just as.|connectors,comparison
+chẳng hạn|adverb|For instance; for example.|connectors,communication
+điển hình là|phrase|A typical example is.|connectors,communication
+nói đúng hơn|phrase|More precisely; rather.|connectors,communication
+chung quy|adverb|In the final analysis; all in all.|connectors,opinion
+suy cho cùng|phrase|When you think it through; ultimately.|connectors,opinion
+bất kể|conjunction|Regardless of.|connectors,grammar
+miễn là|conjunction|As long as; provided that.|connectors,grammar
+giá như|conjunction|If only.|connectors,regret
+phải chi|conjunction|If only; it would be better if.|connectors,regret
+lỡ như|conjunction|In case; if it happens that.|connectors,grammar
+ngộ nhỡ|conjunction|Just in case; if by any chance.|connectors,grammar
+dẫu vậy|adverb|Even so; nonetheless.|connectors,formal
+thế nhưng|conjunction|However; but then.|connectors,grammar
+vả lại|conjunction|Besides; moreover.|connectors,grammar
+hơn thế nữa|phrase|What is more; furthermore.|connectors,communication
+đến mức|phrase|To the extent that; so much that.|connectors,degree
+rốt cục|adverb|In the end; finally.|connectors,time
+một khi|conjunction|Once; as soon as.|connectors,time

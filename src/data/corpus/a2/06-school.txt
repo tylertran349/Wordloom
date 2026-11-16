@@ -1,0 +1,36 @@
+# School stages, exams, and language learning.
+mẫu giáo|noun|Kindergarten; preschool.|school,education
+tiểu học|noun|Primary school.|school,education
+trung học|noun|Secondary school.|school,education
+trung học phổ thông|noun|Upper secondary school; high school.|school,education
+đại học|noun|University; higher education.|school,education
+cao đẳng|noun|College.|school,education
+học bổng|noun|Scholarship.|school,money
+bằng cấp|noun|Degree; qualification.|school,career
+chứng chỉ|noun|Certificate.|school,career
+ngoại ngữ|noun|Foreign language.|school,languages
+tiếng Việt|noun|Vietnamese; the Vietnamese language.|school,languages
+ngữ pháp|noun|Grammar.|school,languages
+từ vựng|noun|Vocabulary.|school,languages
+phát âm|noun|Pronunciation; to pronounce.|school,languages
+luyện tập|verb|To practise; practice.|school,learning
+ôn tập|verb|To revise; to review lessons.|school,study
+kiểm tra|noun|Test; to check.|school,study
+kỳ thi|noun|Examination period; exam.|school,study
+câu hỏi|noun|Question.|school,communication
+đáp án|noun|Answer; correct answer.|school,study
+bài giảng|noun|Lecture; lesson.|school,study
+ghi chú|verb|To take notes; a note.|school,study
+thuyết trình|verb|To give a presentation.|school,work
+tiểu luận|noun|Essay; term paper.|school,study
+nghiên cứu|verb|To research; research.|school,work
+môn học|noun|School subject.|school,study
+lịch học|noun|Class timetable; study schedule.|school,time
+thời khóa biểu|noun|Timetable; schedule.|school,time
+nghỉ hè|noun|Summer break.|school,holidays
+khai giảng|noun|Start of the school year; opening ceremony.|school,education
+tốt nghiệp|verb|To graduate.|school,education
+lớp trưởng|noun|Class monitor; class representative.|school,people
+gia sư|noun|Private tutor.|school,people
+trung tâm ngoại ngữ|noun|Language centre.|school,languages
+nộp bài|verb|To submit an assignment.|school,study

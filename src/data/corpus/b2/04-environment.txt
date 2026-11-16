@@ -1,0 +1,51 @@
+# Climate change, resources, and environmental policy.
+sinh thái|noun|Ecology; ecological.|environment,science
+môi trường sống|noun|Habitat; living environment.|environment,nature
+sự nóng lên toàn cầu|noun|Global warming.|environment,climate
+phát thải|verb|To emit; emissions.|environment,pollution
+khí nhà kính|noun|Greenhouse gas.|environment,climate
+nồng độ|noun|Concentration; level.|environment,science
+ô nhiễm đất|noun|Soil pollution.|environment,pollution
+ô nhiễm biển|noun|Marine pollution.|environment,pollution
+chất thải công nghiệp|noun|Industrial waste.|environment,pollution
+rác thải điện tử|noun|Electronic waste; e-waste.|environment,pollution
+xử lý nước thải|verb|To treat waste water.|environment,infrastructure
+nước ngầm|noun|Groundwater.|environment,nature
+hạn mặn|noun|Saltwater intrusion; salinity drought.|environment,climate
+xâm nhập mặn|noun|Saltwater intrusion.|environment,climate
+sạt lở đất|noun|Landslide.|environment,disaster
+triều cường|noun|High tide; tidal flooding.|environment,weather
+bão nhiệt đới|noun|Tropical storm.|environment,weather
+lốc xoáy|noun|Tornado; whirlwind.|environment,weather
+cháy rừng|noun|Forest fire.|environment,disaster
+suy thoái đất|noun|Land degradation.|environment,agriculture
+sa mạc hóa|noun|Desertification.|environment,climate
+trữ lượng|noun|Reserves; quantity in reserve.|environment,economy
+hệ động thực vật|noun|Flora and fauna.|environment,nature
+sinh cảnh|noun|Habitat; biotope.|environment,nature
+loài ngoại lai|noun|Invasive alien species.|environment,nature
+cân bằng sinh thái|noun|Ecological balance.|environment,nature
+chuỗi thức ăn|noun|Food chain.|environment,nature
+vòng tuần hoàn|noun|Cycle; circulation.|environment,science
+dấu chân sinh thái|noun|Ecological footprint.|environment,science
+phát triển bền vững|noun|Sustainable development.|environment,economy
+nông nghiệp hữu cơ|noun|Organic farming.|environment,agriculture
+phân bón hóa học|noun|Chemical fertiliser.|environment,agriculture
+thuốc trừ sâu|noun|Pesticide.|environment,agriculture
+canh tác|verb|To cultivate; farming.|environment,agriculture
+thủy lợi|noun|Irrigation.|environment,agriculture
+đập thủy điện|noun|Hydroelectric dam.|environment,energy
+thủy điện|noun|Hydropower.|environment,energy
+điện gió|noun|Wind power.|environment,energy
+điện mặt trời|noun|Solar power.|environment,energy
+pin mặt trời|noun|Solar panel; solar cell.|environment,technology
+phương tiện công cộng|noun|Public transport; the vehicles people share.|environment,transport
+xe điện|noun|Electric vehicle.|environment,transport
+nhiên liệu hóa thạch|noun|Fossil fuel.|environment,energy
+dầu mỏ|noun|Petroleum; crude oil.|environment,energy
+than đá|noun|Coal.|environment,energy
+khí đốt|noun|Natural gas.|environment,energy
+tiết kiệm năng lượng|verb|To save energy.|environment,daily life
+hiệu quả năng lượng|noun|Energy efficiency.|environment,energy
+tiêu chuẩn khí thải|noun|Emissions standard.|environment,policy
+tín chỉ carbon|noun|Carbon credit.|environment,economy

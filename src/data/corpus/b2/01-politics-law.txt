@@ -1,0 +1,61 @@
+# Government, diplomacy, law, and political conflict.
+chính trị|noun|Politics.|politics,society
+chính phủ|noun|Government.|politics,government
+nhà nước|noun|The state; state institutions.|politics,government
+quốc hội|noun|National assembly; parliament.|politics,government
+nghị viện|noun|Parliament; legislature.|politics,government
+hiến pháp|noun|Constitution.|politics,law
+pháp luật|noun|The law; legal system.|law,society
+bộ luật|noun|Legal code; statute book.|law,government
+nghị định|noun|Government decree.|law,government
+thông tư|noun|Circular; ministerial guidance.|law,government
+cơ chế|noun|Mechanism.|politics,society
+thể chế|noun|Institution; institutional framework.|politics,society
+dân chủ|noun|Democracy.|politics,society
+độc lập|noun|Independence.|politics,society
+chủ quyền|noun|Sovereignty.|politics,law
+lãnh thổ|noun|Territory.|politics,geography
+biên giới|noun|Border; frontier.|politics,geography
+ngoại giao|noun|Diplomacy; diplomatic.|politics,international
+hiệp định|noun|Agreement; accord.|politics,law
+hiệp ước|noun|Treaty.|politics,law
+quan hệ quốc tế|noun|International relations.|politics,international
+liên hợp quốc|noun|United Nations.|politics,international
+tổ chức quốc tế|noun|International organisation.|politics,international
+đại sứ|noun|Ambassador.|politics,people
+đại sứ quán|noun|Embassy.|politics,international
+lãnh sự quán|noun|Consulate.|politics,international
+bộ trưởng|noun|Minister.|politics,government
+thủ tướng|noun|Prime minister.|politics,government
+chủ tịch|noun|Chairman; president of an organisation.|politics,government
+tổng thống|noun|President of a country.|politics,government
+bầu cử|noun|Election.|politics,voting
+bỏ phiếu|verb|To vote; to cast a ballot.|politics,voting
+ứng cử|verb|To run for office.|politics,voting
+cử tri|noun|Voter; elector.|politics,voting
+phiếu bầu|noun|Ballot; vote.|politics,voting
+đảng phái|noun|Political party.|politics,government
+liên minh|noun|Alliance; coalition.|politics,international
+đối lập|noun|Opposition.|politics,government
+tranh chấp|noun|Dispute; conflict.|politics,law
+xung đột|noun|Conflict; clash.|politics,society
+hòa bình|noun|Peace.|politics,society
+chiến tranh|noun|War.|politics,history
+khủng bố|noun|Terrorism; terrorist.|politics,security
+an ninh|noun|Security.|politics,security
+quốc phòng|noun|National defence.|politics,security
+công lý|noun|Justice.|law,society
+tòa án|noun|Court; courthouse.|law,government
+quan tòa|noun|Judge.|law,people
+bồi thẩm đoàn|noun|Jury.|law,court
+nguyên đơn|noun|Plaintiff; claimant.|law,court
+bị đơn|noun|Defendant.|law,court
+bằng chứng|noun|Evidence.|law,thinking
+bản án|noun|Verdict; court judgment.|law,court
+phán quyết|noun|Ruling; decision.|law,court
+kháng cáo|verb|To appeal a court decision.|law,court
+vi phạm|verb|To violate; a violation.|law,behaviour
+hình phạt|noun|Penalty; punishment.|law,court
+phạt tiền|verb|To impose a fine; a fine.|law,money
+tù giam|noun|Imprisonment; prison sentence.|law,court
+tái hòa nhập cộng đồng|verb|To reintegrate into society.|law,society

@@ -1,0 +1,61 @@
+# Personality, mood, appearance, and judging everyday things.
+mệt mỏi|adjective|Tired; weary.|health,emotion
+buồn ngủ|adjective|Sleepy.|health,sleep
+tỉnh táo|adjective|Alert; clear-headed.|health,description
+khỏe mạnh|adjective|Healthy; fit.|health,description
+ốm yếu|adjective|Sickly; frail.|health,description
+béo|adjective|Fat; chubby.|description,appearance
+gầy|adjective|Thin; skinny.|description,appearance
+nhỏ con|adjective|Small in build; petite.|description,appearance
+cao lớn|adjective|Tall and big; towering.|description,appearance
+xinh đẹp|adjective|Beautiful; lovely.|description,appearance
+dễ thương|adjective|Cute; sweet; likeable.|description,personality
+lịch sự|adjective|Polite; courteous.|personality,politeness
+thô lỗ|adjective|Rude; crude.|personality,description
+trung thực|adjective|Honest; truthful.|personality,character
+dối trá|adjective|Deceitful; false.|personality,character
+thật thà|adjective|Honest; straightforward.|personality,character
+tử tế|adjective|Decent; kind.|personality,character
+ích kỷ|adjective|Selfish.|personality,character
+hào phóng|adjective|Generous.|personality,character
+hoang phí|adjective|Wasteful; extravagant.|personality,money
+lười biếng|adjective|Lazy; idle.|personality,work
+ngu ngốc|adjective|Stupid; foolish.|personality,description
+sáng tạo|adjective|Creative.|personality,work
+logic|adjective|Logical.|thinking,description
+thực tế|adjective|Realistic; practical.|thinking,description
+mơ mộng|adjective|Dreamy; romantic in outlook.|personality,description
+nghiêm túc|adjective|Serious; earnest.|personality,work
+hài hước|adjective|Humorous; funny.|personality,description
+nhút nhát|adjective|Shy; timid.|personality,description
+hướng ngoại|adjective|Outgoing; extroverted.|personality,description
+hướng nội|adjective|Introverted; inward-looking.|personality,description
+nóng tính|adjective|Hot-tempered; quick to anger.|personality,emotion
+điềm tĩnh|adjective|Calm and composed.|personality,emotion
+chu đáo|adjective|Thoughtful; attentive.|personality,description
+cẩn thận|adjective|Careful; cautious.|personality,description
+bất cẩn|adjective|Careless.|personality,description
+gọn gàng|adjective|Neat; tidy.|description,home
+bừa bộn|adjective|Messy; cluttered.|description,home
+sạch sẽ|adjective|Clean and tidy.|description,home
+thoải mái|adjective|Comfortable; relaxed.|description,feeling
+chật|adjective|Narrow; cramped; tight.|description,space
+rộng|adjective|Wide; spacious.|description,space
+tiện lợi|adjective|Convenient.|description,daily life
+hiện đại|adjective|Modern.|description,society
+cổ điển|adjective|Classic; classical.|description,culture
+truyền thống|adjective|Traditional.|description,culture
+phổ biến|adjective|Popular; widespread.|description,society
+nổi tiếng|adjective|Famous; well-known.|description,society
+có sẵn|adjective|Available; ready.|description,shopping
+hết hàng|adjective|Out of stock.|shopping,description
+tức giận|adjective|Angry; furious.|emotion,description
+dễ chịu|adjective|Pleasant; agreeable.|description,feeling
+khó chịu|adjective|Uncomfortable; annoying.|description,feeling
+ngon miệng|adjective|Appetising; tasty.|food,description
+bổ dưỡng|adjective|Nutritious; nourishing.|food,health
+vô lý|adjective|Absurd; unreasonable.|description,opinion
+đáng tin cậy|adjective|Reliable; trustworthy.|personality,description
+nhiệt tình|adjective|Enthusiastic; warm.|personality,work
+khiêm tốn|adjective|Humble; modest.|personality,character
+kiêu ngạo|adjective|Arrogant; haughty.|personality,character

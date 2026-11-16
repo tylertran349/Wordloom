@@ -1,0 +1,51 @@
+# Travel experiences, regional culture, and moving around a country.
+trải nghiệm|noun|Experience; to experience.|travel,life
+khám phá|verb|To explore; to discover.|travel,leisure
+du lịch bụi|noun|Backpacking; budget travel.|travel,leisure
+khu nghỉ dưỡng|noun|Resort; holiday complex.|travel,hotel
+tour|noun|Tour; guided trip.|travel,leisure
+lịch trình|noun|Itinerary; schedule.|travel,planning
+điểm tham quan|noun|Sightseeing spot; attraction.|travel,places
+di sản|noun|Heritage.|travel,culture
+di sản thế giới|noun|World Heritage Site.|travel,culture
+kiến trúc|noun|Architecture.|travel,culture
+phong cảnh|noun|Scenery; landscape.|travel,nature
+thiên nhiên|noun|Nature; the natural world.|travel,nature
+hoàng hôn|noun|Sunset.|travel,nature
+bình minh|noun|Dawn; sunrise.|travel,nature
+đặc sản|noun|Local speciality.|travel,food
+ẩm thực|noun|Cuisine; food culture.|travel,food
+văn hóa địa phương|noun|Local culture.|travel,culture
+nét đẹp văn hóa|noun|A beautiful cultural feature.|travel,culture
+người bản địa|noun|Native person; local inhabitant.|travel,people
+dân địa phương|noun|Local people.|travel,people
+khách quốc tế|noun|International visitor.|travel,people
+hải quan|noun|Customs.|travel,documents
+xuất cảnh|verb|To leave a country; departure.|travel,documents
+nhập cảnh|verb|To enter a country; immigration.|travel,documents
+quá cảnh|verb|To transit; a layover.|travel,transport
+chậm chuyến|verb|To be delayed; a delayed trip.|travel,transport
+mất hành lý|verb|To lose luggage.|travel,transport
+bảo hiểm du lịch|noun|Travel insurance.|travel,insurance
+đổi tiền|verb|To exchange money.|travel,money
+tỷ giá|noun|Exchange rate.|travel,money
+ngôn ngữ|noun|Language.|travel,languages
+phiên dịch|verb|To interpret; interpretation.|travel,languages
+vùng miền|noun|Region; part of the country.|travel,places
+miền Bắc|noun|Northern Vietnam; the north.|travel,places
+miền Trung|noun|Central Vietnam; the centre.|travel,places
+miền Nam|noun|Southern Vietnam; the south.|travel,places
+đồng bằng|noun|Plain; delta.|travel,nature
+cao nguyên|noun|Highland; plateau.|travel,nature
+đồi núi|noun|Hills and mountains.|travel,nature
+bờ biển|noun|Coast; coastline.|travel,nature
+hải đảo|noun|Island; islands.|travel,nature
+vùng sâu vùng xa|noun|Remote and disadvantaged area.|travel,society
+thành phố lớn|noun|Major city; big city.|travel,places
+đô thị|noun|Urban centre; a city, especially in planning and policy.|travel,society
+giao thông công cộng|noun|Public transport as a system; public transit.|travel,transport
+tàu điện ngầm|noun|Metro; underground railway.|travel,transport
+xe khách|noun|Coach; intercity bus.|travel,transport
+giờ cao điểm|noun|Peak hour; rush hour.|travel,transport
+mùa du lịch|noun|Tourist season.|travel,leisure
+thắng cảnh|noun|Scenic spot; beauty spot.|travel,nature

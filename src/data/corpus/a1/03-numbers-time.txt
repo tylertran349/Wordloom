@@ -1,0 +1,88 @@
+# Numbers, clock time, days, months, seasons, and quantity.
+số không|number|Zero; the number 0.|numbers,basics
+một|number|One; the number 1.|numbers,basics
+hai|number|Two; the number 2.|numbers,basics
+số ba|number|Three; the number 3. 'Ba' alone also means dad.|numbers,basics
+bốn|number|Four; the number 4.|numbers,basics
+số năm|number|Five; the number 5. 'Năm' alone also means year.|numbers,basics
+sáu|number|Six; the number 6.|numbers,basics
+bảy|number|Seven; the number 7.|numbers,basics
+tám|number|Eight; the number 8.|numbers,basics
+số chín|number|Nine; the number 9. 'Chín' alone also means ripe.|numbers,basics
+mười|number|Ten; the number 10.|numbers,basics
+mười một|number|Eleven; the number 11.|numbers,basics
+hai mươi|number|Twenty; the number 20.|numbers,basics
+ba mươi|number|Thirty; the number 30.|numbers,basics
+một trăm|number|One hundred; the number 100.|numbers,basics
+một nghìn|number|One thousand; the number 1,000.|numbers,basics
+một triệu|number|One million; the number 1,000,000.|numbers,basics
+một tỷ|number|One billion; the number 1,000,000,000.|numbers,basics
+thứ nhất|noun|First; the first one in an order.|numbers,ordering
+giờ|noun|Hour; o'clock; also means time or a clock.|time,daily life
+phút|noun|Minute.|time,daily life
+giây|noun|Second; a moment.|time,daily life
+ngày|noun|Day.|time,basics
+tuần|noun|Week.|time,basics
+tháng|noun|Month.|time,basics
+năm|noun|Year.|time,basics
+hôm nay|adverb|Today.|time,daily life
+hôm qua|adverb|Yesterday.|time,daily life
+hôm kia|adverb|The day before yesterday.|time,daily life
+ngày mai|adverb|Tomorrow.|time,daily life
+ngày kia|adverb|The day after tomorrow.|time,daily life
+tuần này|noun|This week.|time,daily life
+tuần sau|noun|Next week.|time,daily life
+tuần trước|noun|Last week.|time,daily life
+tháng này|noun|This month.|time,daily life
+tháng sau|noun|Next month.|time,daily life
+tháng trước|noun|Last month.|time,daily life
+năm nay|noun|This year.|time,daily life
+năm sau|noun|Next year.|time,daily life
+năm ngoái|noun|Last year.|time,daily life
+buổi sáng|noun|Morning.|time,daily life
+buổi trưa|noun|Noon; midday.|time,daily life
+buổi chiều|noun|Afternoon.|time,daily life
+buổi tối|noun|Evening.|time,daily life
+ban đêm|noun|Night-time; at night.|time,daily life
+nửa đêm|noun|Midnight.|time,daily life
+sáng sớm|noun|Early morning.|time,daily life
+cuối tuần|noun|Weekend.|time,daily life
+ngày lễ|noun|Holiday; public holiday.|time,celebration
+ngày nghỉ|noun|Day off; rest day.|time,work
+thứ hai|noun|Monday.|time,weekday
+thứ ba|noun|Tuesday.|time,weekday
+thứ tư|noun|Wednesday.|time,weekday
+thứ năm|noun|Thursday.|time,weekday
+thứ sáu|noun|Friday.|time,weekday
+thứ bảy|noun|Saturday.|time,weekday
+chủ nhật|noun|Sunday.|time,weekday
+tháng một|noun|January.|time,month
+tháng hai|noun|February.|time,month
+tháng ba|noun|March.|time,month
+tháng tư|noun|April.|time,month
+tháng năm|noun|May.|time,month
+tháng sáu|noun|June.|time,month
+tháng bảy|noun|July.|time,month
+tháng tám|noun|August.|time,month
+tháng chín|noun|September.|time,month
+tháng mười|noun|October.|time,month
+tháng mười một|noun|November.|time,month
+tháng mười hai|noun|December.|time,month
+mùa xuân|noun|Spring; the spring season.|time,seasons
+mùa hè|noun|Summer.|time,seasons
+mùa thu|noun|Autumn; fall.|time,seasons
+mùa đông|noun|Winter.|time,seasons
+mùa mưa|noun|Rainy season.|time,seasons
+mùa khô|noun|Dry season.|time,seasons
+nhiều|adverb|Much; many; a lot.|quantity,basics
+ít|adverb|Little; few; not much.|quantity,basics
+vài|determiner|A few; some; several.|quantity,basics
+một ít|phrase|A little; a small amount.|quantity,food
+tất cả|determiner|All; everything; everyone.|quantity,basics
+mỗi|determiner|Each; every.|quantity,grammar
+nửa|noun|Half.|quantity,basics
+đủ|adjective|Enough; sufficient.|quantity,basics
+thêm|verb|To add; more; additionally.|quantity,daily life
+khoảng|preposition|About; around; approximately.|quantity,approximation
+hơn|preposition|More than; over; also means better.|quantity,comparison
+ít nhất|phrase|At least.|quantity,comparison

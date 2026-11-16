@@ -243,11 +243,19 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
             icon={<BookOpen size={24} />}
             title={`No ${level} words yet`}
             description={
-              <>
-                Add entries for {level} to the <code>VOCABULARY</code> object in{' '}
-                <code>src/data/vocabulary.ts</code>. Each level is a plain array of words;
-                examples and exercises are generated with AI.
-              </>
+              level === 'C1' || level === 'C2' ? (
+                <>
+                  This deck is intentionally empty. The built-in 3,000-word set covers A1–B2. Add
+                  C1 or C2 entries in <code>src/data/corpus/</code> and run{' '}
+                  <code>npm run vocab:build</code>.
+                </>
+              ) : (
+                <>
+                  Add entries to the corpus in <code>src/data/corpus/</code> and run{' '}
+                  <code>npm run vocab:build</code>. Each level is a plain array of words; examples
+                  and exercises are generated with AI.
+                </>
+              )
             }
           />
         ) : filtered.length === 0 ? (

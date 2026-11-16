@@ -1,0 +1,56 @@
+# Research, data, and the language of science and computing.
+khoa học|noun|Science.|science,learning
+nghiên cứu khoa học|noun|Scientific research.|science,research
+học thuyết|noun|Doctrine; theory.|science,thinking
+giả thuyết|noun|Hypothesis.|science,research
+thực nghiệm|noun|Experiment; empirical work.|science,research
+thí nghiệm|noun|Experiment; to experiment.|science,research
+mẫu thử|noun|Test sample; specimen.|science,research
+kết quả|noun|Result; outcome.|science,research
+số liệu|noun|Data; figures.|science,statistics
+thống kê|noun|Statistics.|science,statistics
+khảo sát|noun|Survey; to survey.|science,research
+bảng câu hỏi|noun|Questionnaire.|science,research
+đối tượng nghiên cứu|noun|Research subject.|science,research
+phương pháp luận|noun|Methodology.|science,research
+tổng quan|noun|Overview; literature review.|science,research
+hội đồng|noun|Council; panel.|science,work
+học giả|noun|Scholar.|science,people
+nhà khoa học|noun|Scientist.|science,people
+viện nghiên cứu|noun|Research institute.|science,places
+giải thưởng|noun|Prize; award.|science,achievement
+bằng sáng chế|noun|Patent.|science,law
+công bố|verb|To publish; to announce findings.|science,media
+tạp chí khoa học|noun|Scientific journal.|science,media
+bài báo khoa học|noun|Scientific paper.|science,writing
+trích dẫn|verb|To cite; a citation.|science,writing
+liêm chính học thuật|noun|Academic integrity.|science,ethics
+phản biện kín|noun|Blind peer review.|science,research
+biên tập|verb|To edit; editing.|science,writing
+tóm tắt|noun|Summary; abstract.|science,writing
+từ khóa|noun|Keyword.|science,writing
+giả định|noun|Assumption.|science,thinking
+biến số|noun|Variable.|science,mathematics
+mô hình|noun|Model.|science,thinking
+mô phỏng|verb|To simulate; simulation.|science,technology
+học máy|noun|Machine learning.|science,technology
+mạng nơ-ron|noun|Neural network.|science,technology
+điện toán đám mây|noun|Cloud computing.|science,technology
+chuỗi khối|noun|Blockchain.|science,technology
+an ninh mạng|noun|Cybersecurity.|science,technology
+mã hóa|verb|To encrypt; encryption.|science,security
+giao thức|noun|Protocol.|science,technology
+cơ sở dữ liệu|noun|Database.|science,technology
+lập trình|verb|To program; programming.|science,technology
+mã nguồn|noun|Source code.|science,technology
+phần cứng|noun|Hardware.|science,technology
+hệ điều hành|noun|Operating system.|science,technology
+vi mạch|noun|Microchip.|science,technology
+bán dẫn|noun|Semiconductor.|science,technology
+năng lượng hạt nhân|noun|Nuclear energy.|science,environment
+vật lý|noun|Physics.|science,subjects
+hóa học|noun|Chemistry.|science,subjects
+sinh học|noun|Biology.|science,subjects
+thiên văn học|noun|Astronomy.|science,subjects
+địa chất|noun|Geology.|science,subjects
+tâm lý học|noun|Psychology.|science,subjects

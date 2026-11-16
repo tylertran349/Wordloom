@@ -1,0 +1,51 @@
+# Jobs, the office, hiring, and workplace routines.
+nghề nghiệp|noun|Profession; occupation.|work,career
+nhân viên|noun|Employee; staff member.|work,people
+quản lý|noun|Manager; to manage.|work,people
+giám đốc|noun|Director; chief executive.|work,people
+thư ký|noun|Secretary; assistant.|work,people
+kế toán|noun|Accountant; accounting.|work,people
+kỹ sư|noun|Engineer.|work,people
+lập trình viên|noun|Programmer; software developer.|work,technology
+thiết kế|noun|Design; designer.|work,creative
+luật sư|noun|Lawyer.|work,law
+đầu bếp|noun|Chef; cook.|work,food
+phục vụ|noun|Waiter; waitress; service.|work,food
+công nhân|noun|Worker; labourer.|work,people
+nông dân|noun|Farmer.|work,people
+ca sĩ|noun|Singer.|work,music
+diễn viên|noun|Actor; actress.|work,media
+nhiếp ảnh gia|noun|Photographer.|work,media
+nhà báo|noun|Journalist; reporter.|work,media
+biên tập viên|noun|Editor.|work,media
+phiên dịch viên|noun|Interpreter; translator.|work,languages
+nhân sự|noun|Human resources; HR.|work,business
+phòng họp|noun|Meeting room.|work,office
+cuộc họp|noun|Meeting.|work,office
+dự án|noun|Project.|work,business
+nhiệm vụ|noun|Task; mission.|work,business
+báo cáo|noun|Report; to report.|work,business
+tài liệu|noun|Document; materials.|work,office
+đối tác|noun|Partner; business partner.|work,business
+sếp|noun|Boss.|work,people
+thực tập|verb|To do an internship.|work,learning
+thực tập sinh|noun|Intern; trainee.|work,people
+phỏng vấn|noun|Interview; to interview.|work,career
+tuyển dụng|verb|To recruit; recruitment.|work,business
+hồ sơ|noun|File; application documents.|work,office
+sơ yếu lý lịch|noun|Curriculum vitae; résumé.|work,career
+kinh nghiệm|noun|Experience.|work,career
+kỹ năng|noun|Skill.|work,career
+chuyên môn|noun|Expertise; speciality.|work,career
+thăng chức|verb|To be promoted.|work,career
+tăng lương|verb|To get a pay rise.|work,money
+nghỉ phép|verb|To take leave; annual leave.|work,time
+tăng ca|verb|To work overtime.|work,time
+làm việc từ xa|verb|To work remotely.|work,technology
+nghỉ việc|verb|To quit a job.|work,career
+xin việc|verb|To apply for a job.|work,career
+sa thải|verb|To dismiss; to lay off.|work,law
+lương thưởng|noun|Salary and bonuses; pay package.|work,money
+chấm công|verb|To clock in; to record attendance.|work,office
+giờ làm việc|noun|Working hours.|work,time
+hạn chót|noun|Deadline.|work,time
