@@ -14,11 +14,13 @@ import {
   Loader2,
   RotateCcw,
   Sparkles,
+  Trash2,
   Volume2,
 } from 'lucide-react';
 import type { VocabWord } from '../types';
 import { LEVEL_WORDS, WORD_BY_ID } from '../data/vocabulary';
 import { LEVEL_INFO } from '../data/levels';
+import { navigate } from '../lib/router';
 import { useApp } from '../context/AppContext';
 import { getLanguage } from '../data/languages';
 import {
@@ -34,6 +36,7 @@ import { generateExercises, hasAiCredentials } from '../lib/ai';
 import { speakText } from '../lib/speech';
 import {
   AppLink,
+  ConfirmDialog,
   EmptyState,
   LevelBadge,
   PageHeader,
@@ -55,6 +58,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     settings,
     progress,
     markStudied,
+    removeStudied,
     addGeneratedExercises,
     notify,
     stats,
@@ -63,10 +67,14 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const word = WORD_BY_ID[wordId];
+  const deck = word ? LEVEL_WORDS[word.level] ?? [] : [];
+  const index = word ? deck.findIndex((entry) => entry.id === word.id) : -1;
   const [revealedExamples, setRevealedExamples] = useState<Set<number>>(new Set());
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [justAdded, setJustAdded] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [jumpValue, setJumpValue] = useState(() => String(index + 1));
 
   const card = word ? progress.cards[word.id] : undefined;
   const generated = word ? progress.generatedPractice[word.id] ?? [] : [];
@@ -85,7 +93,12 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     setRevealedExamples(new Set());
     setGenerateError(null);
     setJustAdded(false);
+    setConfirmRemove(false);
   }, [wordId]);
+
+  useEffect(() => {
+    setJumpValue(String(index + 1));
+  }, [index, wordId]);
 
   // Remember where the learner stopped, per CEFR deck.
   useEffect(() => {
@@ -121,8 +134,6 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     );
   }
 
-  const deck = LEVEL_WORDS[word.level] ?? [];
-  const index = deck.findIndex((entry) => entry.id === word.id);
   const previous = index > 0 ? deck[index - 1] : undefined;
   const next = index >= 0 && index < deck.length - 1 ? deck[index + 1] : undefined;
   const levelStat = stats.levelStats.find((entry) => entry.level === word.level);
@@ -185,6 +196,21 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     if (added) setJustAdded(true);
   }
 
+  function jumpToCard() {
+    if (!word || deck.length === 0) return;
+    const parsed = Number.parseInt(jumpValue, 10);
+    if (!Number.isFinite(parsed)) {
+      setJumpValue(String(index + 1));
+      return;
+    }
+    const targetIndex = Math.min(Math.max(parsed, 1), deck.length) - 1;
+    if (targetIndex === index) {
+      setJumpValue(String(index + 1));
+      return;
+    }
+    navigate({ name: 'word', level: word.level, wordId: deck[targetIndex].id });
+  }
+
   return (
     <div className="view">
       <div className="word-topbar">
@@ -207,9 +233,40 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
               <ChevronLeft size={17} />
             </span>
           )}
-          <span className="word-pager-count">
-            {index + 1} / {deck.length}
-          </span>
+          <form
+            className="word-pager-jump"
+            aria-label="Jump to card"
+            onSubmit={(event) => {
+              event.preventDefault();
+              jumpToCard();
+            }}
+          >
+            <label className="sr-only" htmlFor="word-pager-input">
+              Card number (1 to {deck.length})
+            </label>
+            <input
+              id="word-pager-input"
+              className="word-pager-input"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="off"
+              spellCheck={false}
+              value={jumpValue}
+              onChange={(event) => setJumpValue(event.target.value.replace(/\D/g, ''))}
+              onFocus={(event) => event.currentTarget.select()}
+              onBlur={() => setJumpValue(String(index + 1))}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  setJumpValue(String(index + 1));
+                  event.currentTarget.blur();
+                }
+              }}
+              title="Type a card number and press Enter to jump"
+            />
+            <span className="word-pager-total">/ {deck.length}</span>
+          </form>
           {next ? (
             <AppLink
               to={{ name: 'word', level: word.level, wordId: next.id }}
@@ -473,6 +530,14 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                     Go to review
                     <ArrowRight size={16} aria-hidden="true" />
                   </AppLink>
+                  <button
+                    type="button"
+                    className="button button-ghost button-small"
+                    onClick={() => setConfirmRemove(true)}
+                  >
+                    <Trash2 size={14} aria-hidden="true" />
+                    Remove from queue
+                  </button>
                 </>
               ) : (
                 <button type="button" className="button button-primary" onClick={markWord}>
@@ -553,6 +618,16 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                 Not studied yet. Add it to your queue after working through the exercise sentences.
               </p>
             )}
+            {card && (
+              <button
+                type="button"
+                className="text-link side-remove-link"
+                onClick={() => setConfirmRemove(true)}
+              >
+                <Trash2 size={13} aria-hidden="true" />
+                Remove from review queue
+              </button>
+            )}
             <div className="side-progress">
               <div className="side-progress-labels">
                 <span>{word.level} deck</span>
@@ -622,6 +697,26 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
           </div>
         </aside>
       </div>
+
+      {confirmRemove && card && (
+        <ConfirmDialog
+          title="Remove this word from the review queue?"
+          description={
+            <p>
+              “{word.term}” will stop appearing in reviews and its schedule will be cleared. Your
+              drafts and generated examples are kept, and you can add it to the queue again at any
+              time.
+            </p>
+          }
+          confirmLabel="Yes, remove it"
+          cancelLabel="Keep it"
+          onCancel={() => setConfirmRemove(false)}
+          onConfirm={() => {
+            setConfirmRemove(false);
+            removeStudied(word.id);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -100,6 +100,7 @@ interface AppContextValue {
   dueWords: typeof ALL_WORDS;
   studiedWords: typeof ALL_WORDS;
   markStudied: (wordId: string) => boolean;
+  removeStudied: (wordId: string) => boolean;
   gradeCard: (wordId: string, grade: ReviewGrade) => void;
   setResponse: (wordId: string, exerciseKey: string, text: string) => void;
   setSolution: (wordId: string, exerciseKey: string, solution: string) => void;
@@ -848,6 +849,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [notify, progress.cards, settings.learningStepMinutes, srsConfig, markLocalChange],
   );
 
+  const removeStudied = useCallback(
+    (wordId: string): boolean => {
+      if (!progress.cards[wordId]) {
+        notify('This word is not in your review queue.', 'info');
+        return false;
+      }
+      markLocalChange();
+      setProgress((current) => {
+        if (!current.cards[wordId]) return current;
+        const cards = { ...current.cards };
+        delete cards[wordId];
+        return {
+          ...current,
+          cards,
+          lastStudied:
+            current.lastStudied?.wordId === wordId ? undefined : current.lastStudied,
+        };
+      });
+      notify('Removed from your review queue.');
+      return true;
+    },
+    [markLocalChange, notify, progress.cards],
+  );
+
   const gradeCard = useCallback(
     (wordId: string, grade: ReviewGrade) => {
       const now = Date.now();
@@ -1015,6 +1040,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dueWords,
     studiedWords,
     markStudied,
+    removeStudied,
     gradeCard,
     setResponse,
     setSolution,

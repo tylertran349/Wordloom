@@ -61,6 +61,7 @@ import {
 import { buildSyncLink } from '../lib/sheets';
 import {
   cn,
+  copyText,
   dayKey,
   downloadJSON,
   downloadText,
@@ -241,11 +242,21 @@ export function Settings() {
     text: string;
   } | null>(null);
   const [showBridgeScript, setShowBridgeScript] = useState(false);
-  const [copiedBridge, setCopiedBridge] = useState(false);
+  const [bridgeCopyStatus, setBridgeCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const [copiedSyncLink, setCopiedSyncLink] = useState(false);
   const [confirmSheetPull, setConfirmSheetPull] = useState(false);
   const [confirmSheetPush, setConfirmSheetPush] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bridgeScriptRef = useRef<HTMLPreElement>(null);
+  const selectBridgeOnShow = useRef(false);
+
+  useEffect(() => {
+    if (!showBridgeScript || !selectBridgeOnShow.current) return;
+    selectBridgeOnShow.current = false;
+    selectBridgeScriptText();
+    // Only react to the script becoming visible.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showBridgeScript]);
 
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
@@ -439,17 +450,31 @@ export function Settings() {
     });
   }
 
+  function selectBridgeScriptText() {
+    const node = bridgeScriptRef.current;
+    if (!node) return;
+    const selection = window.getSelection();
+    if (!selection) return;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    node.scrollIntoView({ block: 'nearest' });
+  }
+
   async function copyBridgeScript() {
-    try {
-      await navigator.clipboard.writeText(WORDLOOM_BRIDGE_SOURCE);
-      setCopiedBridge(true);
-      window.setTimeout(() => setCopiedBridge(false), 2000);
-    } catch {
+    if (await copyText(WORDLOOM_BRIDGE_SOURCE)) {
+      setBridgeCopyStatus('copied');
+      notify('Bridge script copied. Paste it into the Apps Script editor.');
+      window.setTimeout(() => setBridgeCopyStatus('idle'), 2000);
+      return;
+    }
+    setBridgeCopyStatus('error');
+    if (showBridgeScript) {
+      selectBridgeScriptText();
+    } else {
+      selectBridgeOnShow.current = true;
       setShowBridgeScript(true);
-      setSheetMessage({
-        tone: 'error',
-        text: 'Copy failed. Show the script and select it manually.',
-      });
     }
   }
 
@@ -461,11 +486,10 @@ export function Settings() {
   async function copySyncLink() {
     const connection = sheetSync.connection;
     if (!connection) return;
-    try {
-      await navigator.clipboard.writeText(buildSyncLink(connection));
+    if (await copyText(buildSyncLink(connection))) {
       setCopiedSyncLink(true);
       window.setTimeout(() => setCopiedSyncLink(false), 2000);
-    } catch {
+    } else {
       setSheetMessage({
         tone: 'error',
         text: 'Copy failed. Select the Web app URL above and copy it manually.',
@@ -1641,16 +1665,31 @@ export function Settings() {
               </Section>
 
               <Section
-                title="Connect a sheet"
-                description="Paste the spreadsheet URL and the Web app URL from the bridge you installed below. Both are needed once per device; a sync link packs them together."
+                title="Connect this device"
+                description="Link this browser to your Wordloom sheet by pasting the two links below. If you are setting up a sheet for the first time, do the one-time setup further down first."
               >
-                <p className="settings-muted">
-                  New to this sheet? Install the bridge in <strong>One-time setup</strong> below,
-                  then paste its URLs here.
-                </p>
+                <div className="sheet-guide">
+                  <div className="sheet-guide-card">
+                    <span className="sheet-guide-tag">First time</span>
+                    <strong>I don’t have a Wordloom sheet yet</strong>
+                    <p>
+                      Follow the six steps in <strong>Set up a new sheet</strong> below. They create
+                      the spreadsheet, install the bridge, and give you the two links to paste here.
+                    </p>
+                  </div>
+                  <div className="sheet-guide-card">
+                    <span className="sheet-guide-tag">Returning</span>
+                    <strong>I already have a Wordloom sheet</strong>
+                    <p>
+                      On a device that is already connected, click <strong>Copy sync link</strong>{' '}
+                      above and paste it into either field. On a new device, connecting imports the
+                      sheet automatically — no new sheet or deployment needed.
+                    </p>
+                  </div>
+                </div>
                 <Row
                   label="Google Sheet URL"
-                  hint="The normal link from your browser’s address bar."
+                  hint="Open your sheet and copy the link from the browser’s address bar (it starts with docs.google.com/spreadsheets/d/)."
                   htmlFor="sheet-url"
                 >
                   <input
@@ -1665,7 +1704,7 @@ export function Settings() {
                 </Row>
                 <Row
                   label="Web app URL"
-                  hint="Ends in /exec. This is the bridge that reads and writes the sheet."
+                  hint="The bridge link from your sheet’s deployment, ending in /exec. Already set up? Find it under Extensions → Apps Script → Deploy → Manage deployments."
                   htmlFor="sheet-bridge"
                 >
                   <input
@@ -1680,7 +1719,7 @@ export function Settings() {
                 </Row>
                 <Row
                   label="Access token"
-                  hint="Optional. Only needed if you set TOKEN in the script."
+                  hint="Optional. Only needed if whoever set up the sheet added TOKEN to the script. It must match exactly."
                   htmlFor="sheet-token"
                 >
                   <div className="sheet-token-row">
@@ -1723,58 +1762,74 @@ export function Settings() {
                     {sheetSync.connection ? 'Reconnect' : 'Connect'}
                   </button>
                   <span className="sheet-hint">
-                    Pasting a “Wordloom sync” block into either field fills both links.
+                    Tip: pasting a “Wordloom sync” block into either field fills in both links.
                   </span>
                 </div>
-                <p className="settings-muted">
-                  After connecting, changes upload a few seconds after you stop editing. Use Sync
-                  now to reconcile, or Import/Upload to force a direction. Requests go straight from
-                  this browser to your Apps Script deployment.
-                </p>
+                <div className="inline-alert is-info">
+                  <Cloud size={15} aria-hidden="true" />
+                  <span>
+                    <strong>What happens after connecting:</strong> changes save automatically
+                    about five seconds after you stop editing. If this device and the sheet both
+                    already contain progress, Wordloom asks which copy to keep before writing
+                    anything.
+                  </span>
+                </div>
               </Section>
 
               <Section
-                title="One-time setup in your sheet"
-                description="Google does not allow a website to write to a sheet from a URL alone, so a short script has to live inside the sheet once. This uses Apps Script inside your own spreadsheet — no Google Cloud project and no server."
+                title="Set up a new sheet (first time only)"
+                description="Skip this if you already have a Wordloom sheet — connect above instead. The bridge is a short Apps Script that lives inside your spreadsheet, with no Google Cloud project or server."
               >
                 <ol className="sheet-steps">
                   <li>
-                    <strong>Create a blank Google Sheet.</strong> Open it, then choose{' '}
-                    <em>Extensions → Apps Script</em>.
+                    <strong>Create the spreadsheet.</strong>{' '}
+                    <a
+                      className="text-link"
+                      href="https://sheets.new"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open a blank Google Sheet
+                      <ExternalLink size={12} aria-hidden="true" />
+                    </a>{' '}
+                    and give it a name such as “Wordloom”. Keep it private: anyone with edit access
+                    can change your progress.
                   </li>
                   <li>
-                    <strong>Paste the bridge into the editor.</strong> Delete the placeholder and
-                    paste the script from this page.
+                    <strong>Open the script editor.</strong> In the sheet, choose{' '}
+                    <em>Extensions → Apps Script</em>. A new tab opens with a code editor.
                   </li>
                   <li>
-                    <strong>Deploy it.</strong> <em>Deploy → New deployment → Web app</em>. Execute
-                    as <em>Me</em>, Who has access <em>Anyone</em>. Authorize, then copy the URL
-                    ending in <code>/exec</code>.
+                    <strong>Paste the bridge script.</strong> Delete the placeholder code, click{' '}
+                    <em>Copy bridge script</em> below, and paste it into the editor. Click the save
+                    icon (or press Ctrl/Cmd + S).
                   </li>
                   <li>
-                    <strong>Connect above.</strong> The first connection uploads this device if the
-                    sheet is empty.
+                    <strong>Deploy it as a web app.</strong> Click <em>Deploy → New deployment</em>,
+                    choose <em>Web app</em> as the type, set <em>Execute as</em> to <em>Me</em> and{' '}
+                    <em>Who has access</em> to <em>Anyone</em>, then click <em>Deploy</em>.
+                  </li>
+                  <li>
+                    <strong>Approve access.</strong> Google asks for permission the first time. Pick
+                    your account, choose <em>Advanced → Go to … (unsafe)</em> if it appears, then{' '}
+                    <em>Allow</em>. This is expected — the script is yours and only accesses this
+                    spreadsheet.
+                  </li>
+                  <li>
+                    <strong>Copy the Web app URL and connect.</strong> The link ends in{' '}
+                    <code>/exec</code>. Paste it, with the sheet URL, into{' '}
+                    <strong>Connect this device</strong> above and press <em>Connect</em>. An empty
+                    sheet is filled from this device on the first connection.
                   </li>
                 </ol>
-                <div className="sheet-setup-links">
-                  <a
-                    className="text-link"
-                    href="https://sheets.new"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Create a blank sheet
-                    <ExternalLink size={13} aria-hidden="true" />
-                  </a>
-                  <a
-                    className="text-link"
-                    href="https://script.google.com/home"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open Apps Script
-                    <ExternalLink size={13} aria-hidden="true" />
-                  </a>
+                <div className="inline-alert is-info">
+                  <Check size={15} aria-hidden="true" />
+                  <span>
+                    <strong>Connecting a device to an existing sheet?</strong> No setup is needed —
+                    use a sync link or the two URLs. Need the Web app URL again? Open the sheet and
+                    go to <em>Extensions → Apps Script → Deploy → Manage deployments</em>. Only
+                    redeploy if you deleted the old deployment.
+                  </span>
                 </div>
                 <div className="data-actions">
                   <div className="data-action">
@@ -1788,11 +1843,11 @@ export function Settings() {
                     <div className="sheet-script-actions">
                       <button
                         type="button"
-                        className="button button-ghost button-small"
+                        className="button button-primary button-small"
                         onClick={() => void copyBridgeScript()}
                       >
                         <Copy size={14} aria-hidden="true" />
-                        {copiedBridge ? 'Copied' : 'Copy'}
+                        {bridgeCopyStatus === 'copied' ? 'Copied!' : 'Copy bridge script'}
                       </button>
                       <button
                         type="button"
@@ -1805,7 +1860,10 @@ export function Settings() {
                       <button
                         type="button"
                         className="button button-ghost button-small"
-                        onClick={() => setShowBridgeScript((value) => !value)}
+                        onClick={() => {
+                          setShowBridgeScript((value) => !value);
+                          setBridgeCopyStatus('idle');
+                        }}
                       >
                         <Eye size={14} aria-hidden="true" />
                         {showBridgeScript ? 'Hide' : 'Show'}
@@ -1813,24 +1871,30 @@ export function Settings() {
                     </div>
                   </div>
                 </div>
+                {bridgeCopyStatus === 'error' && (
+                  <p className="sheet-copy-feedback" role="alert">
+                    Your browser blocked the copy. The script is shown and selected below — press
+                    Ctrl/Cmd + C to copy it.
+                  </p>
+                )}
                 {showBridgeScript && (
-                  <pre className="sheet-script">
+                  <pre className="sheet-script" ref={bridgeScriptRef}>
                     <code>{WORDLOOM_BRIDGE_SOURCE}</code>
                   </pre>
                 )}
                 <div className="inline-alert is-info">
                   <ShieldCheck size={15} aria-hidden="true" />
                   <span>
-                    Anyone with the /exec URL can read and write the sheet. Keep it private, or set
-                    TOKEN in the script and paste the same phrase above. The copied sync link
-                    contains that token, so treat it like a password. API keys never leave this
-                    browser.
+                    <strong>Treat the /exec URL like a password.</strong> Anyone who has it can read
+                    and write the sheet. Keep it private, or add a TOKEN to the script and enter the
+                    same phrase above. The copied sync link includes that token. AI API keys never
+                    leave this browser.
                   </span>
                 </div>
                 <p className="settings-muted">
-                  The script creates readable tabs for cards, drafts, solutions, examples,
-                  practice, activity, and review history. Re-uploading is safe: the newest copy
-                  rewrites those tabs.
+                  Each sync rewrites readable tabs for cards, drafts, solutions, examples, practice,
+                  activity, and review history. Editing cells by hand is not supported — make
+                  changes in Wordloom and let it upload.
                 </p>
               </Section>
             </>

@@ -1286,6 +1286,70 @@ html[data-theme='dark'] .status-due {
   gap: 0.5rem;
 }
 
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(8, 14, 11, 0.55);
+  backdrop-filter: blur(3px);
+  animation: confirmFade 0.16s ease both;
+}
+.confirm-dialog {
+  width: min(100%, 420px);
+  padding: 1.15rem 1.2rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 28px 70px -24px rgba(0, 0, 0, 0.55);
+  animation: confirmIn 0.18s ease both;
+}
+.confirm-dialog h2 {
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+.confirm-dialog p {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+.confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+@keyframes confirmFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes confirmIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 560px) {
+  .confirm-dialog {
+    padding: 1rem;
+  }
+  .confirm-actions .button {
+    flex: 1;
+  }
+}
+
 .muted-copy {
   padding: 0.4rem 0;
   color: var(--muted);
@@ -2152,11 +2216,38 @@ html[data-theme='dark'] .status-due {
   height: 28px;
   border-radius: 8px;
 }
-.word-pager-count {
-  min-width: 3rem;
+.word-pager-jump {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
   color: var(--faint);
   font-size: 0.58rem;
-  text-align: center;
+}
+.word-pager-input {
+  width: 2.6rem;
+  padding: 0.16rem 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.58rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.word-pager-input:hover {
+  border-color: var(--faint);
+}
+.word-pager-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.word-pager-total {
+  white-space: nowrap;
 }
 
 .word-layout {
@@ -2870,6 +2961,14 @@ html[data-theme='dark'] .status-due {
   color: var(--muted);
   font-size: 0.65rem;
   line-height: 1.55;
+}
+.side-remove-link {
+  align-self: flex-start;
+  color: var(--muted);
+  font-size: 0.6rem;
+}
+.side-remove-link:hover {
+  color: var(--danger);
 }
 .side-progress-labels {
   display: flex;
@@ -4478,22 +4577,51 @@ html[data-theme='dark'] .storage-badge.is-warn {
 .sheet-steps code {
   font-size: 0.58rem;
 }
-.sheet-setup-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin: -0.25rem 0 0.85rem;
+.sheet-guide {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0.2rem 0 1rem;
 }
-.sheet-setup-links .text-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.62rem;
+.sheet-guide-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+}
+.sheet-guide-card strong {
+  color: var(--ink);
+  font-size: 0.7rem;
+}
+.sheet-guide-card p {
+  color: var(--muted);
+  font-size: 0.61rem;
+  line-height: 1.55;
+}
+.sheet-guide-tag {
+  align-self: flex-start;
+  padding: 0.08rem 0.42rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .sheet-script-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+.sheet-copy-feedback {
+  margin: 0.45rem 0 0;
+  color: var(--danger);
+  font-size: 0.6rem;
+  line-height: 1.5;
 }
 .sheet-script {
   max-height: 340px;
@@ -4514,6 +4642,9 @@ html[data-theme='dark'] .storage-badge.is-warn {
 @media (max-width: 720px) {
   .sheet-url-input {
     width: 100%;
+  }
+  .sheet-guide {
+    grid-template-columns: 1fr;
   }
   .sheet-connection-meta {
     grid-template-columns: 1fr;
@@ -4982,8 +5113,8 @@ html.reduce-motion *::after {
     width: 100%;
     justify-content: flex-start;
   }
-  .word-pager-count {
-    min-width: 2.6rem;
+  .word-pager-input {
+    width: 2.3rem;
   }
   .daily-chart {
     height: 132px;

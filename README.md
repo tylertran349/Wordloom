@@ -195,28 +195,44 @@ Google does not allow a website to write to a spreadsheet from a URL alone — t
 or code running inside the sheet. Wordloom takes the second route so it needs no Google Cloud
 project, no client ID, and no developer server.
 
-### One-time setup per sheet
+### First-time setup (new sheet)
 
-1. Create a blank Google Sheet and open **Extensions → Apps Script**.
-2. In **Settings → Google Sheets**, copy the bridge script into the editor (the app also offers a
-   `.gs` download).
-3. **Deploy → New deployment → Web app**, with **Execute as: Me** and **Who has access: Anyone**.
-   Authorize it when Google asks.
-4. Copy the Web app URL (it ends in `/exec`) and paste it, with the spreadsheet URL, into
-   **Settings → Google Sheets**. Press **Connect**.
+Follow these steps once per spreadsheet:
+
+1. **Create the sheet.** Open [sheets.new](https://sheets.new) and name it something like
+   “Wordloom”. Keep it private — anyone with edit access can change your progress.
+2. **Open the bridge editor.** In the sheet, choose **Extensions → Apps Script**.
+3. **Paste the bridge.** In **Settings → Google Sheets → Set up a new sheet**, click **Copy bridge
+   script** (or **Download** the `.gs` file), delete the placeholder code in the editor, and paste
+   it in. Save.
+4. **Deploy it.** **Deploy → New deployment → Web app**, with **Execute as: Me** and **Who has
+   access: Anyone**. Authorize it when Google asks — if it warns that the app isn’t verified,
+   choose **Advanced → Go to … (unsafe)**; the script is yours and only accesses this sheet.
+5. **Connect.** Copy the Web app URL (it ends in `/exec`), paste it with the spreadsheet URL into
+   **Settings → Google Sheets**, and press **Connect**.
 
 An empty sheet is seeded from this device. If both sides already contain data, Wordloom asks
 whether to import the sheet or upload this device before it writes anything.
+
+### Already have a Wordloom sheet?
+
+You do not need to repeat the setup or redeploy anything.
+
+- **Another device:** On a connected device, open **Settings → Google Sheets** and press **Copy
+  sync link**, then paste that block into either URL field on the new device — it fills both. A
+  device with no local progress imports the sheet automatically.
+- **Or paste the URLs:** the spreadsheet URL plus the existing `/exec` Web app URL.
+- **Lost the Web app URL?** Open the sheet, go to **Extensions → Apps Script → Deploy → Manage
+  deployments**, and copy the URL ending in `/exec`. Only redeploy if you deleted the old
+  deployment.
+- **Both copies have progress?** Wordloom asks whether to import the sheet or upload this device
+  before writing anything.
 
 After connecting, saving is automatic: local storage updates immediately, and the sheet is
 uploaded about five seconds after you stop editing. A burst of edits becomes one upload instead of
 one request per change. Wordloom also checks the sheet when the app starts and when you return to
 the tab, and attempts a final flush when the tab closes. **Sync now**, **Import**, and **Upload**
 remain available when you want to force a direction.
-
-To connect another device, paste the spreadsheet URL and the same Web app URL, or press **Copy
-sync link** on the first device and paste that block. Both fields are scanned, so the links can go
-in either one. A new device with no local progress imports the sheet automatically.
 
 ### What the sheet contains
 
