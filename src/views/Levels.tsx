@@ -101,7 +101,6 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
       ? savedIndex
       : -1;
   const resumeWord = resumeIndex >= 0 ? words[resumeIndex] : undefined;
-  const resumeDiffers = Boolean(resumeWord && nextWord && resumeWord.id !== nextWord.id);
   const newTodayInLevel = words.filter((word) => {
     const card = progress.cards[word.id];
     return card && new Date(card.createdAt).toDateString() === new Date().toDateString();
@@ -145,14 +144,6 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                     ? 'Practice a word'
                     : 'Study next word'}
                 <ArrowRight size={16} aria-hidden="true" />
-              </AppLink>
-            ) : null}
-            {resumeDiffers && nextWord ? (
-              <AppLink
-                to={{ name: 'word', level, wordId: nextWord.id }}
-                className="button button-ghost"
-              >
-                {progress.cards[nextWord.id] ? 'Practice' : 'Next new word'}
               </AppLink>
             ) : null}
           </div>
