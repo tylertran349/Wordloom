@@ -2758,6 +2758,7 @@ html[data-theme='dark'] .status-due {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.5rem;
 }
 .finish-added {
