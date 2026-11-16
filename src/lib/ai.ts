@@ -6,6 +6,7 @@ import type {
   VocabWord,
 } from '../types';
 import { getLanguage } from '../data/languages';
+import { temperatureForRequest } from './modelDefaults';
 
 export interface ThinkingOption {
   value: ThinkingLevel;
@@ -14,7 +15,7 @@ export interface ThinkingOption {
 }
 
 export const GEMINI_THINKING_LEVELS: ThinkingOption[] = [
-  { value: 'auto', label: 'Auto', hint: 'Let the model decide' },
+  { value: 'auto', label: 'Auto (default)', hint: 'Use whatever the model recommends' },
   { value: 'minimal', label: 'Minimal', hint: 'Fastest, lightest reasoning' },
   { value: 'low', label: 'Low', hint: 'Quick reasoning' },
   { value: 'medium', label: 'Medium', hint: 'Balanced reasoning' },
@@ -22,7 +23,7 @@ export const GEMINI_THINKING_LEVELS: ThinkingOption[] = [
 ];
 
 export const OPENAI_THINKING_LEVELS: ThinkingOption[] = [
-  { value: 'auto', label: 'Auto', hint: 'Omit the reasoning parameter' },
+  { value: 'auto', label: 'Auto (default)', hint: 'Leave the reasoning parameter out' },
   { value: 'none', label: 'None', hint: 'No extra reasoning' },
   { value: 'minimal', label: 'Minimal', hint: 'Fastest reasoning' },
   { value: 'low', label: 'Low', hint: 'Quick reasoning' },
@@ -183,11 +184,11 @@ async function callGemini(
     model,
   )}:generateContent`;
 
-  const buildBody = (includeThinking: boolean, includeTemperature: boolean) => {
+  const buildBody = (includeThinking: boolean) => {
     const generationConfig: Record<string, unknown> = {
       maxOutputTokens,
     };
-    if (includeTemperature) generationConfig.temperature = settings.temperature;
+    if (temperature !== null) generationConfig.temperature = temperature;
     if (includeThinking) {
       const thinking = geminiThinkingConfig(settings.geminiThinking, model, maxOutputTokens);
       if (thinking) generationConfig.thinkingConfig = thinking;
@@ -201,12 +202,17 @@ async function callGemini(
 
   const headers = { 'x-goog-api-key': key };
   let includeThinking = settings.geminiThinking !== 'auto';
-  let includeTemperature = true;
+  let temperature = temperatureForRequest(
+    'gemini',
+    model,
+    settings.temperatureMode,
+    settings.temperature,
+  );
   let data: unknown;
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      data = await postJson(url, headers, buildBody(includeThinking, includeTemperature));
+      data = await postJson(url, headers, buildBody(includeThinking));
       lastError = undefined;
       break;
     } catch (error) {
@@ -217,8 +223,8 @@ async function callGemini(
         includeThinking = false;
         continue;
       }
-      if (includeTemperature && /temperature/i.test(message)) {
-        includeTemperature = false;
+      if (temperature !== null && /temperature/i.test(message)) {
+        temperature = null;
         continue;
       }
       throw lastError;
@@ -279,11 +285,18 @@ async function callOpenAiCompatible(
       { role: 'system', content: system },
       { role: 'user', content: user },
     ],
-    temperature: settings.temperature,
     max_tokens: maxOutputTokens,
   };
-  if (settings.openaiThinking !== 'auto') {
-    body.reasoning_effort = settings.openaiThinking;
+  const temperature = temperatureForRequest(
+    'openai',
+    model,
+    settings.temperatureMode,
+    settings.temperature,
+  );
+  if (temperature !== null) body.temperature = temperature;
+  const reasoningEffort = settings.openaiThinking.trim();
+  if (reasoningEffort && reasoningEffort.toLowerCase() !== 'auto') {
+    body.reasoning_effort = reasoningEffort;
   }
 
   let data: unknown;

@@ -43,6 +43,7 @@ import {
   translateFree,
   translationCacheSize,
 } from '../lib/googleTranslate';
+import { temperaturePlan } from '../lib/modelDefaults';
 import {
   formatBytes,
   clearAllWordloomStorage,
@@ -151,8 +152,9 @@ function RangeSetting({
   max,
   step = 1,
   onChange,
+  disabled = false,
 }: {
-  label: string;
+  label: ReactNode;
   hint?: ReactNode;
   value: number;
   display: string;
@@ -160,10 +162,11 @@ function RangeSetting({
   max: number;
   step?: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }) {
   return (
     <Row label={label} hint={hint}>
-      <div className="range-control">
+      <div className={cn('range-control', disabled && 'is-disabled')}>
         <input
           className="range-input"
           type="range"
@@ -172,7 +175,9 @@ function RangeSetting({
           step={step}
           value={value}
           onChange={(event) => onChange(Number(event.target.value))}
-          aria-label={label}
+          aria-label={typeof label === 'string' ? label : 'Temperature'}
+          aria-disabled={disabled}
+          disabled={disabled}
         />
         <span className="range-readout">{display}</span>
       </div>
@@ -214,9 +219,30 @@ export function Settings() {
   const geminiThinking =
     GEMINI_THINKING_LEVELS.find((option) => option.value === settings.geminiThinking) ??
     GEMINI_THINKING_LEVELS[0];
-  const openAiThinking =
-    OPENAI_THINKING_LEVELS.find((option) => option.value === settings.openaiThinking) ??
-    OPENAI_THINKING_LEVELS[0];
+  const activeModel =
+    settings.aiProvider === 'gemini' ? settings.geminiModel : settings.openaiModel;
+  const temperatureSettings = temperaturePlan(settings.aiProvider, activeModel);
+  const followsModelTemperature =
+    settings.temperatureMode !== 'custom' || temperatureSettings.source === 'unsupported';
+  const shownTemperature = followsModelTemperature
+    ? (temperatureSettings.defaultValue ?? settings.temperature)
+    : settings.temperature;
+  const temperatureDisplay =
+    temperatureSettings.source === 'unsupported' ? '—' : shownTemperature.toFixed(1);
+  const temperatureBadge =
+    temperatureSettings.source === 'unsupported'
+      ? 'Not supported'
+      : !followsModelTemperature
+        ? 'Custom'
+        : temperatureSettings.source === 'model'
+          ? 'Model default'
+          : 'Suggested default';
+  const temperatureHint =
+    temperatureSettings.source === 'unsupported'
+      ? 'This model chooses its own sampling; the slider has no effect.'
+      : followsModelTemperature
+        ? temperatureSettings.detail
+        : 'Sent with every request. Turn the switch back on to use the model default again.';
   const translationSource = getLanguage(target.code === 'en' ? 'vi' : 'en');
   const translationSample =
     translationSource.code === 'vi'
@@ -1054,41 +1080,64 @@ export function Settings() {
                     </div>
                     <div className="field-block">
                       <label htmlFor="openai-thinking">Thinking level</label>
-                      <div className="select-wrap">
-                        <select
-                          id="openai-thinking"
-                          className="select-input"
-                          value={settings.openaiThinking}
-                          onChange={(event) =>
-                            updateAiSettings({
-                              openaiThinking: event.target.value as SettingsType['openaiThinking'],
-                            })
-                          }
-                        >
-                          {OPENAI_THINKING_LEVELS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown size={15} className="select-chevron" aria-hidden="true" />
-                      </div>
+                      <input
+                        id="openai-thinking"
+                        className="text-input"
+                        list="openai-thinking-options"
+                        value={settings.openaiThinking}
+                        onChange={(event) =>
+                          updateAiSettings({ openaiThinking: event.target.value })
+                        }
+                        placeholder="auto"
+                        spellCheck={false}
+                        autoComplete="off"
+                      />
+                      <datalist id="openai-thinking-options">
+                        {OPENAI_THINKING_LEVELS.map((option) => (
+                          <option key={option.value} value={option.value} />
+                        ))}
+                      </datalist>
                       <span className="field-hint">
-                        {openAiThinking.hint}. Sent as <code>reasoning_effort</code>; if a server
-                        rejects it, the request is retried without it automatically.
+                        Free text, sent as <code>reasoning_effort</code>. Leave it blank or type{' '}
+                        <code>auto</code> to use the provider default. If a server rejects it, the
+                        request is retried without it automatically.
                       </span>
                     </div>
                   </div>
                 )}
+              </Section>
 
+              <Section
+                title="Advanced sampling"
+                description="Wordloom leaves these on the provider's defaults until you choose to override them."
+              >
+                <Toggle
+                  label="Use the model's default temperature"
+                  description={
+                    temperatureSettings.source === 'unsupported'
+                      ? temperatureSettings.detail
+                      : 'Keep this on to let the provider decide. Turn it off to send your own value.'
+                  }
+                  checked={followsModelTemperature}
+                  disabled={temperatureSettings.source === 'unsupported'}
+                  onChange={(value) =>
+                    updateAiSettings({ temperatureMode: value ? 'auto' : 'custom' })
+                  }
+                />
                 <RangeSetting
-                  label="Temperature"
-                  hint="Higher values are more varied; lower values are more consistent."
+                  label={
+                    <span className="setting-label-with-badge">
+                      Temperature
+                      <span className="setting-badge">{temperatureBadge}</span>
+                    </span>
+                  }
+                  hint={temperatureHint}
                   min={0}
                   max={2}
                   step={0.1}
-                  value={settings.temperature}
-                  display={settings.temperature.toFixed(1)}
+                  value={shownTemperature}
+                  display={temperatureDisplay}
+                  disabled={followsModelTemperature}
                   onChange={(value) => updateAiSettings({ temperature: value })}
                 />
               </Section>

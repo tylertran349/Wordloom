@@ -3736,6 +3736,32 @@ html[data-theme='dark'] .grade-easy {
   align-items: center;
   gap: 0.7rem;
 }
+.range-control.is-disabled {
+  opacity: 0.5;
+}
+.range-input:disabled {
+  cursor: not-allowed;
+}
+.setting-label-with-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.setting-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.08rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
 .range-input {
   width: 160px;
   height: 4px;

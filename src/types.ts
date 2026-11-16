@@ -83,6 +83,8 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 export type AccentColor = 'jade' | 'indigo' | 'coral' | 'amber' | 'violet';
 export type AIProvider = 'gemini' | 'openai';
 export type ThinkingLevel = 'auto' | 'none' | 'minimal' | 'low' | 'medium' | 'high';
+/** 'auto' follows the model/provider default; 'custom' sends the user's value. */
+export type TemperatureMode = 'auto' | 'custom';
 
 export interface Settings {
   // General
@@ -130,7 +132,11 @@ export interface Settings {
   openaiBaseUrl: string;
   openaiApiKey: string;
   openaiModel: string;
-  openaiThinking: ThinkingLevel;
+  /** Free-text level, sent as `reasoning_effort`; blank or "auto" omits it. */
+  openaiThinking: string;
+  /** Whether to send `temperature` or leave it to the provider (default). */
+  temperatureMode: TemperatureMode;
+  /** Value used only when `temperatureMode` is 'custom'. */
   temperature: number;
   aiFeedback: boolean;
   aiExercises: boolean;

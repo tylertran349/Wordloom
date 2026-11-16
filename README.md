@@ -43,11 +43,13 @@ configured with `base: './'` so subpath deployments work too.
 - **Progress dashboard** with streaks, daily goals, a 14-day activity chart, a 7-day due
   forecast, a 12-week heat map, per-level coverage, and recent review history.
 - **Extensive settings** for language pair, theme, accent, font size, motion, exercise count,
-  hints, audio, scheduling, Google Translate behavior, AI providers, and backup/restore. Every
-  setting is saved to `localStorage` automatically.
+  hints, audio, scheduling, Google Translate behavior, AI providers, and backup/restore. Provider
+  defaults (temperature, thinking) are used automatically unless you override them. Every setting
+  is saved to `localStorage` automatically.
 - **Optional AI** through **Google Gemini** or a **custom OpenAI-compatible endpoint**. Model
-  names are free text; thinking levels are available in provider-specific dropdowns. AI generates
-  example sentences and practice exercises, and gives feedback on a translation.
+  names are free text, the OpenAI-compatible thinking level is free text too, and Gemini offers
+  thinking levels in a dropdown. AI generates example sentences and practice exercises, and gives
+  feedback on a translation.
 - **Local-first storage** with JSON export/import and two-step destructive resets.
 
 ## Project structure
@@ -75,6 +77,7 @@ src/
     srs.ts             ← scheduling algorithm
     googleTranslate.ts ← free endpoint + fallback + cache
     ai.ts              ← Gemini / OpenAI-compatible client
+    modelDefaults.ts   ← per-model temperature defaults and suggestions
     storage.ts         ← defaults, normalization, backup
     router.ts, utils.ts, speech.ts
   types.ts
@@ -173,6 +176,15 @@ step, session limit) are editable in Settings.
 
 AI is optional. Add credentials in **Settings → AI provider**.
 
+### Advanced settings
+
+Wordloom follows each provider's defaults unless you change them. The **Advanced sampling** section
+keeps **temperature** greyed out and lets the model decide: known Gemini and OpenAI chat families
+omit the parameter entirely, reasoning models that manage their own sampling never receive it, and
+models without a published default get a suggested `0.7`. Flip **Use the model's default
+temperature** off to send your own value. Thinking stays on **Auto (default)** for the same reason —
+the parameter is omitted so the provider applies its own behaviour.
+
 ### Google Gemini
 
 - API key (stored only in this browser's local storage)
@@ -186,7 +198,8 @@ AI is optional. Add credentials in **Settings → AI provider**.
 - Base URL, e.g. `https://api.openai.com/v1`, an OpenRouter URL, or a local server
 - API key (optional, for local endpoints that don't need one)
 - Free-text model name
-- Thinking level: Auto, None, Minimal, Low, Medium, High — sent as `reasoning_effort`
+- Free-text thinking level, sent as `reasoning_effort` (for example `minimal`, `low`, `medium`, or
+  `high`). Leave it blank or enter `auto` to omit the parameter and use the provider default.
 - If a server rejects `reasoning_effort`, `temperature`, or `max_tokens`, the client retries with
   a compatible request shape.
 

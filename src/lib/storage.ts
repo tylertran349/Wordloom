@@ -55,6 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   openaiApiKey: '',
   openaiModel: 'gpt-4o-mini',
   openaiThinking: 'auto',
+  temperatureMode: 'auto',
   temperature: 0.7,
   aiFeedback: true,
   aiExercises: true,
@@ -113,7 +114,15 @@ function normalizeSettings(raw: unknown): Settings {
   const accent = source.accent;
   const provider = source.aiProvider;
   const thinking = source.geminiThinking;
-  const openaiThinking = source.openaiThinking;
+  const storedTemperature = asNumber(source.temperature, defaults.temperature, 0, 2);
+  // Older versions always sent a temperature. If it was changed from the old
+  // 0.7 default, treat it as a deliberate override and keep it active.
+  const temperatureMode: Settings['temperatureMode'] =
+    source.temperatureMode === 'custom' || source.temperatureMode === 'auto'
+      ? source.temperatureMode
+      : source.temperature !== undefined && storedTemperature !== defaults.temperature
+        ? 'custom'
+        : defaults.temperatureMode;
   const googleTranslateEnabled = asBoolean(
     source.googleTranslateEnabled,
     defaults.googleTranslateEnabled,
@@ -186,16 +195,9 @@ function normalizeSettings(raw: unknown): Settings {
     openaiBaseUrl: asString(source.openaiBaseUrl, defaults.openaiBaseUrl),
     openaiApiKey: asString(source.openaiApiKey),
     openaiModel: asString(source.openaiModel, defaults.openaiModel),
-    openaiThinking:
-      openaiThinking === 'auto' ||
-      openaiThinking === 'none' ||
-      openaiThinking === 'minimal' ||
-      openaiThinking === 'low' ||
-      openaiThinking === 'medium' ||
-      openaiThinking === 'high'
-        ? openaiThinking
-        : defaults.openaiThinking,
-    temperature: asNumber(source.temperature, defaults.temperature, 0, 2),
+    openaiThinking: asString(source.openaiThinking, defaults.openaiThinking).slice(0, 40),
+    temperatureMode,
+    temperature: storedTemperature,
     aiFeedback: asBoolean(source.aiFeedback, defaults.aiFeedback),
     aiExercises: asBoolean(source.aiExercises, defaults.aiExercises),
   };
