@@ -1,4 +1,4 @@
-import type { CEFRLevel, VocabWord } from '../types';
+import type { CEFRLevel } from '../types';
 import { CEFR_LEVELS } from '../types';
 
 export function cn(...values: Array<string | false | null | undefined>): string {
@@ -40,25 +40,17 @@ export function isCEFRLevel(value: string | undefined): value is CEFRLevel {
 }
 
 /**
- * Collect up to `count` native-language exercise sentences for a word.
- * Authored practice comes first, then AI-generated practice, then any example
- * translations as a sensible fallback so exercises never come up empty.
+ * Collect the AI-generated native-language exercise sentences for a word.
+ * Sentences are generated on demand and cached in local progress.
  */
-export function getPracticeSentences(word: VocabWord, count: number, generated: string[] = []): string[] {
-  const authored = (word.practice ?? []).filter((sentence) => sentence.trim().length > 0);
+export function getPracticeSentences(count: number, generated: string[] = []): string[] {
   const aiGenerated = generated.filter((sentence) => sentence.trim().length > 0);
-  const fromExamples = word.examples.map((example) => example.native);
-  const pool = unique([...authored, ...aiGenerated, ...fromExamples]);
-  return pool.slice(0, Math.max(0, count));
+  return unique(aiGenerated).slice(0, Math.max(0, count));
 }
 
-/** Exercise list shown on the study page: configured seeds plus every AI extra. */
-export function getStudySentences(word: VocabWord, count: number, generated: string[] = []): string[] {
-  const authored = unique((word.practice ?? []).filter((sentence) => sentence.trim().length > 0));
-  const seeded = authored.slice(0, Math.max(0, count));
-  const fromExamples = word.examples.map((example) => example.native);
-  const baseline = seeded.length >= count ? seeded : unique([...seeded, ...fromExamples]).slice(0, count);
-  return unique([...baseline, ...generated.filter((sentence) => sentence.trim().length > 0)]);
+/** Exercise list shown on the study page: every AI-generated sentence. */
+export function getStudySentences(generated: string[] = []): string[] {
+  return unique(generated.filter((sentence) => sentence.trim().length > 0));
 }
 
 export function dayKey(date: Date | number = new Date()): string {

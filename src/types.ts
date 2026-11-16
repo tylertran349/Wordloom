@@ -19,9 +19,6 @@ export interface VocabEntry {
   definition: string;
   /** Optional definition in the target language. */
   definitionTarget?: string;
-  examples: ExampleSentence[];
-  /** Native-language sentences for the learner to translate into the target language. */
-  practice: string[];
   tags?: string[];
 }
 
@@ -70,6 +67,8 @@ export interface ProgressState {
   responses: Record<string, string>;
   /** Cached translation solutions keyed by `${wordId}::${exerciseKey}`. */
   solutions: Record<string, string>;
+  /** AI-generated example sentences, keyed by word id. */
+  generatedExamples: Record<string, ExampleSentence[]>;
   /** AI-generated native-language practice sentences, keyed by word id. */
   generatedPractice: Record<string, string[]>;
   activity: Record<string, DayActivity>;

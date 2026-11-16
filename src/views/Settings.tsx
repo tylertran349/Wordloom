@@ -601,7 +601,7 @@ export function Settings() {
               >
                 <RangeSetting
                   label="Sentences per word"
-                  hint="Words ship with five prompts. Increase this and generate extra practice with AI, or add more in the data file."
+                  hint="Sets how many practice sentences AI generates per batch. Examples are generated alongside the exercises."
                   min={3}
                   max={10}
                   value={settings.exercisesPerWord}
@@ -887,7 +887,7 @@ export function Settings() {
             <>
               <Section
                 title="Provider"
-                description="AI is optional. Use it for extra practice sentences and feedback on your translations."
+                description="AI is optional. Use it to generate example sentences and practice exercises, and to get feedback on your translations."
               >
                 <div className="provider-options" role="group" aria-label="AI provider">
                   <button
@@ -1095,8 +1095,8 @@ export function Settings() {
 
               <Section title="AI features" description="Turn each optional feature on or off independently.">
                 <Toggle
-                  label="Generate extra practice sentences"
-                  description="Adds a “More with AI” button on word pages."
+                  label="Generate examples and practice sentences"
+                  description="Adds a “Generate with AI” button on word pages."
                   checked={settings.aiExercises}
                   onChange={(value) => updateSettings({ aiExercises: value })}
                 />
@@ -1239,7 +1239,7 @@ export function Settings() {
                 <div className="danger-row">
                   <div>
                     <strong>Reset study progress</strong>
-                    <span>Clear cards, review history, drafts, and activity. Settings and vocabulary stay.</span>
+                    <span>Clear cards, review history, drafts, activity, and AI-generated exercises. Settings and vocabulary stay.</span>
                   </div>
                   <button
                     type="button"

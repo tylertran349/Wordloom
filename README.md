@@ -2,10 +2,10 @@
 
 **Words that stick.** A local-first vocabulary studio for deliberate language practice.
 
-Wordloom shows you a word in the language you are learning, its meaning and examples in your
-native language, and five native-language sentences to translate. It uses Google Translate's
-free web endpoint to reveal solutions, schedules reviews with a spaced-repetition algorithm, and
-keeps every setting and every answer in your browser.
+Wordloom shows you a word in the language you are learning, its meaning, AI-generated examples, and
+native-language sentences to translate. It uses Google Translate's free web endpoint to reveal
+solutions, schedules reviews with a spaced-repetition algorithm, and keeps every setting and every
+answer in your browser.
 
 Default language pair: **Vietnamese → English**.
 
@@ -33,10 +33,10 @@ configured with `base: './'` so subpath deployments work too.
 
 - **CEFR decks** split into A1, A2, B1, B2, C1, and C2.
 - **Word pages** with pronunciation, part of speech, a native-language definition, an optional
-  target-language definition, and examples with native-language translations.
-- **Five translation exercises per word** with free-text inputs, saved drafts, and a
-  **Reveal with Google Translate** button on every exercise. Solutions and direct links open
-  without an API key.
+  target-language definition, and AI-generated examples with native-language translations.
+- **Translation exercises generated with AI** — example sentences and practice prompts are created
+  for each word on demand, with free-text inputs, saved drafts, and a **Reveal with Google
+  Translate** button on every exercise. Solutions and direct links open without an API key.
 - **Spaced repetition** (SM-2 style) for every studied word, with Again / Hard / Good / Easy
   grading, interval previews, due queues, extra practice, and review history.
 - **Progress dashboard** with streaks, daily goals, a 14-day activity chart, a 7-day due
@@ -45,8 +45,8 @@ configured with `base: './'` so subpath deployments work too.
   hints, audio, scheduling, Google Translate behavior, AI providers, and backup/restore. Every
   setting is saved to `localStorage` automatically.
 - **Optional AI** through **Google Gemini** or a **custom OpenAI-compatible endpoint**. Model
-  names are free text; thinking levels are available in provider-specific dropdowns. AI can add
-  extra practice sentences and give feedback on a translation.
+  names are free text; thinking levels are available in provider-specific dropdowns. AI generates
+  example sentences and practice exercises, and gives feedback on a translation.
 - **Local-first storage** with JSON export/import and two-step destructive resets.
 
 ## Project structure
@@ -60,7 +60,7 @@ src/
   views/
     Dashboard.tsx
     Levels.tsx
-    Study.tsx          ← word detail + 5 translation exercises
+    Study.tsx          ← word detail + AI-generated translation exercises
     Review.tsx         ← spaced-repetition session
     Progress.tsx
     Settings.tsx
@@ -81,7 +81,7 @@ src/
 
 ## Adding vocabulary
 
-Open `src/data/vocabulary.ts`. Each CEFR level is an array. Add entries using this shape:
+Open `src/data/vocabulary.ts`. Each CEFR level is an array of words. Add entries using this shape:
 
 ```ts
 {
@@ -91,24 +91,17 @@ Open `src/data/vocabulary.ts`. Each CEFR level is an array. Add entries using th
   partOfSpeech: 'greeting',       // optional
   definition: 'Hello…',           // meaning in the learner's native language
   definitionTarget: 'Lời chào…',  // optional meaning in the target language
-  examples: [
-    { target: 'Xin chào! Tôi tên là Lan.', native: 'Hello! My name is Lan.' }
-  ],
-  practice: [                     // native-language sentences to translate
-    'Hello, my name is Minh.',
-    'She smiled and said hello to everyone.',
-    'Hello! How are you today?',
-    'He always says hello when he enters the office.',
-    'I said hello to my new neighbor this morning.'
-  ],
   tags: ['greetings', 'basics']   // optional
 }
 ```
 
-The seed decks contain three Vietnamese words per level (18 words, each with five practice
-sentences and multiple examples) so every screen has something to explore immediately. Add as
-many words as you like. If a word has fewer than five practice sentences, examples are used to
-fill the list; the AI generator can add more.
+The arrays contain vocabulary only. Example sentences and translation exercises are not stored
+in the data file: they are generated with AI the first time you ask for exercises on a word page,
+then cached in your browser's progress. A word you have never generated content for simply shows
+a **Generate with AI** button.
+
+The seed decks contain three Vietnamese words per level (18 words) so every screen has something
+to explore immediately. Add as many words as you like.
 
 > Changing the language pair in Settings changes translation direction, speech, and exercise
 > labels. It does **not** translate the vocabulary content. The seed content is Vietnamese with
@@ -116,14 +109,17 @@ fill the list; the AI generator can add more.
 
 ## How the exercises work
 
-1. Read the word, meaning, and examples. Optional browser text-to-speech uses the target voice.
-2. Write your translation for each of the five native-language sentences. Drafts are saved
-   automatically.
-3. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,
+1. Read the word, meaning, and AI-generated examples. Optional browser text-to-speech uses the
+   target voice.
+2. Press **Generate with AI** on a word page to create a set of example sentences and
+   native-language practice prompts. Generation is cached, so the same exercises come back on
+   later visits.
+3. Write your translation for each prompt. Drafts are saved automatically.
+4. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,
    play it aloud, or open the same sentence on translate.google.com. A direct link is always
    available when the fetch fails.
-4. Optionally use **Check with AI** for specific feedback (when a provider is configured).
-5. Add the word to your review queue. Wordloom schedules its first check-in after the learning
+5. Optionally use **Check with AI** for specific feedback (when a provider is configured).
+6. Add the word to your review queue. Wordloom schedules its first check-in after the learning
    step (default 10 minutes).
 
 The reveal button uses:

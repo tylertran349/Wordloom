@@ -57,6 +57,7 @@ export function Dashboard() {
   const focusLevelStat = focusWord
     ? stats.levelStats.find((level) => level.level === focusWord.level)
     : undefined;
+  const focusExample = focusWord ? progress.generatedExamples[focusWord.id]?.[0] : undefined;
   const weekTotal = Array.from({ length: 7 }, (_, index) => {
     const entry = progress.activity[dayKey(addDays(new Date(), -index))];
     return (entry?.studied ?? 0) + (entry?.reviews ?? 0);
@@ -278,17 +279,17 @@ export function Dashboard() {
           </div>
           <div className="continue-side">
             <span className="continue-side-label">In context</span>
-            {focusWord.examples[0] ? (
+            {focusExample ? (
               <>
                 <blockquote className="continue-example lang-target" lang={target.code}>
-                  {focusWord.examples[0].target}
+                  {focusExample.target}
                 </blockquote>
-                {settings.showExampleTranslations && (
-                  <p className="continue-example-native" lang={native.code}>{focusWord.examples[0].native}</p>
+                {settings.showExampleTranslations && focusExample.native && (
+                  <p className="continue-example-native" lang={native.code}>{focusExample.native}</p>
                 )}
                 <div className="continue-side-tools">
                   <SpeakerButton
-                    text={focusWord.examples[0].target}
+                    text={focusExample.target}
                     lang={target.tts}
                     label="Hear the example sentence"
                   />
@@ -296,7 +297,9 @@ export function Dashboard() {
                 </div>
               </>
             ) : (
-              <p className="continue-example-native">Examples will appear once you add them.</p>
+              <p className="continue-example-native">
+                Examples appear here once you generate exercises with AI.
+              </p>
             )}
             <div className="continue-side-footer">
               <TrendingUp size={14} aria-hidden="true" />

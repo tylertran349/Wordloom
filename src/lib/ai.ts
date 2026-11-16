@@ -1,5 +1,6 @@
 import type {
   AiFeedback,
+  ExampleSentence,
   Settings,
   ThinkingLevel,
   VocabWord,
@@ -362,51 +363,89 @@ function extractJson(raw: string): unknown {
   }
 }
 
-export interface PracticeGenerationInput {
+export interface ExerciseGenerationInput {
   word: VocabWord;
   count: number;
+  exampleCount?: number;
   settings: Settings;
 }
 
+export interface GeneratedExercises {
+  examples: ExampleSentence[];
+  sentences: string[];
+}
+
 /**
- * Ask the configured model for more native-language translation prompts.
- * Solutions are deliberately left to Google Translate at reveal time.
+ * Ask the configured model for context sentences and translation prompts in a
+ * single call. Solutions are deliberately left to Google Translate at reveal
+ * time.
  */
-export async function generatePracticeSentences({
+export async function generateExercises({
   word,
   count,
+  exampleCount = 2,
   settings,
-}: PracticeGenerationInput): Promise<string[]> {
+}: ExerciseGenerationInput): Promise<GeneratedExercises> {
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
 
-  const system = `You are an expert ${target.label} teacher and assessment writer. You create clear, level-appropriate translation exercises and always respond with valid JSON only.`;
-  const user = `Create ${count} ${native.label} sentences for a ${word.level} (CEFR) learner to translate into ${target.label}.
+  const system = `You are an expert ${target.label} teacher and assessment writer. You create clear, level-appropriate example sentences and translation exercises and always respond with valid JSON only.`;
+  const user = `Create ${exampleCount} example sentences and ${count} ${native.label} practice sentences for a ${word.level} (CEFR) learner of ${target.label}.
 
 Target vocabulary: "${word.term}" (${word.partOfSpeech ?? 'word'}) meaning "${word.definition}".
 Requirements:
-- Each ${native.label} sentence must naturally call for "${word.term}" in its most common ${target.label} translation.
+- Examples must naturally use "${word.term}" in a common, natural way.
+- Each practice sentence must naturally call for "${word.term}" in its most common ${target.label} translation.
 - Match ${word.level} difficulty: vocabulary, grammar, and sentence length should fit that CEFR band.
 - Vary the grammar and context. Avoid repeating sentence openings.
-- Write only the ${native.label} sentences. Do not include answers, notes, numbering, or translations.
-- Return strictly: {"sentences":["sentence 1","sentence 2","..."]}`;
+- Examples: write the sentence in ${target.label} ("target") and its natural ${native.label} translation ("native").
+- Practice: write only the ${native.label} sentences the learner should translate into ${target.label}.
+- Do not include notes, numbering, or anything besides the requested JSON.
+- Return strictly: {"examples":[{"target":"${target.label} sentence","native":"${native.label} translation"}],"sentences":["${native.label} sentence","..."]}`;
 
-  const raw = await requestText(system, user, settings, 2000);
+  const raw = await requestText(system, user, settings, 3500);
   const parsed = extractJson(raw);
-  const sentences =
-    parsed && typeof parsed === 'object' && Array.isArray((parsed as { sentences?: unknown }).sentences)
-      ? ((parsed as { sentences: unknown[] }).sentences ?? [])
-      : [];
+  const record = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null;
 
-  const cleaned = sentences
+  const examples: ExampleSentence[] = [];
+  if (record && Array.isArray(record.examples)) {
+    record.examples.forEach((entry) => {
+      if (typeof entry === 'string') {
+        const targetSentence = entry.trim();
+        if (targetSentence) examples.push({ target: targetSentence, native: '' });
+        return;
+      }
+      if (!entry || typeof entry !== 'object') return;
+      const item = entry as Record<string, unknown>;
+      const targetSentence = typeof item.target === 'string' ? item.target.trim() : '';
+      const nativeSentence = typeof item.native === 'string' ? item.native.trim() : '';
+      if (!targetSentence) return;
+      examples.push({ target: targetSentence, native: nativeSentence });
+    });
+  }
+
+  const rawSentences = record && Array.isArray(record.sentences) ? record.sentences : [];
+  const sentences = rawSentences
     .filter((sentence): sentence is string => typeof sentence === 'string')
     .map((sentence) => sentence.trim().replace(/^\d+[.)]\s*/, ''))
     .filter((sentence) => sentence.length > 0);
 
-  if (cleaned.length === 0) {
-    throw new Error('The model did not return usable sentences. Try again or adjust the model settings.');
+  const seenTargets = new Set<string>();
+  const uniqueExamples = examples
+    .filter((example) => {
+      const key = example.target.trim().toLowerCase();
+      if (seenTargets.has(key)) return false;
+      seenTargets.add(key);
+      return true;
+    })
+    .slice(0, exampleCount);
+
+  const uniqueSentences = Array.from(new Set(sentences)).slice(0, count);
+
+  if (uniqueExamples.length === 0 && uniqueSentences.length === 0) {
+    throw new Error('The model did not return usable exercises. Try again or adjust the model settings.');
   }
-  return Array.from(new Set(cleaned)).slice(0, count);
+  return { examples: uniqueExamples, sentences: uniqueSentences };
 }
 
 export interface TranslationFeedbackInput {

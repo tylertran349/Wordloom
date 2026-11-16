@@ -30,7 +30,7 @@ import {
   percent,
   pluralize,
 } from '../lib/utils';
-import { generatePracticeSentences, hasAiCredentials } from '../lib/ai';
+import { generateExercises, hasAiCredentials } from '../lib/ai';
 import { speakText } from '../lib/speech';
 import {
   AppLink,
@@ -55,7 +55,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     settings,
     progress,
     markStudied,
-    addGeneratedPractice,
+    addGeneratedExercises,
     notify,
     stats,
   } = useApp();
@@ -69,13 +69,8 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
 
   const card = word ? progress.cards[word.id] : undefined;
   const generated = word ? progress.generatedPractice[word.id] ?? [] : [];
-  const sentences = useMemo(
-    () =>
-      word
-        ? getStudySentences(word, settings.exercisesPerWord, generated)
-        : [],
-    [word, settings.exercisesPerWord, generated],
-  );
+  const examples = word ? progress.generatedExamples[word.id] ?? [] : [];
+  const sentences = useMemo(() => getStudySentences(generated), [generated]);
 
   useEffect(() => {
     if (word && settings.autoplayAudio) {
@@ -128,20 +123,39 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const canUseAi = hasAiCredentials(settings);
 
   async function generateMore() {
+    if (!word) return;
     if (!canUseAi) {
-      notify('Connect an AI provider in Settings to generate extra practice.', 'info');
+      notify('Connect an AI provider in Settings to generate examples and practice.', 'info');
       return;
     }
     setGenerating(true);
     setGenerateError(null);
     try {
-      const result = await generatePracticeSentences({ word, count: 3, settings });
-      const fresh = result.filter((sentence) => !sentences.includes(sentence));
-      if (fresh.length === 0) {
-        notify('The AI returned sentences you already have. Try again for a fresh set.', 'info');
+      const result = await generateExercises({
+        word,
+        count: Math.max(3, settings.exercisesPerWord),
+        exampleCount: 2,
+        settings,
+      });
+      const freshSentences = result.sentences.filter((sentence) => !sentences.includes(sentence));
+      const existingExampleTargets = new Set(
+        examples.map((example) => example.target.trim().toLowerCase()),
+      );
+      const freshExamples = result.examples.filter(
+        (example) => !existingExampleTargets.has(example.target.trim().toLowerCase()),
+      );
+      if (freshSentences.length === 0 && freshExamples.length === 0) {
+        notify('The AI returned content you already have. Try again for a fresh set.', 'info');
       } else {
-        addGeneratedPractice(word.id, fresh);
-        notify(`Added ${fresh.length} new AI practice ${pluralize(fresh.length, 'sentence')}.`);
+        addGeneratedExercises(word.id, freshExamples, freshSentences);
+        const parts: string[] = [];
+        if (freshExamples.length > 0) {
+          parts.push(`${freshExamples.length} example ${pluralize(freshExamples.length, 'sentence')}`);
+        }
+        if (freshSentences.length > 0) {
+          parts.push(`${freshSentences.length} practice ${pluralize(freshSentences.length, 'sentence')}`);
+        }
+        notify(`Added ${parts.join(' and ')}.`);
       }
     } catch (error) {
       setGenerateError(
@@ -260,14 +274,38 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                 <h2>Examples</h2>
               </div>
               <span className="section-count">
-                {word.examples.length} {pluralize(word.examples.length, 'sentence')}
+                {examples.length} {pluralize(examples.length, 'sentence')}
               </span>
             </div>
-            {word.examples.length === 0 ? (
-              <p className="muted-copy">No examples yet for this word.</p>
+            {examples.length === 0 ? (
+              <div className="examples-empty">
+                <p className="muted-copy">
+                  Examples are generated with AI together with your practice exercises.
+                </p>
+                {settings.aiExercises && (
+                  <button
+                    type="button"
+                    className="button button-ghost button-small"
+                    onClick={() => void generateMore()}
+                    disabled={generating || !canUseAi}
+                    title={
+                      canUseAi
+                        ? 'Generate example sentences and practice exercises'
+                        : 'Connect an AI provider in Settings to generate examples'
+                    }
+                  >
+                    {generating ? (
+                      <Loader2 size={14} className="spin" aria-hidden="true" />
+                    ) : (
+                      <Sparkles size={14} aria-hidden="true" />
+                    )}
+                    {generating ? 'Generating…' : 'Generate with AI'}
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="example-list">
-                {word.examples.map((example, exampleIndex) => {
+                {examples.map((example, exampleIndex) => {
                   const translationVisible =
                     settings.showExampleTranslations || revealedExamples.has(exampleIndex);
                   return (
@@ -275,7 +313,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                       <span className="example-index">{String(exampleIndex + 1).padStart(2, '0')}</span>
                       <div className="example-copy">
                         <p className="example-target lang-target" lang={target.code}>{example.target}</p>
-                        {translationVisible ? (
+                        {!example.native ? null : translationVisible ? (
                           <p className="example-native" lang={native.code}>
                             <span>{native.label}</span>
                             {example.native}
@@ -336,8 +374,8 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                     disabled={generating || !canUseAi}
                     title={
                       canUseAi
-                        ? 'Generate three more practice sentences'
-                        : 'Connect an AI provider in Settings to generate extra practice'
+                        ? 'Generate example sentences and more practice exercises'
+                        : 'Connect an AI provider in Settings to generate exercises'
                     }
                   >
                     {generating ? (
@@ -345,7 +383,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                     ) : (
                       <Sparkles size={14} aria-hidden="true" />
                     )}
-                    {generating ? 'Generating…' : 'More with AI'}
+                    {generating ? 'Generating…' : 'Generate with AI'}
                   </button>
                 )}
               </div>
@@ -359,7 +397,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                   <AppLink to={{ name: 'settings' }} className="text-link">
                     Settings
                   </AppLink>{' '}
-                  to generate extra exercises and get translation feedback.
+                  to generate example sentences and exercises, and get translation feedback.
                 </span>
               </div>
             )}
@@ -373,7 +411,9 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
 
             {sentences.length === 0 ? (
               <p className="muted-copy">
-                Add practice sentences to this word, or generate a set with AI.
+                {canUseAi
+                  ? 'Generate a set of AI practice sentences to start translating.'
+                  : 'Practice sentences are generated with AI. Connect a provider in Settings to get started.'}
               </p>
             ) : (
               <div className="exercise-list">

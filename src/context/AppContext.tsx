@@ -11,6 +11,7 @@ import {
 import type {
   BackupFile,
   CEFRLevel,
+  ExampleSentence,
   ProgressState,
   ReviewGrade,
   Settings,
@@ -72,7 +73,11 @@ interface AppContextValue {
   gradeCard: (wordId: string, grade: ReviewGrade) => void;
   setResponse: (wordId: string, exerciseKey: string, text: string) => void;
   setSolution: (wordId: string, exerciseKey: string, solution: string) => void;
-  addGeneratedPractice: (wordId: string, sentences: string[]) => void;
+  addGeneratedExercises: (
+    wordId: string,
+    examples: ExampleSentence[],
+    sentences: string[],
+  ) => void;
   importBackup: (backup: Pick<BackupFile, 'settings' | 'progress'>) => void;
   exportBackup: () => BackupFile;
   resetProgress: () => void;
@@ -396,16 +401,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const addGeneratedPractice = useCallback((wordId: string, sentences: string[]) => {
-    setProgress((current) => {
-      const existing = current.generatedPractice[wordId] ?? [];
-      const merged = Array.from(new Set([...existing, ...sentences]));
-      return {
-        ...current,
-        generatedPractice: { ...current.generatedPractice, [wordId]: merged },
-      };
-    });
-  }, []);
+  const addGeneratedExercises = useCallback(
+    (wordId: string, examples: ExampleSentence[], sentences: string[]) => {
+      setProgress((current) => {
+        const existingSentences = current.generatedPractice[wordId] ?? [];
+        const mergedSentences = Array.from(new Set([...existingSentences, ...sentences]));
+
+        const existingExamples = current.generatedExamples[wordId] ?? [];
+        const seen = new Set(
+          existingExamples.map((example) => example.target.trim().toLowerCase()),
+        );
+        const mergedExamples = [...existingExamples];
+        examples.forEach((example) => {
+          const key = example.target.trim().toLowerCase();
+          if (!key || seen.has(key)) return;
+          seen.add(key);
+          mergedExamples.push(example);
+        });
+
+        return {
+          ...current,
+          generatedExamples: { ...current.generatedExamples, [wordId]: mergedExamples },
+          generatedPractice: { ...current.generatedPractice, [wordId]: mergedSentences },
+        };
+      });
+    },
+    [],
+  );
 
   const importBackup = useCallback(
     (backup: Pick<BackupFile, 'settings' | 'progress'>) => {
@@ -423,7 +445,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const resetProgress = useCallback(() => {
     setProgress(emptyProgress());
-    notify('Study progress cleared. Your vocabulary and settings are untouched.', 'info');
+    notify('Study progress and generated exercises cleared. Your vocabulary and settings are untouched.', 'info');
   }, [notify]);
 
   const stats = useMemo(() => computeStats(progress, clock), [progress, clock]);
@@ -449,7 +471,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const word = WORD_BY_ID[wordId];
       if (!word) return [];
       return getPracticeSentences(
-        word,
         Math.max(20, settings.exercisesPerWord),
         progress.generatedPractice[wordId] ?? [],
       );
@@ -474,7 +495,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     gradeCard,
     setResponse,
     setSolution,
-    addGeneratedPractice,
+    addGeneratedExercises,
     importBackup,
     exportBackup,
     resetProgress,

@@ -2280,6 +2280,17 @@ html[data-theme='dark'] .status-due {
   text-transform: uppercase;
 }
 
+.examples-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.examples-empty .muted-copy {
+  padding: 0;
+}
+
 .example-list {
   display: flex;
   flex-direction: column;

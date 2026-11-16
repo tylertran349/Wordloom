@@ -102,7 +102,6 @@ export function Review({ practice = false }: { practice?: boolean }) {
   const exercise = useMemo(() => {
     if (!current || !settings.reviewExercise) return null;
     const sentences = getPracticeSentences(
-      current,
       Math.max(20, settings.exercisesPerWord),
       progress.generatedPractice[current.id] ?? [],
     );
@@ -117,6 +116,8 @@ export function Review({ practice = false }: { practice?: boolean }) {
     settings.exercisesPerWord,
     progress.generatedPractice,
   ]);
+
+  const reviewExample = current ? progress.generatedExamples[current.id]?.[0] : undefined;
 
   function startSession(words: VocabWord[]) {
     setQueue(words.slice(0, settings.maxReviewsPerDay));
@@ -453,19 +454,19 @@ export function Review({ practice = false }: { practice?: boolean }) {
                 )}
               </div>
 
-              {settings.reviewShowExample && current.examples[0] && (
+              {settings.reviewShowExample && reviewExample && (
                 <div className="review-example">
                   <span className="definition-label">Example</span>
                   <div className="review-example-row">
-                    <p className="lang-target" lang={target.code}>{current.examples[0].target}</p>
+                    <p className="lang-target" lang={target.code}>{reviewExample.target}</p>
                     <SpeakerButton
-                      text={current.examples[0].target}
+                      text={reviewExample.target}
                       lang={target.tts}
                       label="Hear the example"
                     />
                   </div>
-                  {settings.showExampleTranslations && (
-                    <p className="review-example-native" lang={native.code}>{current.examples[0].native}</p>
+                  {settings.showExampleTranslations && reviewExample.native && (
+                    <p className="review-example-native" lang={native.code}>{reviewExample.native}</p>
                   )}
                 </div>
               )}

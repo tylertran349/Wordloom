@@ -1,6 +1,7 @@
 import type {
   BackupFile,
   DayActivity,
+  ExampleSentence,
   ProgressState,
   ReviewGrade,
   ReviewLogEntry,
@@ -65,6 +66,7 @@ export function emptyProgress(): ProgressState {
     cards: {},
     responses: {},
     solutions: {},
+    generatedExamples: {},
     generatedPractice: {},
     activity: {},
     reviewLog: [],
@@ -239,6 +241,21 @@ function normalizeProgress(raw: unknown): ProgressState {
     );
   };
 
+  const generatedExamples: Record<string, ExampleSentence[]> = {};
+  if (isRecord(raw.generatedExamples)) {
+    Object.entries(raw.generatedExamples).forEach(([wordId, examples]) => {
+      if (!Array.isArray(examples)) return;
+      const cleaned = examples
+        .filter((example): example is Record<string, unknown> => isRecord(example))
+        .map((example) => ({
+          target: asString(example.target).trim(),
+          native: asString(example.native).trim(),
+        }))
+        .filter((example) => example.target.length > 0);
+      if (cleaned.length > 0) generatedExamples[wordId] = cleaned;
+    });
+  }
+
   const generatedPractice: Record<string, string[]> = {};
   if (isRecord(raw.generatedPractice)) {
     Object.entries(raw.generatedPractice).forEach(([wordId, sentences]) => {
@@ -303,6 +320,7 @@ function normalizeProgress(raw: unknown): ProgressState {
     cards,
     responses: stringRecord(raw.responses),
     solutions: stringRecord(raw.solutions),
+    generatedExamples,
     generatedPractice,
     activity,
     reviewLog: reviewLog.slice(0, 500),

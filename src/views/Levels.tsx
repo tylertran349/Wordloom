@@ -245,8 +245,8 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
             description={
               <>
                 Add entries for {level} to the <code>VOCABULARY</code> object in{' '}
-                <code>src/data/vocabulary.ts</code>. Each word can include examples, tags, and
-                translation prompts.
+                <code>src/data/vocabulary.ts</code>. Each level is a plain array of words;
+                examples and exercises are generated with AI.
               </>
             }
           />
@@ -282,6 +282,7 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                 const card = progress.cards[word.id];
                 const status = statusFor(word.id, progress.cards);
                 const due = card && card.due <= Date.now();
+                const exampleCount = progress.generatedExamples[word.id]?.length ?? 0;
                 return (
                   <div className="word-row" key={word.id}>
                     <AppLink
@@ -310,7 +311,9 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                             <span key={tag}>{tag}</span>
                           ))}
                           <span>
-                            {word.examples.length} {pluralize(word.examples.length, 'example')}
+                            {exampleCount > 0
+                              ? `${exampleCount} ${pluralize(exampleCount, 'example')}`
+                              : 'No examples yet'}
                           </span>
                         </div>
                       </div>
