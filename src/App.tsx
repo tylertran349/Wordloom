@@ -14,7 +14,7 @@ import { Settings } from './views/Settings';
 
 function App() {
   const route = useRoute();
-  const { stats } = useApp();
+  const { stats, sheetSync } = useApp();
   const key = routeKey(route);
 
   useEffect(() => {
@@ -81,7 +81,8 @@ function App() {
           <footer className="app-foot">
             <span>Wordloom · words that stick</span>
             <span className="app-foot-meta">
-              {stats.studied} {pluralize(stats.studied, 'word')} in rotation · saved on this device
+              {stats.studied} {pluralize(stats.studied, 'word')} in rotation ·{' '}
+              {sheetSync.connection ? 'synced to Google Sheets' : 'saved on this device'}
             </span>
           </footer>
         </main>

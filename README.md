@@ -42,6 +42,11 @@ configured with `base: './'` so subpath deployments work too.
   grading, interval previews, due queues, extra practice, and review history.
 - **Progress dashboard** with streaks, daily goals, a 14-day activity chart, a 7-day due
   forecast, a 12-week heat map, per-level coverage, and recent review history.
+- **Per-level resume** — Wordloom remembers the last word you opened in each CEFR deck, so the
+  Resume button and deck badge take you back to that term instead of the top of the list.
+- **Optional Google Sheets sync** — point Wordloom at a spreadsheet you own and your progress is
+  mirrored into readable tabs. Works alongside local storage; setup takes a one-time Apps Script
+  paste and needs no Google Cloud project.
 - **Extensive settings** for language pair, theme, accent, font size, motion, exercise count,
   hints, audio, scheduling, Google Translate behavior, AI providers, and backup/restore. Provider
   defaults (temperature, thinking) are used automatically unless you override them. Every setting
@@ -50,7 +55,8 @@ configured with `base: './'` so subpath deployments work too.
   names are free text, the OpenAI-compatible thinking level is free text too, and Gemini offers
   thinking levels in a dropdown. AI generates example sentences and practice exercises, and gives
   feedback on a translation.
-- **Local-first storage** with JSON export/import and two-step destructive resets.
+- **Local-first storage** with JSON export/import, optional Google Sheets sync, and two-step
+  destructive resets.
 
 ## Project structure
 
@@ -79,6 +85,8 @@ src/
     ai.ts              ← Gemini / OpenAI-compatible client
     modelDefaults.ts   ← per-model temperature defaults and suggestions
     storage.ts         ← defaults, normalization, backup
+    sheets.ts          ← Google Sheets client + local sync state
+    sheetsScript.ts    ← Apps Script bridge source shown in Settings
     router.ts, utils.ts, speech.ts
   types.ts
   index.css
@@ -178,6 +186,61 @@ review queue; **Practice anyway** on the empty review screen lets you revisit st
 early. All scheduling values (starting ease, easy bonus, hard multiplier, max interval, learning
 step, session limit) are editable in Settings.
 
+## Google Sheets sync
+
+Wordloom can mirror settings and progress into a Google Sheet you own. Local storage stays the
+offline cache and keeps working if Google is unreachable.
+
+Google does not allow a website to write to a spreadsheet from a URL alone — that requires OAuth
+or code running inside the sheet. Wordloom takes the second route so it needs no Google Cloud
+project, no client ID, and no developer server.
+
+### One-time setup per sheet
+
+1. Create a blank Google Sheet and open **Extensions → Apps Script**.
+2. In **Settings → Google Sheets**, copy the bridge script into the editor (the app also offers a
+   `.gs` download).
+3. **Deploy → New deployment → Web app**, with **Execute as: Me** and **Who has access: Anyone**.
+   Authorize it when Google asks.
+4. Copy the Web app URL (it ends in `/exec`) and paste it, with the spreadsheet URL, into
+   **Settings → Google Sheets**. Press **Connect**.
+
+An empty sheet is seeded from this device. If both sides already contain data, Wordloom asks
+whether to import the sheet or upload this device before it writes anything.
+
+To connect another device, paste the spreadsheet URL and the same Web app URL, or press **Copy
+sync link** on the first device and paste that block. Both fields are scanned, so the links can go
+in either one. A new device with no local progress imports the sheet automatically.
+
+### What the sheet contains
+
+The bridge creates readable tabs instead of storing one opaque JSON blob:
+
+| Tab | Rows |
+| --- | --- |
+| `Wordloom Meta` | revision, device id, review totals, per-level resume positions |
+| `Wordloom Settings` | every setting, JSON-encoded |
+| `Wordloom Cards` | one row per scheduled word |
+| `Wordloom Responses` / `Solutions` | saved drafts and revealed translations |
+| `Wordloom Examples` / `Practice` | AI-generated sentences |
+| `Wordloom Activity` | daily studied/review counts |
+| `Wordloom Review Log` | recent review grades |
+
+Each upload rewrites the tabs, so editing a cell is not a supported way to change progress.
+
+### Conflicts and privacy
+
+- Every write sends the revision it was based on. If the sheet changed elsewhere, the next sync
+  reports the newer copy (or asks which copy to keep when both changed); a device with no study
+  data never silently erases a populated sheet.
+- The `/exec` URL is effectively a password. Anyone who has it can read and write the sheet when
+  `TOKEN` is blank. Keep it private, or set `TOKEN` in the script and enter the same phrase in
+  Settings.
+- API keys are never uploaded. The sheet copy of settings blanks `geminiApiKey` and
+  `openaiApiKey`, and importing from a sheet preserves the keys already on that device.
+- The sheet is only as private as its sharing settings. Do not share it publicly if the progress
+  or drafts are sensitive.
+
 ## AI providers
 
 AI is optional. Add credentials in **Settings → AI provider**.
@@ -221,12 +284,18 @@ computer.
 - Settings: `wordloom.settings.v1`
 - Study progress: `wordloom.progress.v1`
 - Translation cache: `wordloom.translations.v1`
+- Google Sheets connection (URLs, device id): `wordloom.sheets.v1`
 - Translation requests go to Google (and MyMemory only if Google fails).
 - AI requests go directly to the provider you configure.
+- Sheet sync requests go directly to your own Apps Script deployment; Wordloom never sees the
+  sheet or the deployment URL.
 - There is no Wordloom server and no analytics.
 - **Settings → Data** exports a complete JSON backup and can import it again. Deleting progress
   leaves vocabulary and settings intact. All resets require a second click.
-- Backups contain any AI credentials saved in Settings. Store backup files privately.
+- The Google Sheets connection is device-local: it is not part of JSON backups. Use **Copy sync
+  link** in Settings to move the connection to another device.
+- Backups contain any AI credentials saved in Settings. Store backup files privately. Sheets
+  never receive those credentials.
 
 ## Scripts
 

@@ -9,6 +9,7 @@ import type {
   SRSCard,
 } from '../types';
 import { LANGUAGES } from '../data/languages';
+import { CEFR_LEVELS } from '../types';
 import { clamp } from './utils';
 
 const SETTINGS_KEY = 'wordloom.settings.v1';
@@ -74,6 +75,7 @@ export function emptyProgress(): ProgressState {
     reviewLog: [],
     reviewCount: 0,
     strongReviewCount: 0,
+    levelPositions: {},
   };
 }
 
@@ -304,6 +306,15 @@ function normalizeProgress(raw: unknown): ProgressState {
       }
     : undefined;
 
+  const levelPositions: Record<string, number> = {};
+  if (isRecord(raw.levelPositions)) {
+    Object.entries(raw.levelPositions).forEach(([level, value]) => {
+      if (!(CEFR_LEVELS as string[]).includes(level)) return;
+      const index = Math.round(asNumber(value, -1, -1, 100_000));
+      if (index >= 0) levelPositions[level] = index;
+    });
+  }
+
   const strongFromLog = reviewLog.filter(
     (entry) => entry.grade === 'good' || entry.grade === 'easy',
   ).length;
@@ -330,6 +341,7 @@ function normalizeProgress(raw: unknown): ProgressState {
     reviewLog: reviewLog.slice(0, 500),
     reviewCount,
     strongReviewCount,
+    levelPositions,
     lastStudied,
   };
 }

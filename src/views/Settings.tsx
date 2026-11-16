@@ -2,11 +2,13 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   AlertCircle,
   ArrowLeftRight,
+  ArrowRight,
   BookOpen,
   Brain,
   Check,
   ChevronDown,
   Cloud,
+  Copy,
   Database,
   Download,
   ExternalLink,
@@ -17,12 +19,14 @@ import {
   Monitor,
   Moon,
   Palette,
+  RefreshCw,
   RotateCcw,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Sun,
   Trash2,
+  Unplug,
   Upload,
   Volume2,
 } from 'lucide-react';
@@ -51,16 +55,24 @@ import {
   parseBackup,
 } from '../lib/storage';
 import {
+  WORDLOOM_BRIDGE_FILENAME,
+  WORDLOOM_BRIDGE_SOURCE,
+} from '../lib/sheetsScript';
+import { buildSyncLink } from '../lib/sheets';
+import {
   cn,
   dayKey,
   downloadJSON,
+  downloadText,
   formatInterval,
+  formatShortDate,
+  formatTime,
   pluralize,
 } from '../lib/utils';
 import { speakText } from '../lib/speech';
 import { AppLink, LevelBadge, PageHeader, Toggle } from '../components/ui';
 
-type Tab = 'general' | 'appearance' | 'study' | 'review' | 'translate' | 'ai' | 'data';
+type Tab = 'general' | 'appearance' | 'study' | 'review' | 'translate' | 'ai' | 'sheets' | 'data';
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof SlidersHorizontal }> = [
   { id: 'general', label: 'General', icon: SlidersHorizontal },
@@ -69,6 +81,7 @@ const TABS: Array<{ id: Tab; label: string; icon: typeof SlidersHorizontal }> = 
   { id: 'review', label: 'Review', icon: Brain },
   { id: 'translate', label: 'Translate', icon: Languages },
   { id: 'ai', label: 'AI provider', icon: Sparkles },
+  { id: 'sheets', label: 'Google Sheets', icon: Cloud },
   { id: 'data', label: 'Data', icon: Database },
 ];
 
@@ -195,6 +208,15 @@ export function Settings() {
     exportBackup,
     resetProgress,
     notify,
+    sheetSync,
+    sheetPhase,
+    sheetBusy,
+    connectSheet,
+    disconnectSheet,
+    syncSheet,
+    pullSheet,
+    pushSheet,
+    resolveSheetConflict,
   } = useApp();
   const [tab, setTab] = useState<Tab>('general');
   const [showGeminiKey, setShowGeminiKey] = useState(false);
@@ -210,6 +232,19 @@ export function Settings() {
   const [cacheCount, setCacheCount] = useState(() => translationCacheSize());
   const [importError, setImportError] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState<'progress' | 'settings' | 'all' | null>(null);
+  const [sheetUrlInput, setSheetUrlInput] = useState(sheetSync.connection?.sheetUrl ?? '');
+  const [sheetBridgeInput, setSheetBridgeInput] = useState(sheetSync.connection?.endpoint ?? '');
+  const [sheetTokenInput, setSheetTokenInput] = useState(sheetSync.connection?.token ?? '');
+  const [showSheetToken, setShowSheetToken] = useState(false);
+  const [sheetMessage, setSheetMessage] = useState<{
+    tone: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
+  const [showBridgeScript, setShowBridgeScript] = useState(false);
+  const [copiedBridge, setCopiedBridge] = useState(false);
+  const [copiedSyncLink, setCopiedSyncLink] = useState(false);
+  const [confirmSheetPull, setConfirmSheetPull] = useState(false);
+  const [confirmSheetPush, setConfirmSheetPush] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const target = getLanguage(settings.targetLanguage);
@@ -248,6 +283,16 @@ export function Settings() {
     translationSource.code === 'vi'
       ? 'Xin chào, rất vui được gặp bạn.'
       : 'I would like a cup of coffee, please.';
+  const sheetPhaseLabel =
+    sheetPhase === 'syncing'
+      ? 'Syncing'
+      : sheetPhase === 'needs-decision'
+        ? 'Needs a choice'
+        : sheetPhase === 'error'
+          ? 'Sync issue'
+          : sheetPhase === 'idle'
+            ? 'Synced'
+            : 'Local only';
 
   useEffect(() => {
     setTranslationTest({ loading: false });
@@ -331,6 +376,101 @@ export function Settings() {
     }
   }
 
+  useEffect(() => {
+    if (!sheetSync.connection) return;
+    setSheetUrlInput(sheetSync.connection.sheetUrl);
+    setSheetBridgeInput(sheetSync.connection.endpoint);
+    setSheetTokenInput(sheetSync.connection.token);
+  }, [sheetSync.connection]);
+
+  async function handleSheetConnect() {
+    setSheetMessage(null);
+    const result = await connectSheet({
+      sheetUrl: sheetUrlInput,
+      endpoint: sheetBridgeInput,
+      token: sheetTokenInput,
+    });
+    setSheetMessage({ tone: result.ok ? 'success' : 'error', text: result.message });
+  }
+
+  async function handleSheetSyncNow() {
+    setSheetMessage(null);
+    const result = await syncSheet();
+    setSheetMessage({ tone: result.ok ? 'success' : 'error', text: result.message });
+  }
+
+  async function handleSheetPull() {
+    if (!confirmSheetPull) {
+      setConfirmSheetPull(true);
+      return;
+    }
+    setConfirmSheetPull(false);
+    setSheetMessage(null);
+    const result = await pullSheet(true);
+    setSheetMessage({ tone: result.ok ? 'success' : 'error', text: result.message });
+  }
+
+  async function handleSheetPush() {
+    if (!confirmSheetPush) {
+      setConfirmSheetPush(true);
+      return;
+    }
+    setConfirmSheetPush(false);
+    setSheetMessage(null);
+    const result = await pushSheet(true);
+    setSheetMessage({ tone: result.ok ? 'success' : 'error', text: result.message });
+  }
+
+  async function handleSheetDecision(choice: 'pull' | 'push') {
+    setSheetMessage(null);
+    const result = await resolveSheetConflict(choice);
+    setSheetMessage({ tone: result.ok ? 'success' : 'error', text: result.message });
+  }
+
+  function handleSheetDisconnect() {
+    disconnectSheet();
+    setConfirmSheetPull(false);
+    setConfirmSheetPush(false);
+    setSheetMessage({
+      tone: 'info',
+      text: 'Stopped syncing on this device. Local data and the sheet are unchanged.',
+    });
+  }
+
+  async function copyBridgeScript() {
+    try {
+      await navigator.clipboard.writeText(WORDLOOM_BRIDGE_SOURCE);
+      setCopiedBridge(true);
+      window.setTimeout(() => setCopiedBridge(false), 2000);
+    } catch {
+      setShowBridgeScript(true);
+      setSheetMessage({
+        tone: 'error',
+        text: 'Copy failed. Show the script and select it manually.',
+      });
+    }
+  }
+
+  function downloadBridgeScript() {
+    downloadText(WORDLOOM_BRIDGE_FILENAME, WORDLOOM_BRIDGE_SOURCE);
+    notify('Bridge script downloaded.');
+  }
+
+  async function copySyncLink() {
+    const connection = sheetSync.connection;
+    if (!connection) return;
+    try {
+      await navigator.clipboard.writeText(buildSyncLink(connection));
+      setCopiedSyncLink(true);
+      window.setTimeout(() => setCopiedSyncLink(false), 2000);
+    } catch {
+      setSheetMessage({
+        tone: 'error',
+        text: 'Copy failed. Select the Web app URL above and copy it manually.',
+      });
+    }
+  }
+
   function handleReset(kind: 'progress' | 'settings' | 'all') {
     if (confirmReset !== kind) {
       setConfirmReset(kind);
@@ -347,6 +487,13 @@ export function Settings() {
       resetSettings();
       clearTranslationCache();
       clearAllWordloomStorage();
+      disconnectSheet();
+      setSheetUrlInput('');
+      setSheetBridgeInput('');
+      setSheetTokenInput('');
+      setSheetMessage(null);
+      setConfirmSheetPull(false);
+      setConfirmSheetPush(false);
       setCacheCount(0);
       setTranslationTest({ loading: false });
       setTestResult(null);
@@ -371,11 +518,25 @@ export function Settings() {
       <PageHeader
         eyebrow="Make it yours"
         title="Settings"
-        description="Every option is saved automatically to this browser. Wordloom stays local-first by default."
+        description={
+          sheetSync.connection
+            ? 'Changes save to this browser and sync to your Google Sheet.'
+            : 'Every option is saved automatically to this browser. Wordloom stays local-first by default.'
+        }
         actions={
-          <span className="saved-indicator">
-            <Check size={14} aria-hidden="true" />
-            Saved locally
+          <span className={cn('saved-indicator', sheetPhase === 'error' && 'is-error')}>
+            {sheetSync.connection ? (
+              <Cloud size={14} aria-hidden="true" />
+            ) : (
+              <Check size={14} aria-hidden="true" />
+            )}
+            {sheetSync.connection
+              ? sheetPhase === 'error'
+                ? 'Sync issue'
+                : sheetPhase === 'syncing'
+                  ? 'Syncing…'
+                  : 'Google Sheets'
+              : 'Saved locally'}
           </span>
         }
       />
@@ -1235,9 +1396,436 @@ export function Settings() {
             </>
           )}
 
+          {tab === 'sheets' && (
+            <>
+              <Section
+                title="Google Sheets"
+                description="Keep your progress in a spreadsheet you own. Wordloom still works offline; the sheet is the shared copy."
+              >
+                {sheetSync.connection ? (
+                  <>
+                    <div className="storage-card sheet-card">
+                      <div className="storage-icon">
+                        <Cloud size={22} aria-hidden="true" />
+                      </div>
+                      <div>
+                        <strong>
+                          {sheetSync.connection.sheetUrl ? 'Sheet connected' : 'Bridge connected'}
+                        </strong>
+                        <span>
+                          {sheetSync.lastSyncedAt
+                            ? `Last synced ${formatShortDate(sheetSync.lastSyncedAt)} at ${formatTime(sheetSync.lastSyncedAt)}`
+                            : 'No sync yet'}
+                          {' · '}
+                          {Object.keys(progress.cards).length}{' '}
+                          {pluralize(Object.keys(progress.cards).length, 'card')} on this device
+                        </span>
+                      </div>
+                      <span
+                        className={cn(
+                          'storage-badge',
+                          sheetPhase === 'error' && 'is-error',
+                          sheetPhase === 'needs-decision' && 'is-warn',
+                        )}
+                      >
+                        {sheetPhaseLabel}
+                      </span>
+                    </div>
+
+                    {sheetSync.lastError && !sheetMessage && (
+                      <div className="inline-alert is-error" role="alert">
+                        <AlertCircle size={15} aria-hidden="true" />
+                        <span>{sheetSync.lastError}</span>
+                      </div>
+                    )}
+
+                    {sheetSync.connection.sheetUrl && (
+                      <a
+                        className="text-link sheet-open"
+                        href={sheetSync.connection.sheetUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open the spreadsheet
+                        <ExternalLink size={13} aria-hidden="true" />
+                      </a>
+                    )}
+
+                    {sheetSync.pendingDecision && (
+                      <div className="sheet-decision">
+                        <div>
+                          <strong>This sheet already has Wordloom data</strong>
+                          <p>
+                            Sheet:{' '}
+                            {sheetSync.remoteSummary
+                              ? `${sheetSync.remoteSummary.cards} cards · ${sheetSync.remoteSummary.reviews} reviews`
+                              : 'data available'}
+                            . This device: {Object.keys(progress.cards).length} cards.
+                          </p>
+                          <p>
+                            Importing replaces this device. Uploading replaces the sheet. Choose the
+                            copy you want to keep.
+                          </p>
+                        </div>
+                        <div className="sheet-decision-actions">
+                          <button
+                            type="button"
+                            className="button button-primary button-small"
+                            onClick={() => void handleSheetDecision('pull')}
+                            disabled={sheetBusy}
+                          >
+                            <Download size={14} aria-hidden="true" />
+                            Import from sheet
+                          </button>
+                          <button
+                            type="button"
+                            className="button button-ghost button-small"
+                            onClick={() => void handleSheetDecision('push')}
+                            disabled={sheetBusy}
+                          >
+                            <Upload size={14} aria-hidden="true" />
+                            Keep this device
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="data-actions">
+                      <div className="data-action">
+                        <div>
+                          <strong>Sync now</strong>
+                          <span>Compare this device with the sheet and use the newest copy.</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="button button-primary button-small"
+                          onClick={() => void handleSheetSyncNow()}
+                          disabled={sheetBusy || sheetSync.pendingDecision}
+                        >
+                          {sheetBusy ? (
+                            <Loader2 className="spin" size={14} aria-hidden="true" />
+                          ) : (
+                            <RefreshCw size={14} aria-hidden="true" />
+                          )}
+                          {sheetBusy ? 'Syncing…' : 'Sync now'}
+                        </button>
+                      </div>
+                      <div className="data-action">
+                        <div>
+                          <strong>Import from sheet</strong>
+                          <span>
+                            {confirmSheetPull
+                              ? 'This replaces local progress. Click again to confirm.'
+                              : 'Replace this device with the sheet copy.'}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className={cn(
+                            'button button-small',
+                            confirmSheetPull ? 'button-danger-solid' : 'button-ghost',
+                          )}
+                          onClick={() => void handleSheetPull()}
+                          disabled={sheetBusy || sheetSync.pendingDecision}
+                        >
+                          <Download size={14} aria-hidden="true" />
+                          {confirmSheetPull ? 'Click again to import' : 'Import'}
+                        </button>
+                      </div>
+                      <div className="data-action">
+                        <div>
+                          <strong>Upload this device</strong>
+                          <span>
+                            {confirmSheetPush
+                              ? 'This replaces the sheet copy. Click again to confirm.'
+                              : 'Replace the sheet copy with this device’s data.'}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className={cn(
+                            'button button-small',
+                            confirmSheetPush ? 'button-danger-solid' : 'button-ghost',
+                          )}
+                          onClick={() => void handleSheetPush()}
+                          disabled={sheetBusy || sheetSync.pendingDecision}
+                        >
+                          <Upload size={14} aria-hidden="true" />
+                          {confirmSheetPush ? 'Click again to upload' : 'Upload'}
+                        </button>
+                      </div>
+                      <div className="data-action">
+                        <div>
+                          <strong>Sync link</strong>
+                          <span>Copy the Sheet and Web app URLs for another device.</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="button button-ghost button-small"
+                          onClick={() => void copySyncLink()}
+                        >
+                          {copiedSyncLink ? (
+                            <Check size={14} aria-hidden="true" />
+                          ) : (
+                            <Copy size={14} aria-hidden="true" />
+                          )}
+                          {copiedSyncLink ? 'Copied' : 'Copy sync link'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="sheet-connection-meta">
+                      <span>Web app</span>
+                      <code>{sheetSync.connection.endpoint}</code>
+                      <span>This device</span>
+                      <code>{sheetSync.deviceId.slice(0, 8)}</code>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="text-link sheet-disconnect"
+                      onClick={handleSheetDisconnect}
+                    >
+                      <Unplug size={14} aria-hidden="true" />
+                      Disconnect this device
+                    </button>
+                  </>
+                ) : (
+                  <p className="settings-muted">
+                    Not connected. Local browser storage is still the only copy of your progress.
+                  </p>
+                )}
+
+                {sheetMessage && (
+                  <div
+                    className={cn(
+                      'inline-alert',
+                      sheetMessage.tone === 'error'
+                        ? 'is-error'
+                        : sheetMessage.tone === 'success'
+                          ? 'is-success'
+                          : 'is-info',
+                    )}
+                    role={sheetMessage.tone === 'error' ? 'alert' : 'status'}
+                  >
+                    {sheetMessage.tone === 'success' ? (
+                      <Check size={15} aria-hidden="true" />
+                    ) : sheetMessage.tone === 'error' ? (
+                      <AlertCircle size={15} aria-hidden="true" />
+                    ) : (
+                      <Cloud size={15} aria-hidden="true" />
+                    )}
+                    <span>{sheetMessage.text}</span>
+                  </div>
+                )}
+              </Section>
+
+              <Section
+                title="Connect a sheet"
+                description="Paste the spreadsheet URL and the Web app URL from the bridge you installed below. Both are needed once per device; a sync link packs them together."
+              >
+                <p className="settings-muted">
+                  New to this sheet? Install the bridge in <strong>One-time setup</strong> below,
+                  then paste its URLs here.
+                </p>
+                <Row
+                  label="Google Sheet URL"
+                  hint="The normal link from your browser’s address bar."
+                  htmlFor="sheet-url"
+                >
+                  <input
+                    id="sheet-url"
+                    className="text-input setting-input sheet-url-input"
+                    value={sheetUrlInput}
+                    placeholder="https://docs.google.com/spreadsheets/d/…"
+                    autoComplete="off"
+                    spellCheck={false}
+                    onChange={(event) => setSheetUrlInput(event.target.value)}
+                  />
+                </Row>
+                <Row
+                  label="Web app URL"
+                  hint="Ends in /exec. This is the bridge that reads and writes the sheet."
+                  htmlFor="sheet-bridge"
+                >
+                  <input
+                    id="sheet-bridge"
+                    className="text-input setting-input sheet-url-input"
+                    value={sheetBridgeInput}
+                    placeholder="https://script.google.com/macros/s/…/exec"
+                    autoComplete="off"
+                    spellCheck={false}
+                    onChange={(event) => setSheetBridgeInput(event.target.value)}
+                  />
+                </Row>
+                <Row
+                  label="Access token"
+                  hint="Optional. Only needed if you set TOKEN in the script."
+                  htmlFor="sheet-token"
+                >
+                  <div className="sheet-token-row">
+                    <input
+                      id="sheet-token"
+                      className="text-input setting-input sheet-url-input"
+                      type={showSheetToken ? 'text' : 'password'}
+                      value={sheetTokenInput}
+                      placeholder="Optional shared secret"
+                      autoComplete="off"
+                      spellCheck={false}
+                      onChange={(event) => setSheetTokenInput(event.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="icon-button"
+                      onClick={() => setShowSheetToken((value) => !value)}
+                      aria-label={showSheetToken ? 'Hide token' : 'Show token'}
+                    >
+                      {showSheetToken ? (
+                        <EyeOff size={16} aria-hidden="true" />
+                      ) : (
+                        <Eye size={16} aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                </Row>
+                <div className="sheet-connect-actions">
+                  <button
+                    type="button"
+                    className="button button-primary button-small"
+                    onClick={() => void handleSheetConnect()}
+                    disabled={sheetBusy}
+                  >
+                    {sheetBusy ? (
+                      <Loader2 className="spin" size={14} aria-hidden="true" />
+                    ) : (
+                      <Cloud size={14} aria-hidden="true" />
+                    )}
+                    {sheetSync.connection ? 'Reconnect' : 'Connect'}
+                  </button>
+                  <span className="sheet-hint">
+                    Pasting a “Wordloom sync” block into either field fills both links.
+                  </span>
+                </div>
+                <p className="settings-muted">
+                  After connecting, changes upload a few seconds after you stop editing. Use Sync
+                  now to reconcile, or Import/Upload to force a direction. Requests go straight from
+                  this browser to your Apps Script deployment.
+                </p>
+              </Section>
+
+              <Section
+                title="One-time setup in your sheet"
+                description="Google does not allow a website to write to a sheet from a URL alone, so a short script has to live inside the sheet once. This uses Apps Script inside your own spreadsheet — no Google Cloud project and no server."
+              >
+                <ol className="sheet-steps">
+                  <li>
+                    <strong>Create a blank Google Sheet.</strong> Open it, then choose{' '}
+                    <em>Extensions → Apps Script</em>.
+                  </li>
+                  <li>
+                    <strong>Paste the bridge into the editor.</strong> Delete the placeholder and
+                    paste the script from this page.
+                  </li>
+                  <li>
+                    <strong>Deploy it.</strong> <em>Deploy → New deployment → Web app</em>. Execute
+                    as <em>Me</em>, Who has access <em>Anyone</em>. Authorize, then copy the URL
+                    ending in <code>/exec</code>.
+                  </li>
+                  <li>
+                    <strong>Connect above.</strong> The first connection uploads this device if the
+                    sheet is empty.
+                  </li>
+                </ol>
+                <div className="sheet-setup-links">
+                  <a
+                    className="text-link"
+                    href="https://sheets.new"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Create a blank sheet
+                    <ExternalLink size={13} aria-hidden="true" />
+                  </a>
+                  <a
+                    className="text-link"
+                    href="https://script.google.com/home"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open Apps Script
+                    <ExternalLink size={13} aria-hidden="true" />
+                  </a>
+                </div>
+                <div className="data-actions">
+                  <div className="data-action">
+                    <div>
+                      <strong>Bridge script</strong>
+                      <span>
+                        {WORDLOOM_BRIDGE_SOURCE.split('\n').length} lines · the same code for every
+                        Wordloom sheet
+                      </span>
+                    </div>
+                    <div className="sheet-script-actions">
+                      <button
+                        type="button"
+                        className="button button-ghost button-small"
+                        onClick={() => void copyBridgeScript()}
+                      >
+                        <Copy size={14} aria-hidden="true" />
+                        {copiedBridge ? 'Copied' : 'Copy'}
+                      </button>
+                      <button
+                        type="button"
+                        className="button button-ghost button-small"
+                        onClick={downloadBridgeScript}
+                      >
+                        <Download size={14} aria-hidden="true" />
+                        Download
+                      </button>
+                      <button
+                        type="button"
+                        className="button button-ghost button-small"
+                        onClick={() => setShowBridgeScript((value) => !value)}
+                      >
+                        <Eye size={14} aria-hidden="true" />
+                        {showBridgeScript ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {showBridgeScript && (
+                  <pre className="sheet-script">
+                    <code>{WORDLOOM_BRIDGE_SOURCE}</code>
+                  </pre>
+                )}
+                <div className="inline-alert is-info">
+                  <ShieldCheck size={15} aria-hidden="true" />
+                  <span>
+                    Anyone with the /exec URL can read and write the sheet. Keep it private, or set
+                    TOKEN in the script and paste the same phrase above. The copied sync link
+                    contains that token, so treat it like a password. API keys never leave this
+                    browser.
+                  </span>
+                </div>
+                <p className="settings-muted">
+                  The script creates readable tabs for cards, drafts, solutions, examples,
+                  practice, activity, and review history. Re-uploading is safe: the newest copy
+                  rewrites those tabs.
+                </p>
+              </Section>
+            </>
+          )}
+
           {tab === 'data' && (
             <>
-              <Section title="Stored on this device" description="Wordloom is local-first: vocabulary schedules, drafts, and settings live in your browser.">
+              <Section
+                title="Stored on this device"
+                description={
+                  sheetSync.connection
+                    ? 'Local browser storage is the offline cache; your Google Sheet keeps the shared copy.'
+                    : 'Wordloom is local-first: vocabulary schedules, drafts, and settings live in your browser.'
+                }
+              >
                 <div className="storage-card">
                   <div className="storage-icon"><Database size={22} aria-hidden="true" /></div>
                   <div>
@@ -1250,10 +1838,34 @@ export function Settings() {
                       {pluralize(Object.keys(progress.cards).length, 'card')}
                     </span>
                   </div>
-                  <span className="storage-badge">
-                    <ShieldCheck size={14} aria-hidden="true" />
-                    Local only
+                  <span className={cn('storage-badge', sheetSync.connection && 'is-cloud')}>
+                    {sheetSync.connection ? (
+                      <Cloud size={14} aria-hidden="true" />
+                    ) : (
+                      <ShieldCheck size={14} aria-hidden="true" />
+                    )}
+                    {sheetSync.connection ? sheetPhaseLabel : 'Local only'}
                   </span>
+                </div>
+                <div className="data-actions">
+                  <div className="data-action">
+                    <div>
+                      <strong>Google Sheets</strong>
+                      <span>
+                        {sheetSync.connection
+                          ? 'Connected. Manage sync, import, or disconnect in the Google Sheets tab.'
+                          : 'Save progress to a spreadsheet you own.'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="button button-ghost button-small"
+                      onClick={() => setTab('sheets')}
+                    >
+                      Open
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               </Section>
 
@@ -1309,7 +1921,14 @@ export function Settings() {
                 </p>
               </Section>
 
-              <Section title="Reset" description="These actions affect this browser only. Download a backup first if you might want the data later.">
+              <Section
+                title="Reset"
+                description={
+                  sheetSync.connection
+                    ? 'Reset progress or settings. The change is saved here and synced to your connected sheet; if the sheet still contains progress, Wordloom asks before replacing it.'
+                    : 'These actions affect this browser only. Download a backup first if you might want the data later.'
+                }
+              >
                 <div className="danger-row">
                   <div>
                     <strong>Reset study progress</strong>

@@ -151,8 +151,8 @@ export function truncate(value: string, length: number): string {
   return `${value.slice(0, length).trimEnd()}…`;
 }
 
-export function downloadJSON(filename: string, data: unknown): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+export function downloadText(filename: string, text: string, type = 'text/plain'): void {
+  const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
@@ -161,4 +161,8 @@ export function downloadJSON(filename: string, data: unknown): void {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+export function downloadJSON(filename: string, data: unknown): void {
+  downloadText(filename, JSON.stringify(data, null, 2), 'application/json');
 }

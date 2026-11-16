@@ -58,6 +58,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     addGeneratedExercises,
     notify,
     stats,
+    recordLevelPosition,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
@@ -85,6 +86,18 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     setGenerateError(null);
     setJustAdded(false);
   }, [wordId]);
+
+  // Remember where the learner stopped, per CEFR deck.
+  useEffect(() => {
+    if (!word) return;
+    const levelDeck = LEVEL_WORDS[word.level] ?? [];
+    recordLevelPosition(
+      word.level,
+      levelDeck.findIndex((entry) => entry.id === word.id),
+    );
+    // Only record when the opened word changes, not on every progress update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [word?.id, recordLevelPosition]);
 
   if (!word) {
     return (

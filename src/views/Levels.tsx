@@ -95,6 +95,13 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
   }, [words, query, filter, sort, progress.cards, settings.targetLanguage, stats.dueNow]);
 
   const nextWord = words.find((word) => !progress.cards[word.id]) ?? words[0];
+  const savedIndex = progress.levelPositions[level];
+  const resumeIndex =
+    savedIndex !== undefined && Number.isInteger(savedIndex) && words[savedIndex]
+      ? savedIndex
+      : -1;
+  const resumeWord = resumeIndex >= 0 ? words[resumeIndex] : undefined;
+  const resumeDiffers = Boolean(resumeWord && nextWord && resumeWord.id !== nextWord.id);
   const newTodayInLevel = words.filter((word) => {
     const card = progress.cards[word.id];
     return card && new Date(card.createdAt).toDateString() === new Date().toDateString();
@@ -125,11 +132,27 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
             )}
             {nextWord ? (
               <AppLink
-                to={{ name: 'word', level, wordId: nextWord.id }}
+                to={{
+                  name: 'word',
+                  level,
+                  wordId: resumeWord ? resumeWord.id : nextWord.id,
+                }}
                 className="button button-primary"
               >
-                {progress.cards[nextWord.id] ? 'Practice a word' : 'Study next word'}
+                {resumeWord
+                  ? `Resume at #${resumeIndex + 1}`
+                  : progress.cards[nextWord.id]
+                    ? 'Practice a word'
+                    : 'Study next word'}
                 <ArrowRight size={16} aria-hidden="true" />
+              </AppLink>
+            ) : null}
+            {resumeDiffers && nextWord ? (
+              <AppLink
+                to={{ name: 'word', level, wordId: nextWord.id }}
+                className="button button-ghost"
+              >
+                {progress.cards[nextWord.id] ? 'Practice' : 'Next new word'}
               </AppLink>
             ) : null}
           </div>
@@ -304,6 +327,11 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                             <span className="word-row-pron">/{word.pronunciation}/</span>
                           )}
                           <span className={`status-pill status-${status.key}`}>{status.label}</span>
+                          {resumeWord?.id === word.id && (
+                            <span className="status-pill status-resume">
+                              Resume · #{resumeIndex + 1}
+                            </span>
+                          )}
                           {due && (
                             <span className="status-pill status-due">
                               <span className="status-dot" /> Due

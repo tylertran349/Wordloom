@@ -76,6 +76,8 @@ export interface ProgressState {
   /** Lifetime review totals. `reviewLog` is capped as recent display history. */
   reviewCount: number;
   strongReviewCount: number;
+  /** Last deck index the learner opened, per CEFR level. */
+  levelPositions: Record<string, number>;
   lastStudied?: { wordId: string; at: number };
 }
 
