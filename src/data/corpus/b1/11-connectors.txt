@@ -39,15 +39,15 @@ sai rồi|phrase|That's wrong.|disagreement,daily life
 thôi được rồi|phrase|Fine, okay then; never mind.|daily life,slang
 chuyện nhỏ|phrase|No big deal; it's nothing.|daily life,slang
 đúng là|phrase|Truly; indeed; that's really…|daily life,slang
-thật á|phrase|Really?; for real?|daily life,slang
+thật à|phrase|Really?; for real?|daily life,slang
 vậy hả|phrase|Oh really?; is that so?|daily life,slang
 chứ sao|phrase|Of course; obviously.|daily life,slang
 biết đâu đấy|phrase|Who knows; maybe.|daily life,slang
 không đùa đâu|phrase|I'm not joking.|daily life,slang
 đùa thôi|phrase|Just kidding.|daily life,slang
-hết hồn|phrase|That scared me; phew.|daily life,slang
+giật mình|phrase|Startled; to jump with fright.|daily life,slang
 tuyệt vời|adjective|Wonderful; excellent.|opinion,daily life
-quá đã|phrase|Awesome; so satisfying.|slang,opinion
+quá tuyệt|phrase|Absolutely wonderful; fantastic.|slang,opinion
 nói cách khác|adverb|In other words.|connectors,communication
 nói tóm lại|adverb|To put it briefly; in summary.|connectors,communication
 ví dụ như|phrase|For example; such as.|connectors,communication

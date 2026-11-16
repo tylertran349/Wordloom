@@ -49,3 +49,4 @@ lương thưởng|noun|Salary and bonuses; pay package.|work,money
 chấm công|verb|To clock in; to record attendance.|work,office
 giờ làm việc|noun|Working hours.|work,time
 hạn chót|noun|Deadline.|work,time
+đồng nghiệp|noun|Colleague; coworker.|work,people

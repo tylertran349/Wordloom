@@ -7,7 +7,7 @@ native-language sentences to translate. It uses Google Translate's free web endp
 solutions, schedules reviews with a spaced-repetition algorithm, and keeps every setting and every
 answer in your browser.
 
-Default language pair: **Vietnamese → English**.
+Default language pair: **Northern Vietnamese (Hanoi standard) → English**.
 
 ---
 
@@ -31,7 +31,7 @@ configured with `base: './'` so subpath deployments work too.
 
 ## What is included
 
-- **CEFR decks** for A1, A2, B1, and B2 — 3,000 Vietnamese words in total (800 / 800 /
+- **CEFR decks** for A1, A2, B1, and B2 — 3,000 northern Vietnamese words in total (800 / 800 /
   750 / 650). The C1 and C2 decks are present but intentionally empty.
 - **Word pages** with audio pronunciation, part of speech, a native-language definition, an optional
   target-language definition, and AI-generated examples with native-language translations.
@@ -57,7 +57,7 @@ configured with `base: './'` so subpath deployments work too.
 ```
 src/
   data/
-    corpus/            ← compact source text for the 3,000-word Vietnamese deck
+    corpus/            ← compact source text for the 3,000-word northern Vietnamese deck
     vocabulary.ts      ← generated word arrays (do not edit directly)
     levels.ts          ← CEFR names and descriptions
     languages.ts       ← language pair options and TTS locales
@@ -102,6 +102,11 @@ The build slugs the term into a stable id, checks that all 3,000 lines are uniqu
 `src/data/vocabulary.ts`. Add or remove files freely; they are read in filename order. Keep the
 totals in `scripts/build-vocabulary.mjs` in sync if you deliberately change the deck size.
 
+The deck uses northern Vietnamese (Hanoi standard) vocabulary and spelling. Prefer northern forms
+and avoid southern regional words and southern-only chat spellings. Word ids are derived from the
+term, so keeping a term unchanged keeps its existing study progress attached; changing a term
+starts that word fresh.
+
 Generated entries use this shape:
 
 ```ts
@@ -123,8 +128,8 @@ data file: they are generated with AI the first time you ask for exercises on a 
 cached in your browser's progress. A word you have never generated content for simply shows a
 **Generate with AI** button.
 
-The built-in deck covers A1–B2 everyday Vietnamese, with extra weight on conversation, work,
-services, and texting shortcuts. C1 and C2 are left empty by design.
+The built-in deck covers A1–B2 everyday northern Vietnamese, with extra weight on conversation,
+work, services, and texting shortcuts. C1 and C2 are left empty by design.
 
 > Changing the language pair in Settings changes translation direction, speech, and exercise
 > labels. It does **not** translate the vocabulary content. The built-in content is Vietnamese

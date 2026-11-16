@@ -49,3 +49,6 @@ kết bạn|verb|To make friends; to add as a friend.|relationships,social media
 đồng cảm|verb|To sympathise; to relate to.|emotion,communication
 yêu thương|verb|To love and cherish.|emotion,relationships
 nhớ nhung|verb|To long for; to miss deeply.|emotion,relationships
+hân hạnh|adjective|Honoured; pleased; used in formal introductions.|politeness,formal
+mẹ chồng|noun|Mother-in-law; husband's mother.|family,relationships
+bố vợ|noun|Father-in-law; wife's father.|family,relationships

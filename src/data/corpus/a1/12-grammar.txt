@@ -25,7 +25,7 @@ sẽ|particle|Future marker; will; shall.|grammar,time
 rồi|particle|Already; then; finished.|grammar,time
 chưa|particle|Not yet; used in yes/no questions.|grammar,time
 nhé|particle|Softens a request or suggestion, like 'okay?'.|grammar,daily life
-nha|particle|Casual variant of 'nhé', common in chat.|grammar,texting
+nhá|particle|Casual variant of 'nhé', common in northern speech and chat.|grammar,texting
 ạ|particle|Polite sentence-ending particle, used with elders.|grammar,politeness
 cũng|adverb|Also; too; as well.|grammar,daily life
 rất|adverb|Very; extremely.|grammar,description

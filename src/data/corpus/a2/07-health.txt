@@ -15,7 +15,7 @@ chiều cao|noun|Height.|health,body
 chế độ ăn|noun|Diet; eating plan.|health,food
 dinh dưỡng|noun|Nutrition.|health,food
 vitamin|noun|Vitamin.|health,food
-trái cây|noun|Fruit.|food,health
+hoa quả|noun|Fruit.|food,health
 ngủ đủ giấc|verb|To get enough sleep.|health,sleep
 tập luyện|verb|To train; to exercise regularly.|health,sport
 chạy bộ|verb|To jog.|health,sport

@@ -3,7 +3,7 @@ dọn dẹp|verb|To tidy up; to clean.|home,chores
 rửa bát|verb|To wash the dishes.|home,chores
 đổ rác|verb|To take out the rubbish.|home,chores
 gấp quần áo|verb|To fold clothes.|home,chores
-ủi đồ|verb|To iron clothes.|home,chores
+là quần áo|verb|To iron clothes.|home,chores
 lau nhà|verb|To mop the floor.|home,chores
 quét nhà|verb|To sweep the floor.|home,chores
 đi chợ|verb|To go to the market; to do the grocery shopping.|food,chores
@@ -27,7 +27,7 @@ nội quy|noun|Rules; regulations.|home,work
 lò vi sóng|noun|Microwave oven.|home,kitchen
 nồi cơm điện|noun|Rice cooker.|home,kitchen
 máy hút bụi|noun|Vacuum cleaner.|home,appliance
-bàn ủi|noun|Iron; clothes iron.|home,appliance
+bàn là|noun|Iron; clothes iron.|home,appliance
 bồn rửa|noun|Sink; washbasin.|home,kitchen
 vòi nước|noun|Tap; faucet.|home,kitchen
 ngăn kéo|noun|Drawer.|home,furniture

@@ -72,8 +72,6 @@ mùa xuân|noun|Spring; the spring season.|time,seasons
 mùa hè|noun|Summer.|time,seasons
 mùa thu|noun|Autumn; fall.|time,seasons
 mùa đông|noun|Winter.|time,seasons
-mùa mưa|noun|Rainy season.|time,seasons
-mùa khô|noun|Dry season.|time,seasons
 nhiều|adverb|Much; many; a lot.|quantity,basics
 ít|adverb|Little; few; not much.|quantity,basics
 vài|determiner|A few; some; several.|quantity,basics

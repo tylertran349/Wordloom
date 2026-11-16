@@ -36,7 +36,7 @@ no|adjective|Full; not hungry.|health,food
 quần áo|noun|Clothes; clothing.|clothing,daily life
 áo|noun|Shirt; top; jacket.|clothing,daily life
 áo sơ mi|noun|Shirt; button-down shirt.|clothing,work
-áo thun|noun|T-shirt.|clothing,casual
+áo phông|noun|T-shirt.|clothing,casual
 áo khoác|noun|Jacket; coat.|clothing,weather
 quần|noun|Trousers; pants.|clothing,daily life
 quần jeans|noun|Jeans.|clothing,casual
@@ -51,8 +51,8 @@ khăn quàng cổ|noun|Scarf.|clothing,accessories
 màu|noun|Colour.|colours,description
 đỏ|adjective|Red.|colours,description
 xanh|adjective|Blue or green; the general word for both.|colours,description
-xanh dương|adjective|Blue.|colours,description
-xanh lá|adjective|Green; leaf-green.|colours,description
+xanh nước biển|adjective|Blue; the blue of the sea.|colours,description
+xanh lá cây|adjective|Green; leaf-green.|colours,description
 vàng|adjective|Yellow; gold.|colours,description
 màu cam|adjective|Orange; the colour.|colours,description
 tím|adjective|Purple; violet.|colours,description
@@ -61,3 +61,7 @@ nâu|adjective|Brown.|colours,description
 đen|adjective|Black.|colours,description
 trắng|adjective|White.|colours,description
 xám|adjective|Grey.|colours,description
+mệt mỏi|adjective|Tired; weary.|health,emotion
+buồn ngủ|adjective|Sleepy.|health,sleep
+béo|adjective|Fat; chubby.|description,appearance
+gầy|adjective|Thin; skinny.|description,appearance

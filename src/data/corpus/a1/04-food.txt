@@ -50,7 +50,6 @@ bữa ăn|noun|Meal.|food,daily life
 bữa sáng|noun|Breakfast.|food,daily life
 bữa trưa|noun|Lunch.|food,daily life
 bữa tối|noun|Dinner; evening meal.|food,daily life
-thực đơn|noun|Menu.|food,restaurant
 đũa|noun|Chopsticks.|food,tableware
 thìa|noun|Spoon.|food,tableware
 dao|noun|Knife.|food,tableware
@@ -66,5 +65,4 @@ nóng|adjective|Hot; warm.|food,weather
 lạnh|adjective|Cold; chilled.|food,weather
 nấu|verb|To cook; to prepare food.|food,cooking
 nướng|verb|To grill; to bake; to roast.|food,cooking
-chiên|verb|To fry in oil.|food,cooking
 xào|verb|To stir-fry.|food,cooking

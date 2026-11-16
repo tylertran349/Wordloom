@@ -41,7 +41,7 @@ lái xe|verb|To drive; to drive a vehicle.|transport,daily life
 vé|noun|Ticket.|transport,travel
 tài xế|noun|Driver.|transport,people
 bến|noun|Wharf; station; terminal.|transport,places
-trái|noun|Left side; also means fruit.|directions,basics
+trái|noun|Left side; short for bên trái.|directions,basics
 phải|noun|Right side; also means 'must' or 'correct'.|directions,basics
 thẳng|adjective|Straight; direct.|directions,description
 trước|preposition|Before; in front of.|directions,time

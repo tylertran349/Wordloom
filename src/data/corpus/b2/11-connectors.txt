@@ -19,7 +19,7 @@ suy cho cùng|phrase|When you think it through; ultimately.|connectors,opinion
 bất kể|conjunction|Regardless of.|connectors,grammar
 miễn là|conjunction|As long as; provided that.|connectors,grammar
 giá như|conjunction|If only.|connectors,regret
-phải chi|conjunction|If only; it would be better if.|connectors,regret
+ước gì|conjunction|If only; I wish.|connectors,regret
 lỡ như|conjunction|In case; if it happens that.|connectors,grammar
 ngộ nhỡ|conjunction|Just in case; if by any chance.|connectors,grammar
 dẫu vậy|adverb|Even so; nonetheless.|connectors,formal

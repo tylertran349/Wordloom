@@ -26,11 +26,11 @@ nấm|noun|Mushroom.|food,vegetables
 giá đỗ|noun|Bean sprouts.|food,ingredients
 miến|noun|Glass noodles.|food,ingredients
 bánh cuốn|noun|Steamed rice rolls with pork and mushroom.|food,dishes
-bánh xèo|noun|Crispy Vietnamese pancake.|food,dishes
+chả cá|noun|Turmeric-marinated grilled fish with dill, a Hanoi speciality.|food,dishes
 bánh chưng|noun|Square sticky-rice cake, traditional at Tet.|food,dishes
 nem rán|noun|Fried spring rolls.|food,dishes
 bún chả|noun|Grilled pork with noodles, a Hanoi speciality.|food,dishes
-cơm tấm|noun|Broken rice with grilled pork, a southern dish.|food,dishes
+bún ốc|noun|Snail noodle soup, a Hanoi speciality.|food,dishes
 cơm rang|noun|Fried rice.|food,dishes
 canh|noun|Soup; broth, usually served with rice.|food,dishes
 lẩu|noun|Hotpot.|food,dishes
@@ -49,3 +49,4 @@ mang về|phrase|Takeaway; to take food away.|food,restaurant
 chia hóa đơn|phrase|To split the bill.|food,money
 ít đá|phrase|A little ice, please.|food,drink
 không đường|phrase|No sugar, please.|food,drink
+thực đơn|noun|Menu.|food,restaurant

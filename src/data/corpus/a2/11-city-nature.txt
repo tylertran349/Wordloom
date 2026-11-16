@@ -9,7 +9,7 @@ khu công nghiệp|noun|Industrial zone.|places,work
 đường một chiều|noun|One-way street.|transport,places
 vỉa hè|noun|Pavement; sidewalk.|places,city
 làn đường|noun|Traffic lane.|transport,places
-biển báo|noun|Road sign; sign.|transport,transport
+biển báo|noun|Road sign; sign.|transport,traffic
 đèn đỏ|noun|Red light.|transport,traffic
 đèn xanh|noun|Green light.|transport,traffic
 tắc đường|noun|Traffic jam.|transport,daily life
@@ -39,3 +39,5 @@ sóng thần|noun|Tsunami.|weather,environment
 thiên tai|noun|Natural disaster.|weather,environment
 khí hậu|noun|Climate.|environment,weather
 môi trường|noun|Environment; surroundings.|environment,society
+mùa mưa|noun|Rainy season.|time,seasons
+mùa khô|noun|Dry season.|time,seasons

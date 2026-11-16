@@ -109,3 +109,7 @@ hợp tác|verb|To cooperate; to collaborate.|work,business
 truyền đạt|verb|To convey; to communicate information.|communication,work
 liên hệ|verb|To contact; to get in touch.|communication,work
 phản hồi|verb|To respond; feedback.|communication,work
+tiết kiệm|verb|To save money; economical.|money,daily life
+vay|verb|To borrow money; to take a loan.|money,work
+thuê|verb|To rent; to hire.|money,home
+xây|verb|To build; to construct.|home,work

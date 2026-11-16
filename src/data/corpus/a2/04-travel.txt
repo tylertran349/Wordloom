@@ -20,7 +20,7 @@ vé máy bay|noun|Plane ticket; airfare.|travel,transport
 vé tàu|noun|Train ticket.|travel,transport
 chuyến bay|noun|Flight.|travel,transport
 giờ bay|noun|Departure time of a flight.|travel,transport
-trễ chuyến|verb|To miss or be delayed on a trip.|travel,transport
+lỡ chuyến|verb|To miss a flight, train, or bus.|travel,transport
 đúng giờ|adjective|On time; punctual.|travel,daily life
 ga tàu|noun|Railway station.|travel,places
 bến tàu|noun|Boat pier; ferry terminal.|travel,places

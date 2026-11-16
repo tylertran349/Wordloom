@@ -68,12 +68,8 @@ cho|verb|To give; to let; also the preposition 'for'.|daily life,grammar
 nhận|verb|To receive; to accept.|daily life,communication
 gửi|verb|To send; to deposit.|communication,services
 đặt|verb|To place; to put; to order food.|food,daily life
-tiết kiệm|verb|To save money; economical.|money,daily life
-vay|verb|To borrow money; to take a loan.|money,work
 mượn|verb|To borrow an object.|daily life,objects
-thuê|verb|To rent; to hire.|money,home
 sửa|verb|To repair; to fix; to edit.|home,work
-xây|verb|To build; to construct.|home,work
 cắt|verb|To cut; to chop.|daily life,food
 gấp|verb|To fold; also means urgent or double.|daily life,objects
 phơi|verb|To dry in the sun; to hang out washing.|home,weather

@@ -12,7 +12,7 @@ không có gì|phrase|You're welcome; literally 'there is nothing'.|politeness,b
 xin lỗi|phrase|Sorry; excuse me; also a verb meaning to apologise.|politeness,basics
 không sao|phrase|No problem; it's fine.|politeness,daily life
 vâng|particle|Yes; polite agreement, usually to someone older.|politeness,basics
-dạ|particle|Yes; a polite response, common in the south and to elders.|politeness,basics
+dạ|particle|Yes; a polite response to someone older.|politeness,basics
 ừ|particle|Yeah; a casual, informal yes.|daily life,slang
 không|adverb|No; not; used to negate verbs and adjectives.|basics,grammar
 có|verb|To have; also used to answer yes or to emphasise existence.|basics,grammar
@@ -24,7 +24,6 @@ tôi khỏe|phrase|I'm well; a simple answer to 'how are you?'.|greetings,daily 
 rất vui được gặp bạn|phrase|Nice to meet you.|greetings,politeness
 bạn tên là gì|phrase|What is your name?|greetings,basics
 tôi tên là|phrase|My name is…|greetings,basics
-hân hạnh|adjective|Honoured; pleased; used in formal introductions.|politeness,formal
 xin mời|phrase|Please go ahead; please help yourself; a polite invitation.|politeness,daily life
 làm ơn|phrase|Please; said when asking for a favour.|politeness,basics
 giúp tôi với|phrase|Please help me.|requests,daily life

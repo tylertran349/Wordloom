@@ -33,8 +33,8 @@ người già|noun|Elderly people; the elderly.|people,daily life
 thanh niên|noun|Young people; a young person.|people,society
 bố|noun|Dad; father.|family,basics
 mẹ|noun|Mom; mother.|family,basics
-ba|noun|Dad; an affectionate word for father, common in the south.|family,daily life
-má|noun|Mom; an affectionate word for mother, common in the south.|family,daily life
+thím|noun|Aunt; the wife of your father's younger brother.|family,basics
+cô dâu|noun|Bride; the woman getting married.|family,celebration
 cha|noun|Father; a more formal word for dad.|family,formal
 anh trai|noun|Older brother.|family,basics
 em trai|noun|Younger brother.|family,basics
@@ -58,7 +58,6 @@ bạn gái|noun|Girlfriend.|relationships,daily life
 người yêu|noun|Partner; boyfriend or girlfriend; sweetheart.|relationships,daily life
 bạn thân|noun|Best friend; close friend.|relationships,friendship
 hàng xóm|noun|Neighbour.|people,daily life
-đồng nghiệp|noun|Colleague; coworker.|work,people
 bạn học|noun|Classmate; schoolmate.|school,people
 thầy giáo|noun|Male teacher.|school,people
 cô giáo|noun|Female teacher.|school,people
@@ -73,8 +72,6 @@ con dâu|noun|Daughter-in-law; a son's wife.|family,relationships
 con rể|noun|Son-in-law; a daughter's husband.|family,relationships
 anh rể|noun|Older sister's husband; brother-in-law.|family,relationships
 chị dâu|noun|Older brother's wife; sister-in-law.|family,relationships
-mẹ chồng|noun|Mother-in-law; husband's mother.|family,relationships
-bố vợ|noun|Father-in-law; wife's father.|family,relationships
 con nuôi|noun|Adopted child.|family,relationships
 sinh đôi|adjective|Twin; born as a pair.|family,description
 bạn bè|noun|Friends.|friendship,people
