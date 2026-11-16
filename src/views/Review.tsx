@@ -378,7 +378,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
             Card <strong>{index + 1}</strong> of {queue.length}
           </span>
           <div className="progress-bar">
-            <span style={{ width: `${percent(index + (revealed ? 0.4 : 0), queue.length)}%` }} />
+            <span style={{ width: `${percent(index + (revealed ? 1 : 0), queue.length)}%` }} />
           </div>
           <span className="review-streak">
             <Flame size={14} aria-hidden="true" />
