@@ -204,10 +204,14 @@ html[data-theme='dark'] [data-level='C2'] {
 html {
   font-size: calc(16px * var(--font-scale, 1));
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
+  min-width: 0;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--ink);
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -382,19 +386,24 @@ kbd {
 .app-shell {
   display: grid;
   grid-template-columns: 256px minmax(0, 1fr);
+  align-content: start;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .sidebar {
   position: sticky;
   top: 0;
+  align-self: start;
   z-index: 40;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   height: 100vh;
+  height: 100dvh;
   padding: 1.35rem 0.9rem 1rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--line);
 }
@@ -658,6 +667,7 @@ kbd {
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.045em;
+  text-wrap: balance;
 }
 .title-accent {
   color: var(--accent-strong);
@@ -673,12 +683,14 @@ kbd {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.65;
+  text-wrap: pretty;
 }
 .page-head-actions,
 .head-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.5rem;
 }
 .streak-pill {
@@ -729,6 +741,7 @@ kbd {
 .section-head h2 {
   font-size: 1.3rem;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 .section-head p {
   max-width: 62ch;
@@ -1033,6 +1046,7 @@ html[data-theme='dark'] .status-due {
   font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
 }
 .ring-value.is-small {
@@ -1765,6 +1779,7 @@ html[data-theme='dark'] .status-due {
   font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 1.65rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.035em;
 }
 .stat-hint {
@@ -2170,6 +2185,7 @@ html[data-theme='dark'] .status-due {
   position: relative;
   z-index: 1;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
@@ -2959,6 +2975,7 @@ html[data-theme='dark'] .status-due {
 }
 .review-card-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
@@ -3675,6 +3692,7 @@ html[data-theme='dark'] .grade-easy {
 }
 .settings-section-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
@@ -4319,7 +4337,7 @@ html[data-theme='dark'] .grade-easy {
 
 .toast {
   position: fixed;
-  bottom: 1.25rem;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
   left: 50%;
   z-index: 100;
   display: flex;
@@ -4399,6 +4417,23 @@ html.reduce-motion *::after {
    Responsive
    ========================================================================== */
 
+@media (min-width: 1600px) {
+  .view-transition,
+  .app-foot {
+    max-width: 1320px;
+  }
+}
+
+@media (min-width: 2000px) {
+  .app-shell {
+    grid-template-columns: 288px minmax(0, 1fr);
+  }
+  .view-transition,
+  .app-foot {
+    max-width: 1440px;
+  }
+}
+
 @media (max-width: 1240px) {
   .level-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4435,11 +4470,40 @@ html.reduce-motion *::after {
   .progress-grid.is-uneven {
     grid-template-columns: 1fr;
   }
+  .settings-layout {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+}
+
+/* Collapse the widest two-column inner layouts before they get cramped on
+   mid-size laptops and landscape tablets. */
+@media (max-width: 1080px) {
+  .word-layout {
+    grid-template-columns: 1fr;
+  }
+  .word-side {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+  .side-goal-card {
+    grid-column: 1 / -1;
+  }
+  .continue-card {
+    grid-template-columns: 1fr;
+  }
+  .continue-side {
+    min-height: 150px;
+  }
 }
 
 @media (max-width: 960px) {
   .app-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
   .sidebar {
     top: 0;
@@ -4447,9 +4511,10 @@ html.reduce-motion *::after {
     align-items: center;
     gap: 0.55rem;
     height: auto;
-    padding: 0.5rem 0.8rem;
-    overflow-x: auto;
-    overflow-y: visible;
+    padding: calc(0.5rem + env(safe-area-inset-top))
+      max(0.8rem, env(safe-area-inset-right)) 0.5rem max(0.8rem, env(safe-area-inset-left));
+    overflow-x: hidden;
+    overflow-y: hidden;
     border-right: 0;
     border-bottom: 1px solid var(--line);
     background: color-mix(in srgb, var(--bg) 86%, transparent);
@@ -4484,7 +4549,11 @@ html.reduce-motion *::after {
     flex-direction: row;
     align-items: center;
     gap: 1px;
+    min-width: 0;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
   .nav::-webkit-scrollbar {
@@ -4499,8 +4568,10 @@ html.reduce-motion *::after {
     display: none;
   }
   .nav-item {
+    min-height: 38px;
     padding: 0.38rem 0.52rem;
     font-size: 0.69rem;
+    scroll-snap-align: center;
     white-space: nowrap;
   }
   .nav-icon {
@@ -4516,21 +4587,8 @@ html.reduce-motion *::after {
     flex: none;
   }
   .main {
-    padding: 1.4rem 1rem 1.5rem;
-  }
-  .word-layout {
-    grid-template-columns: 1fr;
-  }
-  .word-side {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-height: none;
-    overflow: visible;
-    padding-right: 0;
-  }
-  .side-goal-card {
-    grid-column: 1 / -1;
+    padding: 1.4rem max(1rem, env(safe-area-inset-right))
+      calc(1.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
   .settings-layout {
     grid-template-columns: 1fr;
@@ -4540,7 +4598,10 @@ html.reduce-motion *::after {
     flex-direction: row;
     gap: 0.22rem;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     padding-bottom: 0.15rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
   .settings-tabs::-webkit-scrollbar {
@@ -4551,6 +4612,7 @@ html.reduce-motion *::after {
     padding: 0.4rem 0.6rem;
     border-color: var(--line);
     background: var(--surface-muted);
+    scroll-snap-align: start;
     white-space: nowrap;
   }
   .page-head {
@@ -4590,15 +4652,33 @@ html.reduce-motion *::after {
     align-items: stretch;
   }
   .search-box {
+    width: 100%;
+    min-width: 0;
     max-width: none;
+  }
+  .search-box input {
+    min-width: 0;
   }
   .deck-controls {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
+    min-width: 0;
   }
   .filter-chips {
+    width: 100%;
+    min-width: 0;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+  }
+  .filter-chip {
+    scroll-snap-align: start;
+  }
+  .sort-control {
+    max-width: 100%;
   }
   .filter-chips::-webkit-scrollbar {
     display: none;
@@ -4647,7 +4727,8 @@ html.reduce-motion *::after {
   }
   .language-swap {
     align-self: center;
-    margin: 0.1rem 0;
+    justify-self: center;
+    margin: 0.15rem 0;
     transform: rotate(90deg);
   }
   .provider-options {
@@ -4706,6 +4787,11 @@ html.reduce-motion *::after {
   }
   .page-head-actions {
     width: 100%;
+    justify-content: flex-start;
+  }
+  .page-head-actions > .head-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
   .word-pager-count {
     min-width: 2.6rem;
@@ -4727,17 +4813,19 @@ html.reduce-motion *::after {
     gap: 0.2rem;
   }
   .toast {
-    bottom: 0.9rem;
+    bottom: calc(0.9rem + env(safe-area-inset-bottom));
   }
 }
 
 @media (max-width: 560px) {
   .main {
-    padding: 1.15rem 0.8rem 1.3rem;
+    padding: 1.15rem max(0.8rem, env(safe-area-inset-right))
+      calc(1.3rem + env(safe-area-inset-bottom)) max(0.8rem, env(safe-area-inset-left));
   }
   .sidebar {
     gap: 0.35rem;
-    padding: 0.45rem 0.55rem;
+    padding: calc(0.45rem + env(safe-area-inset-top))
+      max(0.55rem, env(safe-area-inset-right)) 0.45rem max(0.55rem, env(safe-area-inset-left));
   }
   .brand-copy {
     display: none;
@@ -4751,10 +4839,23 @@ html.reduce-motion *::after {
     display: none;
   }
   .nav-settings {
+    min-width: 38px;
     padding: 0.36rem;
+  }
+  /* Wrap section tabs instead of hiding destinations off the right edge. */
+  .settings-tabs {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  .settings-tab {
+    flex: 0 1 auto;
   }
   .page-head h1 {
     font-size: 1.8rem;
+  }
+  .page-head-actions > .button,
+  .head-actions > .button {
+    flex: 1 1 auto;
   }
   .page-description {
     font-size: 0.76rem;
@@ -4963,6 +5064,9 @@ html.reduce-motion *::after {
   .review-summary-hero h2 {
     font-size: 1.3rem;
   }
+  .review-summary-actions .button {
+    flex: 1 1 auto;
+  }
   .summary-grades {
     gap: 0.35rem;
   }
@@ -4981,6 +5085,13 @@ html.reduce-motion *::after {
   }
   .daily-label {
     font-size: 0.46rem;
+  }
+  /* Keep date labels legible instead of letting fourteen numbers collide. */
+  .daily-column:not(.is-today) .daily-label {
+    visibility: hidden;
+  }
+  .daily-column:nth-child(2n + 1) .daily-label {
+    visibility: visible;
   }
   .heatmap {
     gap: 2px;
@@ -5029,6 +5140,54 @@ html.reduce-motion *::after {
   }
 }
 
+/* Give the primary navigation its own row on the narrowest phones so every
+   destination stays visible instead of being clipped mid-label. */
+@media (max-width: 430px) {
+  .sidebar {
+    flex-wrap: wrap;
+    gap: 0.25rem 0.35rem;
+    padding: calc(0.45rem + env(safe-area-inset-top))
+      max(0.55rem, env(safe-area-inset-right)) 0.45rem max(0.55rem, env(safe-area-inset-left));
+  }
+  .brand {
+    flex: 1 1 auto;
+  }
+  .brand-copy {
+    display: flex;
+  }
+  .nav {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.15rem;
+    overflow: visible;
+  }
+  .nav-item {
+    position: relative;
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0.45rem 0.25rem;
+  }
+  .nav-badge {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    min-width: 1rem;
+    margin-left: 0;
+    padding: 0.02rem 0.24rem;
+    font-size: 0.5rem;
+  }
+  .nav-settings {
+    order: 2;
+    flex: none;
+    align-self: center;
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
 @media (max-width: 400px) {
   .level-summary-stats {
     grid-template-columns: repeat(2, 1fr);
@@ -5040,6 +5199,53 @@ html.reduce-motion *::after {
     display: none;
   }
   .nav-item {
-    padding: 0.34rem 0.4rem;
+    padding: 0.45rem 0.2rem;
+    font-size: 0.65rem;
+  }
+  .level-tabs {
+    gap: 1px;
+    padding: 0.2rem;
+  }
+  .level-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.45rem 0.3rem;
+    font-size: 0.68rem;
+  }
+}
+
+/* Touch devices should not keep a hover lift stuck after a tap. */
+@media (hover: none), (pointer: coarse) {
+  .button:not(:disabled):hover,
+  .level-card:hover,
+  .grade-button:hover {
+    transform: none;
+  }
+  .button,
+  .nav-item,
+  .filter-chip,
+  .settings-tab,
+  .theme-option,
+  .provider-card,
+  .accent-option,
+  .grade-button,
+  .switch {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Short landscape viewports need compact vertical chrome. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .review-card {
+    min-height: 0;
+  }
+  .review-front {
+    padding: 1.2rem 0 0.8rem;
+  }
+  .empty-state {
+    padding: 1.75rem 1rem;
+  }
+  .word-side {
+    max-height: none;
   }
 }

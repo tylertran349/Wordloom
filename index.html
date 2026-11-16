@@ -2,7 +2,10 @@
 <html lang="en" data-theme="light" data-accent="jade">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <!-- Google Translate's free TTS endpoint returns 404 when a referer is sent. -->
     <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#f6f4ef" />
@@ -32,6 +35,10 @@
               ? 'dark'
               : 'light';
         document.documentElement.dataset.theme = theme;
+        var themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) {
+          themeMeta.setAttribute('content', theme === 'dark' ? '#101512' : '#f6f4ef');
+        }
         if (saved.accent) document.documentElement.dataset.accent = saved.accent;
         if (saved.fontScale) {
           document.documentElement.style.setProperty('--font-scale', String(saved.fontScale));

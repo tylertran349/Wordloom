@@ -136,6 +136,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
     setCounts(nextCounts);
     if (index >= queue.length - 1) {
       setSummary({ counts: nextCounts, total: queue.length });
+      window.scrollTo({ top: 0, behavior: settings.reduceMotion ? 'auto' : 'smooth' });
     } else {
       setIndex((value) => value + 1);
       setRevealed(false);
