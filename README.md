@@ -208,6 +208,12 @@ project, no client ID, and no developer server.
 An empty sheet is seeded from this device. If both sides already contain data, Wordloom asks
 whether to import the sheet or upload this device before it writes anything.
 
+After connecting, saving is automatic: local storage updates immediately, and the sheet is
+uploaded about five seconds after you stop editing. A burst of edits becomes one upload instead of
+one request per change. Wordloom also checks the sheet when the app starts and when you return to
+the tab, and attempts a final flush when the tab closes. **Sync now**, **Import**, and **Upload**
+remain available when you want to force a direction.
+
 To connect another device, paste the spreadsheet URL and the same Web app URL, or press **Copy
 sync link** on the first device and paste that block. Both fields are scanned, so the links can go
 in either one. A new device with no local progress imports the sheet automatically.

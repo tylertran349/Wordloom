@@ -286,13 +286,15 @@ export function Settings() {
   const sheetPhaseLabel =
     sheetPhase === 'syncing'
       ? 'Syncing'
-      : sheetPhase === 'needs-decision'
-        ? 'Needs a choice'
-        : sheetPhase === 'error'
-          ? 'Sync issue'
-          : sheetPhase === 'idle'
-            ? 'Synced'
-            : 'Local only';
+      : sheetPhase === 'unsaved'
+        ? 'Waiting to save'
+        : sheetPhase === 'needs-decision'
+          ? 'Needs a choice'
+          : sheetPhase === 'error'
+            ? 'Sync issue'
+            : sheetPhase === 'idle'
+              ? 'Synced'
+              : 'Local only';
 
   useEffect(() => {
     setTranslationTest({ loading: false });
@@ -535,7 +537,11 @@ export function Settings() {
                 ? 'Sync issue'
                 : sheetPhase === 'syncing'
                   ? 'Syncing…'
-                  : 'Google Sheets'
+                  : sheetPhase === 'unsaved'
+                    ? 'Unsaved'
+                    : sheetPhase === 'needs-decision'
+                      ? 'Needs a choice'
+                      : 'Google Sheets'
               : 'Saved locally'}
           </span>
         }
@@ -1425,12 +1431,26 @@ export function Settings() {
                         className={cn(
                           'storage-badge',
                           sheetPhase === 'error' && 'is-error',
-                          sheetPhase === 'needs-decision' && 'is-warn',
+                          (sheetPhase === 'needs-decision' || sheetPhase === 'unsaved') &&
+                            'is-warn',
                         )}
                       >
                         {sheetPhaseLabel}
                       </span>
                     </div>
+
+                    <p className="sheet-autosave">
+                      <RefreshCw size={12} aria-hidden="true" />
+                      {sheetSync.pendingDecision
+                        ? 'Auto-save is paused until you choose which copy to keep.'
+                        : sheetBusy
+                          ? 'Syncing with Google Sheets…'
+                          : sheetSync.lastError
+                            ? 'The last upload failed. Edit again or use Sync now to retry.'
+                            : sheetSync.dirty
+                              ? 'Changes queued — uploading in a few seconds.'
+                              : 'Auto-save is on — changes upload about 5 seconds after you stop editing.'}
+                    </p>
 
                     {sheetSync.lastError && !sheetMessage && (
                       <div className="inline-alert is-error" role="alert">

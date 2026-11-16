@@ -4349,6 +4349,19 @@ html[data-theme='dark'] .grade-easy {
 .sheet-card {
   margin-bottom: 0.35rem;
 }
+.sheet-autosave {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0.55rem;
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.45;
+}
+.sheet-autosave svg {
+  flex: none;
+  color: var(--accent-strong);
+}
 .storage-badge.is-cloud {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent-strong) !important;

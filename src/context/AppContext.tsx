@@ -76,7 +76,13 @@ export interface AppStats {
   levelStats: LevelStat[];
 }
 
-export type SheetPhase = 'disconnected' | 'idle' | 'syncing' | 'needs-decision' | 'error';
+export type SheetPhase =
+  | 'disconnected'
+  | 'idle'
+  | 'syncing'
+  | 'unsaved'
+  | 'needs-decision'
+  | 'error';
 
 export interface SheetActionResult {
   ok: boolean;
@@ -368,6 +374,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           remoteSummary: null,
           lastError: null,
         });
+        // Edits made while the upload was in flight need another pass.
+        if (stillDirty) markLocalChangeRef.current();
         return {
           ok: true,
           message: `Saved ${summary.cards} ${summary.cards === 1 ? 'card' : 'cards'} to Google Sheets.`,
@@ -636,16 +644,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [patchSheet, pullSheet, pushSheet],
   );
 
-  /** Mark a local edit and schedule an upload a couple of seconds later. */
+  /** Mark a local edit and upload once the learner pauses for a moment. */
   const markLocalChange = useCallback(() => {
     if (!sheetRef.current.connection) return;
     patchSheet({ dirty: true, localChangedAt: Date.now() });
     if (sheetRef.current.pendingDecision) return;
     if (pushTimer.current) window.clearTimeout(pushTimer.current);
+    // Debounced so a burst of edits produces one upload. Each upload rewrites
+    // the sheet tabs, so keep this well under Google's per-minute write quota.
     pushTimer.current = window.setTimeout(() => {
       pushTimer.current = undefined;
       void pushSheet(false);
-    }, 8000);
+    }, 5000);
   }, [patchSheet, pushSheet]);
 
   markLocalChangeRef.current = markLocalChange;
@@ -992,7 +1002,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ? 'syncing'
         : sheetSync.lastError
           ? 'error'
-          : 'idle';
+          : sheetSync.dirty
+            ? 'unsaved'
+            : 'idle';
 
   const value: AppContextValue = {
     settings,
