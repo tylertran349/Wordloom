@@ -8,7 +8,6 @@ import {
   Check,
   ChevronDown,
   Cloud,
-  Copy,
   Database,
   Download,
   ExternalLink,
@@ -56,21 +55,14 @@ import {
   parseBackup,
 } from '../lib/storage';
 import {
-  WORDLOOM_BRIDGE_FILENAME,
-  WORDLOOM_BRIDGE_SOURCE,
-} from '../lib/sheetsScript';
-import {
   SHARED_CONNECT_ENDPOINT,
-  SHARED_SHEET_ENDPOINT,
   SHARED_SHEET_URL,
 } from '../lib/site';
 import { consumeSheetTabRequest } from '../lib/sheetConnect';
 import {
   cn,
-  copyText,
   dayKey,
   downloadJSON,
-  downloadText,
   formatInterval,
   formatShortDate,
   formatTime,
@@ -249,21 +241,9 @@ export function Settings() {
     tone: 'success' | 'error' | 'info';
     text: string;
   } | null>(null);
-  const [showBridgeScript, setShowBridgeScript] = useState(false);
-  const [bridgeCopyStatus, setBridgeCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const [confirmSheetPull, setConfirmSheetPull] = useState(false);
   const [confirmSheetPush, setConfirmSheetPush] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const bridgeScriptRef = useRef<HTMLPreElement>(null);
-  const selectBridgeOnShow = useRef(false);
-
-  useEffect(() => {
-    if (!showBridgeScript || !selectBridgeOnShow.current) return;
-    selectBridgeOnShow.current = false;
-    selectBridgeScriptText();
-    // Only react to the script becoming visible.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showBridgeScript]);
 
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
@@ -476,39 +456,6 @@ export function Settings() {
       text: 'Logged out. Your data is still saved in this browser.',
     });
     notify('Logged out of Google Sheets sync. Your data is still saved in this browser.', 'info');
-  }
-
-  function selectBridgeScriptText() {
-    const node = bridgeScriptRef.current;
-    if (!node) return;
-    const selection = window.getSelection();
-    if (!selection) return;
-    const range = document.createRange();
-    range.selectNodeContents(node);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    node.scrollIntoView({ block: 'nearest' });
-  }
-
-  async function copyBridgeScript() {
-    if (await copyText(WORDLOOM_BRIDGE_SOURCE)) {
-      setBridgeCopyStatus('copied');
-      notify('Bridge script copied. Paste it into the Apps Script editor.');
-      window.setTimeout(() => setBridgeCopyStatus('idle'), 2000);
-      return;
-    }
-    setBridgeCopyStatus('error');
-    if (showBridgeScript) {
-      selectBridgeScriptText();
-    } else {
-      selectBridgeOnShow.current = true;
-      setShowBridgeScript(true);
-    }
-  }
-
-  function downloadBridgeScript() {
-    downloadText(WORDLOOM_BRIDGE_FILENAME, WORDLOOM_BRIDGE_SOURCE);
-    notify('Bridge script downloaded.');
   }
 
   function handleReset(kind: 'progress' | 'settings' | 'all') {
@@ -1987,8 +1934,8 @@ export function Settings() {
                       <div className="inline-alert is-error">
                         <AlertCircle size={15} aria-hidden="true" />
                         <span>
-                          The Google sign-in page is not configured for this build. See{' '}
-                          <strong>Site owner setup</strong> below.
+                          The Google sign-in page is not configured for this build. Ask the site
+                          owner to finish the setup.
                         </span>
                       </div>
                     )}
@@ -2131,113 +2078,6 @@ export function Settings() {
                 </div>
               </Section>
 
-              <Section
-                title="Site owner setup"
-                description="Only needed if you manage the Google side. Regular users can ignore this section."
-              >
-                <details className="sheet-details">
-                  <summary>Set up or update the Apps Script</summary>
-                  <p className="settings-muted">
-                    One script, two web-app deployments. The <strong>data</strong> deployment
-                    writes to each learner's spreadsheet. The <strong>connect</strong> deployment
-                    signs learners in and shares the sheet they pick.
-                  </p>
-                  <ol className="sheet-steps">
-                    <li>
-                      <strong>Paste the script.</strong> Open the existing Apps Script project,
-                      replace the code with the script below, and save.
-                    </li>
-                    <li>
-                      <strong>Update the data deployment.</strong> <em>Deploy → Manage deployments
-                      → edit the existing web app → New version</em>. Keep{' '}
-                      <em>Execute as: Me</em> and <em>Who has access: Anyone</em>.
-                    </li>
-                    <li>
-                      <strong>Add the connect deployment.</strong> <em>Deploy → New deployment →
-                      Web app</em>. Choose <em>Execute as: User accessing the web app</em> and{' '}
-                      <em>Who has access: Anyone with a Google account</em>. Approve the consent
-                      screen.
-                    </li>
-                    <li>
-                      <strong>Copy the new URL.</strong> Put the second <code>/exec</code> URL in{' '}
-                      <code>src/lib/site.ts</code> (or <code>VITE_WORDLOOM_CONNECT_URL</code>), then
-                      rebuild the site.
-                    </li>
-                  </ol>
-                  <p className="settings-muted">
-                    Learners may see Google's "unverified app" warning and choose{' '}
-                    <em>Advanced → Continue</em>. The owner's Google account keeps edit access to
-                    each spreadsheet so the anonymous data deployment can write to it.
-                  </p>
-                  <div className="data-actions">
-                    <div className="data-action">
-                      <div>
-                        <strong>Bridge and connect script</strong>
-                        <span>
-                          {WORDLOOM_BRIDGE_SOURCE.split('\n').length} lines · one file, two
-                          deployments
-                        </span>
-                      </div>
-                      <div className="sheet-script-actions">
-                        <button
-                          type="button"
-                          className="button button-primary button-small"
-                          onClick={() => void copyBridgeScript()}
-                        >
-                          <Copy size={14} aria-hidden="true" />
-                          {bridgeCopyStatus === 'copied' ? 'Copied!' : 'Copy script'}
-                        </button>
-                        <button
-                          type="button"
-                          className="button button-ghost button-small"
-                          onClick={downloadBridgeScript}
-                        >
-                          <Download size={14} aria-hidden="true" />
-                          Download
-                        </button>
-                        <button
-                          type="button"
-                          className="button button-ghost button-small"
-                          onClick={() => {
-                            setShowBridgeScript((value) => !value);
-                            setBridgeCopyStatus('idle');
-                          }}
-                        >
-                          <Eye size={14} aria-hidden="true" />
-                          {showBridgeScript ? 'Hide' : 'Show'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {bridgeCopyStatus === 'error' && (
-                    <p className="sheet-copy-feedback" role="alert">
-                      Your browser blocked the copy. The script is shown and selected below - press
-                      Ctrl/Cmd + C to copy it.
-                    </p>
-                  )}
-                  {showBridgeScript && (
-                    <pre className="sheet-script" ref={bridgeScriptRef}>
-                      <code>{WORDLOOM_BRIDGE_SOURCE}</code>
-                    </pre>
-                  )}
-                  <div className="inline-alert is-info">
-                    <Check size={15} aria-hidden="true" />
-                    <span>
-                      <strong>After deploying both:</strong> open the connect URL once, approve it,
-                      then sign in from Settings. If Google shows "unverified app" choose{' '}
-                      <em>Advanced → Continue</em>.
-                    </span>
-                  </div>
-                  <div className="sheet-connection-meta">
-                    <span>Data web app</span>
-                    <code>{SHARED_SHEET_ENDPOINT || 'Not configured'}</code>
-                    <span>Connect web app</span>
-                    <code>{SHARED_CONNECT_ENDPOINT || 'Not configured'}</code>
-                    <span>Legacy spreadsheet</span>
-                    <code>{SHARED_SHEET_URL || 'Not configured'}</code>
-                  </div>
-                </details>
-              </Section>
             </>
           )}
 

@@ -403,7 +403,7 @@ function assertBridgeSchema(payload: BridgeStatePayload): void {
   if (payload.schema === undefined) return;
   if (numberOr(payload.schema, 0) === BRIDGE_SCHEMA) return;
   throw new Error(
-    'Google Sheets sync needs a one-time update. If you manage the sheet, open Settings → Google Sheets → Site owner setup and deploy the latest bridge. Otherwise, ask the site owner to update it. Your data is safe in this browser.',
+    'Google Sheets sync needs a one-time update. If you manage the Google side, redeploy the latest Apps Script bridge. Otherwise, ask the site owner to update it. Your data is safe in this browser.',
   );
 }
 

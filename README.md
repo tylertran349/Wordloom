@@ -88,8 +88,7 @@ src/
     storage.ts         ← defaults, normalization, backup, per-email local profiles
     sheets.ts          ← Google Sheets client + local sync state
     sheetConnect.ts    ← Google sign-in URL + returned connection
-    sheetsScript.ts    ← Apps Script bridge source shown in Settings
-    wordloom-sheets.gs ← the Apps Script itself (one file, two deployments)
+    wordloom-sheets.gs ← the Apps Script to paste into Google (one file, two deployments)
     router.ts, utils.ts, speech.ts
   types.ts
   index.css
@@ -257,8 +256,8 @@ that writes to everyone's sheets.
 
 #### Connection details
 
-The data web app URL, the connect page URL, the owner email, and the allowed site origins live in
-`src/lib/site.ts`. They can also be set at build time:
+The data web app URL, the connect page URL, and the owner email live in `src/lib/site.ts`. They
+can also be set at build time:
 
 ```bash
 VITE_WORDLOOM_BRIDGE_URL=https://script.google.com/macros/s/…/exec
@@ -267,16 +266,18 @@ VITE_WORDLOOM_SHEET_URL=https://docs.google.com/spreadsheets/d/…
 VITE_WORDLOOM_OWNER_EMAIL=owner@example.com
 VITE_WORDLOOM_LEGACY_OWNER_EMAIL=owner@example.com
 VITE_WORDLOOM_SYNC_TOKEN=optional-shared-secret
-VITE_WORDLOOM_ALLOWED_ORIGINS=https://example.com
 ```
+
+The origins the connect page may redirect back to are listed in
+`src/lib/wordloom-sheets.gs`, next to the owner email.
 
 #### Set up the script
 
 One script, two web-app deployments.
 
 1. Create a Google Sheet (or reuse an old Wordloom sheet) and open **Extensions → Apps Script**.
-2. Delete the placeholder code, paste the script from **Settings → Google Sheets → Site owner
-   setup**, and save.
+2. Delete the placeholder code, paste the contents of `src/lib/wordloom-sheets.gs`, and save.
+   Keep the owner email and allowed origins at the top of that file in sync with `src/lib/site.ts`.
 3. **Data deployment:** **Deploy → New deployment → Web app**, choose **Execute as: Me** and **Who
    has access: Anyone**, then deploy and authorize. Copy the URL ending in `/exec` into
    `src/lib/site.ts` (or `VITE_WORDLOOM_BRIDGE_URL`).

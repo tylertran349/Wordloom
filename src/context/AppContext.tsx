@@ -814,7 +814,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return {
         ok: false,
         message:
-          'Google sign-in is not configured for this build. Follow Site owner setup in Settings, then add the connect web app URL.',
+          'Google sign-in is not configured for this build. Ask the site owner to finish the Google Sheets setup.',
       };
     }
     // The return trip reloads the app, so persist everything first.

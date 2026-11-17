@@ -16,8 +16,8 @@ const DEFAULT_SHEET_URL =
   'https://docs.google.com/spreadsheets/d/18sPZDwPeFFFpPFtjOI8UddACO8ilg5jJBDoozQ7Iek4/edit';
 
 /**
- * The connect page URL, ending in /exec. Leave blank until the second web-app
- * deployment exists; Settings explains how to create it.
+ * The connect page URL, ending in /exec. See src/lib/wordloom-sheets.gs for the
+ * Apps Script that serves it.
  */
 const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbwTtEqB9A4dDjFa_prXych3H4eC_NIMap_fVT5N3rya94Q_2jJic4yuMP0LI0p0zt52/exec';
 const DEFAULT_LEGACY_OWNER_EMAIL = 'tylertran349@gmail.com';
@@ -49,31 +49,10 @@ export const BRIDGE_OWNER_EMAIL = (
 /**
  * Existing single-user data in the legacy sheet is adopted by this email during
  * the one-time schema migration. Keep this in sync with LEGACY_OWNER_EMAIL in
- * the bridge script (sheetsScript.ts imports this value).
+ * src/lib/wordloom-sheets.gs.
  */
 export const LEGACY_OWNER_EMAIL = (
   env.VITE_WORDLOOM_LEGACY_OWNER_EMAIL ?? DEFAULT_LEGACY_OWNER_EMAIL
 )
   .trim()
   .toLowerCase();
-
-/**
- * Origins the connect page may redirect back to. Keep this list in sync with
- * wherever the built site is served.
- */
-export const CONNECT_ALLOWED_ORIGINS = Array.from(
-  new Set(
-    [
-      'https://tylertran349.github.io',
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'http://localhost:4173',
-      'http://127.0.0.1:4173',
-      ...(env.VITE_WORDLOOM_ALLOWED_ORIGINS
-        ? String(env.VITE_WORDLOOM_ALLOWED_ORIGINS).split(',')
-        : []),
-    ]
-      .map((origin) => origin.trim())
-      .filter(Boolean),
-  ),
-);

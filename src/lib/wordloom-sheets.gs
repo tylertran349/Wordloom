@@ -24,6 +24,10 @@
  * that is the legacy shared-sheet mode, kept for importing old progress.
  *
  * Schema 5 keeps the per-email row layout from schema 4.
+ *
+ * This file is pasted into the Apps Script editor as-is. Keep
+ * LEGACY_OWNER_EMAIL, BRIDGE_OWNER_EMAIL, and CONNECT_ORIGINS in sync with
+ * src/lib/site.ts when the deployment changes.
  */
 
 var SCHEMA = 5;
@@ -32,14 +36,20 @@ var SCHEMA = 5;
 var TOKEN = '';
 
 // Rows from before the per-email migration belong to this address.
-var LEGACY_OWNER_EMAIL = __LEGACY_OWNER_EMAIL__;
+var LEGACY_OWNER_EMAIL = 'tylertran349@gmail.com';
 
 // User sheets are shared with this account so the anonymous data bridge can
 // open them. It must be the Google account that deployed the data bridge.
-var BRIDGE_OWNER_EMAIL = __BRIDGE_OWNER_EMAIL__;
+var BRIDGE_OWNER_EMAIL = 'tylertran349@gmail.com';
 
 // Only these site origins may receive the connection redirect.
-var CONNECT_ORIGINS = __CONNECT_ORIGINS__;
+var CONNECT_ORIGINS = [
+  'https://tylertran349.github.io',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173'
+];
 
 var GLOBAL_EMAIL = '';
 
