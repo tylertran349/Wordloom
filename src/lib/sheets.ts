@@ -1,15 +1,6 @@
 import type { ProgressState, Settings } from '../types';
+import { parseStoredProgress, parseStoredSettings } from './storage';
 import {
-  hasStoredProfile,
-  loadProgress,
-  loadSettings,
-  parseStoredProgress,
-  parseStoredSettings,
-  saveProgress,
-  saveSettings,
-} from './storage';
-import {
-  LEGACY_OWNER_EMAIL,
   SHARED_SHEET_ENDPOINT,
   SHARED_SHEET_URL,
   SHARED_SYNC_TOKEN,
@@ -154,16 +145,6 @@ function defaultSheetSync(): SheetSyncState {
   };
 }
 
-/**
- * Upgrade path for the owner's existing device: copy the old local-only cache
- * into the owner's per-email profile so the first load feels continuous.
- */
-function adoptLegacyLocalProfile(email: string): void {
-  if (!email || hasStoredProfile(email)) return;
-  saveSettings(loadSettings(''), email);
-  saveProgress(loadProgress(''), email);
-}
-
 export function loadSheetSync(): SheetSyncState {
   const base = defaultSheetSync();
   try {
@@ -172,28 +153,9 @@ export function loadSheetSync(): SheetSyncState {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return base;
     const source = parsed as Record<string, unknown>;
-    const storedConnection = isRecord(source.connection) ? source.connection : null;
-    const storedEndpoint =
-      storedConnection && typeof storedConnection.endpoint === 'string'
-        ? storedConnection.endpoint
-        : '';
-    let email = normalizeEmail(typeof source.email === 'string' ? source.email : '');
-
-    // Upgrade path for the owner's existing device: the old connection pointed
-    // at this same shared bridge, so adopt its local data into the owner's
-    // per-email profile instead of making them re-enter everything.
-    if (
-      !email &&
-      LEGACY_OWNER_EMAIL &&
-      storedEndpoint &&
-      storedEndpoint === SHARED_SHEET_ENDPOINT
-    ) {
-      email = normalizeEmail(LEGACY_OWNER_EMAIL);
-      adoptLegacyLocalProfile(email);
-    }
-
+    const email = normalizeEmail(typeof source.email === 'string' ? source.email : '');
     // The old device-level connection is intentionally dropped. The site now
-    // uses one shared bridge and asks each learner for an email instead.
+    // uses one shared bridge and asks each learner to enter an email.
     const connection = email ? createSharedConnection() : null;
     return {
       connection,

@@ -601,7 +601,11 @@ export function Settings() {
             <>
               <Section
                 title="Google Sheets account"
-                description="Sync is optional. Logging out keeps all of your data in this browser."
+                description={
+                  sheetSync.email
+                    ? 'Sync is optional. Logging out keeps all of your data in this browser.'
+                    : 'Sync is optional. Your data always stays in this browser.'
+                }
               >
                 {sheetSync.email ? (
                   <div className="account-row">
@@ -1694,7 +1698,7 @@ export function Settings() {
                           type="email"
                           value={sheetEmailInput}
                           placeholder="you@example.com"
-                          autoComplete="email"
+                          autoComplete="off"
                           spellCheck={false}
                           onChange={(event) => setSheetEmailInput(event.target.value)}
                           onKeyDown={(event) => {

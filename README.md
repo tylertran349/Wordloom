@@ -287,9 +287,10 @@ The first sync after the update migrates the old tabs in place:
 - A `Wordloom Users` tab lists every email, when it was first and last seen, its last device, and its
   card/review counts.
 
-Nothing is deleted. Sign in with the legacy owner email and choose **Use the sheet version** if
-Wordloom asks. On the owner's existing browser, the old connection is detected automatically and the
-local cache is adopted into the owner's email profile, so the same sync keeps working.
+Nothing is deleted. On the owner's browser, enter the legacy owner email in
+**Settings → Google Sheets** and choose **Use the sheet version** if Wordloom asks. Your local data
+stays in the browser; the sheet copy keeps the migrated progress. No browser is associated with the
+owner email automatically.
 
 #### What the sheet contains
 
