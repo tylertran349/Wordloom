@@ -70,7 +70,7 @@ import {
   pluralize,
 } from '../lib/utils';
 import { speakText } from '../lib/speech';
-import { AppLink, LevelBadge, PageHeader, Toggle } from '../components/ui';
+import { AppLink, ConfirmDialog, LevelBadge, PageHeader, Toggle } from '../components/ui';
 
 type Tab = 'general' | 'appearance' | 'study' | 'review' | 'translate' | 'ai' | 'sheets' | 'data';
 
@@ -237,7 +237,9 @@ export function Settings() {
   const [confirmReset, setConfirmReset] = useState<'progress' | 'settings' | 'all' | null>(null);
   const [sheetEmailInput, setSheetEmailInput] = useState('');
   const [legacyEmailInput, setLegacyEmailInput] = useState('');
-  const [confirmLegacyImport, setConfirmLegacyImport] = useState(false);
+  const [sheetConfirm, setSheetConfirm] = useState<
+    'pull' | 'push' | 'legacy-import' | 'conflict-push' | null
+  >(null);
   const [importBusy, setImportBusy] = useState(false);
   const [sheetMessage, setSheetMessage] = useState<{
     tone: 'success' | 'error' | 'info';
@@ -246,8 +248,6 @@ export function Settings() {
     const error = takeConnectError();
     return error ? { tone: 'error', text: error } : null;
   });
-  const [confirmSheetPull, setConfirmSheetPull] = useState(false);
-  const [confirmSheetPush, setConfirmSheetPush] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const target = getLanguage(settings.targetLanguage);
@@ -286,6 +286,10 @@ export function Settings() {
     translationSource.code === 'vi'
       ? 'Xin chào, rất vui được gặp bạn.'
       : 'I would like a cup of coffee, please.';
+  const sheetTargetLabel =
+    sheetSync.connection?.kind === 'legacy'
+      ? 'the old shared Google Sheet'
+      : sheetSync.connection?.name || 'your Google Sheet';
   const sheetPhaseLabel =
     sheetPhase === 'syncing'
       ? 'Syncing…'
@@ -399,17 +403,8 @@ export function Settings() {
     if (!result.ok) showSheetResult(result);
   }
 
-  async function handleLegacyImport() {
-    if (!confirmLegacyImport) {
-      setConfirmLegacyImport(true);
-      return;
-    }
-    setConfirmLegacyImport(false);
-    setImportBusy(true);
-    setSheetMessage(null);
-    const result = await importLegacySheet(legacyEmailInput);
-    setImportBusy(false);
-    showSheetResult(result);
+  function handleLegacyImport() {
+    setSheetConfirm('legacy-import');
   }
 
   async function handleSheetSyncNow() {
@@ -418,29 +413,39 @@ export function Settings() {
     showSheetResult(result);
   }
 
-  async function handleSheetPull() {
-    if (!confirmSheetPull) {
-      setConfirmSheetPull(true);
-      return;
-    }
-    setConfirmSheetPull(false);
-    setSheetMessage(null);
-    const result = await pullSheet(true);
-    showSheetResult(result);
+  function handleSheetPull() {
+    setSheetConfirm('pull');
   }
 
-  async function handleSheetPush() {
-    if (!confirmSheetPush) {
-      setConfirmSheetPush(true);
+  function handleSheetPush() {
+    setSheetConfirm('push');
+  }
+
+  async function runSheetConfirm() {
+    const action = sheetConfirm;
+    if (!action) return;
+    setSheetConfirm(null);
+    setSheetMessage(null);
+
+    if (action === 'legacy-import') {
+      setImportBusy(true);
+      const result = await importLegacySheet(legacyEmailInput);
+      setImportBusy(false);
+      showSheetResult(result);
       return;
     }
-    setConfirmSheetPush(false);
-    setSheetMessage(null);
-    const result = await pushSheet(true);
-    showSheetResult(result);
+    if (action === 'conflict-push') {
+      showSheetResult(await resolveSheetConflict('push'));
+      return;
+    }
+    showSheetResult(action === 'pull' ? await pullSheet(true) : await pushSheet(true));
   }
 
   async function handleSheetDecision(choice: 'pull' | 'push') {
+    if (choice === 'push') {
+      setSheetConfirm('conflict-push');
+      return;
+    }
     setSheetMessage(null);
     const result = await resolveSheetConflict(choice);
     showSheetResult(result);
@@ -457,9 +462,7 @@ export function Settings() {
     signOutSheet();
     setSheetEmailInput('');
     setLegacyEmailInput('');
-    setConfirmLegacyImport(false);
-    setConfirmSheetPull(false);
-    setConfirmSheetPush(false);
+    setSheetConfirm(null);
     setSheetMessage({
       tone: 'info',
       text: 'Logged out. Your data is still saved in this browser.',
@@ -486,10 +489,8 @@ export function Settings() {
       clearAllWordloomStorage();
       setSheetEmailInput('');
       setLegacyEmailInput('');
-      setConfirmLegacyImport(false);
+      setSheetConfirm(null);
       setSheetMessage(null);
-      setConfirmSheetPull(false);
-      setConfirmSheetPush(false);
       setCacheCount(0);
       setTranslationTest({ loading: false });
       setTestResult(null);
@@ -1653,45 +1654,31 @@ export function Settings() {
                         <div className="data-action">
                           <div>
                             <strong>Use the sheet version</strong>
-                            <span>
-                              {confirmSheetPull
-                                ? "This replaces this browser's data. Click again to confirm."
-                                : "Replace this browser's progress with the copy in your sheet."}
-                            </span>
+                            <span>Replace this browser's progress with the copy in your sheet.</span>
                           </div>
                           <button
                             type="button"
-                            className={cn(
-                              'button button-small',
-                              confirmSheetPull ? 'button-danger-solid' : 'button-ghost',
-                            )}
-                            onClick={() => void handleSheetPull()}
+                            className="button button-ghost button-small"
+                            onClick={handleSheetPull}
                             disabled={sheetBusy || sheetSync.pendingDecision}
                           >
                             <Download size={14} aria-hidden="true" />
-                            {confirmSheetPull ? 'Click again to replace' : 'Replace'}
+                            Replace
                           </button>
                         </div>
                         <div className="data-action">
                           <div>
                             <strong>Use this browser's version</strong>
-                            <span>
-                              {confirmSheetPush
-                                ? "This replaces your sheet's rows. Click again to confirm."
-                                : "Replace your sheet's rows with this browser's progress."}
-                            </span>
+                            <span>Replace your sheet's rows with this browser's progress.</span>
                           </div>
                           <button
                             type="button"
-                            className={cn(
-                              'button button-small',
-                              confirmSheetPush ? 'button-danger-solid' : 'button-ghost',
-                            )}
-                            onClick={() => void handleSheetPush()}
+                            className="button button-ghost button-small"
+                            onClick={handleSheetPush}
                             disabled={sheetBusy || sheetSync.pendingDecision}
                           >
                             <Upload size={14} aria-hidden="true" />
-                            {confirmSheetPush ? 'Click again to replace' : 'Replace'}
+                            Replace
                           </button>
                         </div>
                         <div className="data-action">
@@ -1716,26 +1703,18 @@ export function Settings() {
                           <div>
                             <strong>Import from the old shared sheet</strong>
                             <span>
-                              {confirmLegacyImport
-                                ? "This replaces this browser's data with the old copy. Click again to import."
-                                : 'Copy progress saved under an email in the old shared spreadsheet into your sheet.'}
+                              Copy progress saved under an email in the old shared spreadsheet into
+                              your sheet.
                             </span>
                           </div>
                           <button
                             type="button"
-                            className={cn(
-                              'button button-small',
-                              confirmLegacyImport ? 'button-danger-solid' : 'button-ghost',
-                            )}
-                            onClick={() => void handleLegacyImport()}
+                            className="button button-ghost button-small"
+                            onClick={handleLegacyImport}
                             disabled={sheetBusy || importBusy || sheetSync.pendingDecision}
                           >
                             <Download size={14} aria-hidden="true" />
-                            {importBusy
-                              ? 'Importing...'
-                              : confirmLegacyImport
-                                ? 'Click again to import'
-                                : 'Import'}
+                            {importBusy ? 'Importing...' : 'Import'}
                           </button>
                         </div>
                       </div>
@@ -1909,15 +1888,12 @@ export function Settings() {
                           </div>
                           <button
                             type="button"
-                            className={cn(
-                              'button button-small',
-                              confirmSheetPull ? 'button-danger-solid' : 'button-ghost',
-                            )}
-                            onClick={() => void handleSheetPull()}
+                            className="button button-ghost button-small"
+                            onClick={handleSheetPull}
                             disabled={sheetBusy || sheetSync.pendingDecision}
                           >
                             <Download size={14} aria-hidden="true" />
-                            {confirmSheetPull ? 'Click again to replace' : 'Replace'}
+                            Replace
                           </button>
                         </div>
                         <div className="data-action">
@@ -1927,15 +1903,12 @@ export function Settings() {
                           </div>
                           <button
                             type="button"
-                            className={cn(
-                              'button button-small',
-                              confirmSheetPush ? 'button-danger-solid' : 'button-ghost',
-                            )}
-                            onClick={() => void handleSheetPush()}
+                            className="button button-ghost button-small"
+                            onClick={handleSheetPush}
                             disabled={sheetBusy || sheetSync.pendingDecision}
                           >
                             <Upload size={14} aria-hidden="true" />
-                            {confirmSheetPush ? 'Click again to replace' : 'Replace'}
+                            Replace
                           </button>
                         </div>
                       </div>
@@ -2338,6 +2311,58 @@ export function Settings() {
           )}
         </div>
       </div>
+
+      {sheetConfirm && (
+        <ConfirmDialog
+          title={
+            sheetConfirm === 'pull'
+              ? 'Replace this browser’s data with the sheet version?'
+              : sheetConfirm === 'legacy-import'
+                ? 'Import the old progress into your Google Sheet?'
+                : sheetConfirm === 'conflict-push'
+                  ? 'Replace the sheet with this browser’s version?'
+                  : 'Replace your Google Sheet with this browser’s data?'
+          }
+          description={
+            sheetConfirm === 'pull' ? (
+              <p>
+                This browser’s progress and saved settings will be replaced by the copy in{' '}
+                {sheetTargetLabel}. The sheet itself is not changed.
+              </p>
+            ) : sheetConfirm === 'legacy-import' ? (
+              <p>
+                Wordloom will copy the progress saved for{' '}
+                {(legacyEmailInput || sheetSync.email).trim() || 'that email'} in the old shared
+                sheet into {sheetTargetLabel}, then replace this browser’s data. The old shared
+                sheet is not changed.
+              </p>
+            ) : (
+              <p>
+                The rows for {sheetSync.email || 'this account'} in {sheetTargetLabel} will be
+                overwritten with this browser’s progress and saved settings. Any progress saved
+                there from another device will be lost. The spreadsheet and its other tabs are
+                kept.
+              </p>
+            )
+          }
+          confirmLabel={
+            sheetConfirm === 'pull'
+              ? 'Use the sheet version'
+              : sheetConfirm === 'legacy-import'
+                ? 'Import into my sheet'
+                : 'Replace the sheet'
+          }
+          cancelLabel={
+            sheetConfirm === 'pull'
+              ? 'Keep this browser’s data'
+              : sheetConfirm === 'legacy-import'
+                ? 'Cancel'
+                : 'Keep the sheet'
+          }
+          onCancel={() => setSheetConfirm(null)}
+          onConfirm={() => void runSheetConfirm()}
+        />
+      )}
     </div>
   );
 }
