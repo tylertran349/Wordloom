@@ -5116,6 +5116,9 @@ html.reduce-motion *::after {
   .sort-control {
     align-self: flex-end;
   }
+  .deck-controls > .icon-button {
+    align-self: flex-end;
+  }
   .word-row-side .word-row-due {
     display: none;
   }

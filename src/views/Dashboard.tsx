@@ -37,7 +37,7 @@ import {
 } from '../components/ui';
 
 export function Dashboard() {
-  const { settings, stats, progress, studiedWords, sheetSync } = useApp();
+  const { settings, stats, progress, studiedWords, studyOrder, sheetSync } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const goalPercent = percent(stats.practicedToday, settings.dailyGoal);
@@ -46,8 +46,8 @@ export function Dashboard() {
   const lastStudiedWord = progress.lastStudied
     ? WORD_BY_ID[progress.lastStudied.wordId]
     : undefined;
-  const nextNewWord = ALL_WORDS.find((word) => !progress.cards[word.id]);
-  const focusWord = nextNewWord ?? lastStudiedWord ?? ALL_WORDS[0];
+  const nextNewWord = studyOrder.find((word) => !progress.cards[word.id]);
+  const focusWord = nextNewWord ?? lastStudiedWord ?? studyOrder[0] ?? ALL_WORDS[0];
   const focusLabel = nextNewWord
     ? stats.studied === 0
       ? 'Start here'

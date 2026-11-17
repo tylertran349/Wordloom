@@ -22,6 +22,7 @@ import {
   RefreshCw,
   RotateCcw,
   ShieldCheck,
+  Shuffle,
   SlidersHorizontal,
   Sparkles,
   Sun,
@@ -202,6 +203,7 @@ export function Settings() {
     settings,
     updateSettings,
     resetSettings,
+    shuffleWordOrder,
     progress,
     importBackup,
     exportBackup,
@@ -869,6 +871,47 @@ export function Settings() {
                 />
               </Section>
 
+              <Section
+                title="New word order"
+                description="Choose how fresh vocabulary is arranged when you open a CEFR deck."
+              >
+                <Row
+                  label="Study order"
+                  hint="Random mixes words from different topics so each session feels varied. Deck order follows the vocabulary file."
+                  htmlFor="new-word-order"
+                >
+                  <div className="select-wrap">
+                    <select
+                      id="new-word-order"
+                      className="select-input select-medium"
+                      value={settings.newWordOrder}
+                      onChange={(event) =>
+                        updateSettings({
+                          newWordOrder: event.target.value as SettingsType['newWordOrder'],
+                        })
+                      }
+                    >
+                      <option value="random">Random order</option>
+                      <option value="deck">Deck order</option>
+                    </select>
+                    <ChevronDown size={15} className="select-chevron" aria-hidden="true" />
+                  </div>
+                </Row>
+                {settings.newWordOrder === 'random' && (
+                  <div className="setting-action-row">
+                    <span>Want a different mix of words?</span>
+                    <button
+                      type="button"
+                      className="button button-ghost button-small"
+                      onClick={shuffleWordOrder}
+                    >
+                      <Shuffle size={14} aria-hidden="true" />
+                      Shuffle again
+                    </button>
+                  </div>
+                )}
+              </Section>
+
               <Section title="Word display" description="Control what appears on study cards and word rows.">
                 <Toggle
                   label="Pronunciation hints"
@@ -1357,6 +1400,14 @@ export function Settings() {
                     </div>
                   </div>
                 )}
+                <div className="inline-alert is-info">
+                  <ShieldCheck size={15} aria-hidden="true" />
+                  <span>
+                    API keys are saved in this browser. When Google Sheets sync is on, they are also
+                    saved in your own sheet so your other devices can use them. Keep the sheet
+                    private.
+                  </span>
+                </div>
               </Section>
 
               <Section
@@ -1450,11 +1501,12 @@ export function Settings() {
                 <div className="settings-note is-compact">
                   <ShieldCheck size={17} aria-hidden="true" />
                   <div>
-                    <strong>Your keys stay here</strong>
+                    <strong>Where your keys live</strong>
                     <p>
                       Requests go directly from this browser to the provider. Keys and settings are
-                      stored in this browser's local storage, which is not encrypted — avoid shared
-                      computers for sensitive keys.
+                      stored in this browser's local storage, which is not encrypted, and in your
+                      own Google Sheet when sync is on — avoid shared computers and shared sheets
+                      for sensitive keys.
                     </p>
                   </div>
                 </div>
@@ -1962,7 +2014,8 @@ export function Settings() {
                         <strong>You keep the spreadsheet</strong>
                         <p>
                           Wordloom shares it with the site owner so the background sync can write
-                          to it. AI keys stay on this device and never go into the sheet.
+                          to it. AI keys are saved in this browser and, when sync is on, also in
+                          your sheet — keep the sheet private.
                         </p>
                       </div>
                     </div>
@@ -2012,7 +2065,7 @@ export function Settings() {
                           <p>
                             Everyone's data lives in one shared spreadsheet, separated by email.
                             Anyone who knows an email can open its data. Use an address you do not
-                            mind sharing.
+                            mind sharing. API keys are not written to this shared sheet.
                           </p>
                         </div>
                       </div>
@@ -2189,7 +2242,8 @@ export function Settings() {
                 )}
                 <p className="settings-muted">
                   Tip: export a backup before trying a new schedule or clearing your progress.
-                  Backups include any AI credentials saved in Settings, so keep the file private.
+                  Backups include any AI credentials saved in Settings, and sync also writes them
+                  to your Google Sheet when enabled. Keep both private.
                 </p>
               </Section>
 

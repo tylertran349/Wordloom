@@ -31,6 +31,29 @@ export function shuffle<T>(values: T[]): T[] {
   return copy;
 }
 
+/**
+ * Deterministic Fisher–Yates shuffle. The same seed and input always produce
+ * the same order, so a learner's randomized deck stays stable between visits
+ * while still being unrelated to the vocabulary file's topic grouping.
+ */
+export function seededShuffle<T>(values: T[], seed: number): T[] {
+  let state = seed >>> 0;
+  const random = () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+
+  const copy = [...values];
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+  }
+  return copy;
+}
+
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return count === 1 ? singular : plural;
 }

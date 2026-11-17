@@ -17,6 +17,7 @@ import type {
   Settings,
   SRSCard,
   ToastMessage,
+  VocabWord,
 } from '../types';
 import { CEFR_LEVELS } from '../types';
 import { ALL_WORDS, LEVEL_WORDS, WORD_BY_ID } from '../data/vocabulary';
@@ -35,7 +36,14 @@ import {
   storageKeyForProfile,
 } from '../lib/storage';
 import { createCard, isDue, scheduleCard } from '../lib/srs';
-import { dayKey, endOfDay, formatInterval, getPracticeSentences } from '../lib/utils';
+import {
+  dayKey,
+  endOfDay,
+  formatInterval,
+  getPracticeSentences,
+  hashString,
+  seededShuffle,
+} from '../lib/utils';
 import {
   attachSheetUrl,
   beaconSheet,
@@ -110,6 +118,12 @@ interface AppContextValue {
   stats: AppStats;
   dueWords: typeof ALL_WORDS;
   studiedWords: typeof ALL_WORDS;
+  /** Vocab words in the learner's chosen order, per CEFR level. */
+  levelDecks: Record<CEFRLevel, VocabWord[]>;
+  /** Every word in study order: CEFR levels, then the chosen order within each. */
+  studyOrder: VocabWord[];
+  /** Re-rolls the randomized new-word order. */
+  shuffleWordOrder: () => void;
   markStudied: (wordId: string) => boolean;
   removeStudied: (wordId: string) => boolean;
   gradeCard: (wordId: string, grade: ReviewGrade) => void;
@@ -232,6 +246,11 @@ function computeStats(progress: ProgressState, now = Date.now()): AppStats {
 function messageFromError(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
   return 'Something went wrong while syncing with Google Sheets. Your data is safe in this browser.';
+}
+
+/** True when the learner has entered at least one AI API key. */
+function hasApiKeys(settings: Settings): boolean {
+  return Boolean(settings.geminiApiKey.trim() || settings.openaiApiKey.trim());
 }
 
 /** True when two states point at the same spreadsheet and account. */
@@ -365,11 +384,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
         window.clearTimeout(pushTimer.current);
         pushTimer.current = undefined;
       }
-      // Credentials never travel through the sheet, so keep this device's keys.
+      // API keys sync with the sheet. If an older sheet has no key yet, keep
+      // this device's key instead of clearing it during the first pull.
+      const localGeminiKey = settingsRef.current.geminiApiKey;
+      const localOpenAiKey = settingsRef.current.openaiApiKey;
+      // The legacy shared sheet is readable by email, so it never carries keys.
+      const sharesCredentials = connection?.kind !== 'legacy';
+      const remoteKnowsGeminiKey =
+        sharesCredentials &&
+        (snapshot.credentialRows?.geminiApiKey ??
+          Boolean(snapshot.settings.geminiApiKey.trim()));
+      const remoteKnowsOpenAiKey =
+        sharesCredentials &&
+        (snapshot.credentialRows?.openaiApiKey ??
+          Boolean(snapshot.settings.openaiApiKey.trim()));
+      const inheritedKey =
+        sharesCredentials &&
+        ((!remoteKnowsGeminiKey && Boolean(localGeminiKey.trim())) ||
+          (!remoteKnowsOpenAiKey && Boolean(localOpenAiKey.trim())));
       const nextSettings = {
         ...snapshot.settings,
-        geminiApiKey: settingsRef.current.geminiApiKey,
-        openaiApiKey: settingsRef.current.openaiApiKey,
+        geminiApiKey: remoteKnowsGeminiKey ? snapshot.settings.geminiApiKey : localGeminiKey,
+        openaiApiKey: remoteKnowsOpenAiKey ? snapshot.settings.openaiApiKey : localOpenAiKey,
       };
       // Update the refs now so an immediate push sends the snapshot, not the
       // pre-import state.
@@ -388,6 +424,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         remoteSummary: null,
         lastError: null,
       });
+      // A key that exists only on this device has just been merged into the
+      // settings; upload it so the sheet gains the credential too.
+      if (inheritedKey) markLocalChangeRef.current();
     },
     [patchSheet],
   );
@@ -590,7 +629,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (!remote.hasData) {
         patchSheet({ connection, lastError: null });
-        if (hasProgressData(progressRef.current) || dirty) return await performPush(true);
+        if (
+          hasProgressData(progressRef.current) ||
+          dirty ||
+          (connection.kind === 'sheet' && hasApiKeys(settingsRef.current))
+        ) {
+          return await performPush(true);
+        }
         return { ok: true, message: `You’re syncing as ${email}. Changes will be backed up automatically.` };
       }
 
@@ -603,6 +648,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (!remoteChanged && !dirty) {
+        const localSettings = settingsRef.current;
+        const remoteSettings = remote.snapshot.settings;
+        const remoteKnowsGeminiKey =
+          remote.snapshot.credentialRows?.geminiApiKey ??
+          Boolean(remoteSettings.geminiApiKey.trim());
+        const remoteKnowsOpenAiKey =
+          remote.snapshot.credentialRows?.openaiApiKey ??
+          Boolean(remoteSettings.openaiApiKey.trim());
+        const needsSecretUpload =
+          connection.kind === 'sheet' &&
+          ((Boolean(localSettings.geminiApiKey.trim()) && !remoteKnowsGeminiKey) ||
+            (Boolean(localSettings.openaiApiKey.trim()) && !remoteKnowsOpenAiKey));
+        // Existing keys entered before this sheet was connected still need to
+        // reach the sheet once. Remote has not changed, so this push is safe.
+        if (needsSecretUpload) {
+          patchSheet({ dirty: true, localChangedAt: Date.now() });
+          return await performPush(false);
+        }
         patchSheet({ connection, lastSyncedAt: Date.now(), lastError: null });
         return { ok: true, message: 'You’re all caught up.' };
       }
@@ -924,8 +987,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         if (!remote.hasData) {
           const hadProgress = hasProgressData(progressRef.current);
+          const hadApiKey = hasApiKeys(settingsRef.current);
           patchSheet({ lastRemoteUpdatedAt: remote.updatedAt });
-          if (!hadProgress) {
+          if (!hadProgress && !hadApiKey) {
             return {
               ok: true,
               message: `Connected to ${email}. Changes save to ${label} automatically.`,
@@ -936,7 +1000,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return {
             ok: result.ok,
             message: result.ok
-              ? `Connected. Backed up this browser's progress to ${label}.`
+              ? hadProgress
+                ? `Connected. Backed up this browser's progress to ${label}.`
+                : `Connected. Saved this browser's AI key to ${label}.`
               : result.message,
           };
         }
@@ -1254,6 +1320,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ],
   );
 
+  const levelDecks = useMemo(() => {
+    const decks = {} as Record<CEFRLevel, VocabWord[]>;
+    CEFR_LEVELS.forEach((level) => {
+      const words = LEVEL_WORDS[level] ?? [];
+      decks[level] =
+        settings.newWordOrder === 'random'
+          ? seededShuffle(words, hashString(level) ^ settings.newWordSeed)
+          : words;
+    });
+    return decks;
+  }, [settings.newWordOrder, settings.newWordSeed]);
+
+  const studyOrder = useMemo(
+    () => CEFR_LEVELS.flatMap((level) => levelDecks[level]),
+    [levelDecks],
+  );
+
+  const shuffleWordOrder = useCallback(() => {
+    updateSettings({ newWordSeed: Math.floor(Math.random() * 2_147_483_647) });
+    notify('New word order shuffled.', 'info');
+  }, [notify, updateSettings]);
+
   const markStudied = useCallback(
     (wordId: string): boolean => {
       if (progress.cards[wordId]) {
@@ -1474,6 +1562,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     stats,
     dueWords,
     studiedWords,
+    levelDecks,
+    studyOrder,
+    shuffleWordOrder,
     markStudied,
     removeStudied,
     gradeCard,

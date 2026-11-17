@@ -15,7 +15,7 @@ import {
   cn,
   formatDue,
   formatInterval,
-  getPracticeSentences,
+  getStudySentences,
   hashString,
   percent,
   pluralize,
@@ -50,6 +50,12 @@ interface SessionSummary {
 
 const emptyCounts: GradeCounts = { again: 0, hard: 0, good: 0, easy: 0 };
 
+/** Pick an item from the list using a stable value in the range [0, 1). */
+function pickWithSeed<T>(values: T[], seed: number): T | undefined {
+  if (values.length === 0) return undefined;
+  return values[Math.min(values.length - 1, Math.floor(seed * values.length))];
+}
+
 export function Review({ practice = false }: { practice?: boolean }) {
   const {
     settings,
@@ -76,6 +82,12 @@ export function Review({ practice = false }: { practice?: boolean }) {
   const [revealed, setRevealed] = useState(false);
   const [counts, setCounts] = useState<GradeCounts>(emptyCounts);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
+  // A fresh random seed per card, so the example and exercise vary between
+  // reviews but stay fixed while the learner works through this card.
+  const [picks, setPicks] = useState(() => ({
+    example: Math.random(),
+    exercise: Math.random(),
+  }));
   const gradeLock = useRef(false);
   const termRef = useRef<HTMLHeadingElement>(null);
 
@@ -99,25 +111,25 @@ export function Review({ practice = false }: { practice?: boolean }) {
       }, now)
     : null;
 
+  useEffect(() => {
+    setPicks({ example: Math.random(), exercise: Math.random() });
+  }, [current?.id, index, queue]);
+
   const exercise = useMemo(() => {
     if (!current || !settings.reviewExercise) return null;
-    const sentences = getPracticeSentences(
-      Math.max(20, settings.exercisesPerWord),
-      progress.generatedPractice[current.id] ?? [],
-    );
-    if (sentences.length === 0) return null;
-    const sentenceIndex =
-      (hashString(current.id) + (currentCard?.totalReviews ?? 0)) % sentences.length;
-    return { sentence: sentences[sentenceIndex], index: sentenceIndex };
+    const sentences = getStudySentences(progress.generatedPractice[current.id] ?? []);
+    const sentence = pickWithSeed(sentences, picks.exercise);
+    if (!sentence) return null;
+    return { sentence, index: sentences.indexOf(sentence) };
   }, [
     current,
-    currentCard?.totalReviews,
+    picks.exercise,
     settings.reviewExercise,
-    settings.exercisesPerWord,
     progress.generatedPractice,
   ]);
 
-  const reviewExample = current ? progress.generatedExamples[current.id]?.[0] : undefined;
+  const examples = current ? progress.generatedExamples[current.id] ?? [] : [];
+  const reviewExample = pickWithSeed(examples, picks.example);
 
   function startSession(words: VocabWord[]) {
     setQueue(words.slice(0, settings.maxReviewsPerDay));

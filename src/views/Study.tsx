@@ -63,11 +63,12 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     notify,
     stats,
     recordLevelPosition,
+    levelDecks,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const word = WORD_BY_ID[wordId];
-  const deck = word ? LEVEL_WORDS[word.level] ?? [] : [];
+  const deck = word ? levelDecks[word.level] ?? [] : [];
   const index = word ? deck.findIndex((entry) => entry.id === word.id) : -1;
   const [revealedExamples, setRevealedExamples] = useState<Set<number>>(new Set());
   const [generating, setGenerating] = useState(false);
@@ -100,7 +101,8 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     setJumpValue(String(index + 1));
   }, [index, wordId]);
 
-  // Remember where the learner stopped, per CEFR deck.
+  // Remember where the learner stopped, per CEFR deck. Positions are stored in
+  // vocabulary-file order so a randomized study order does not invalidate them.
   useEffect(() => {
     if (!word) return;
     const levelDeck = LEVEL_WORDS[word.level] ?? [];

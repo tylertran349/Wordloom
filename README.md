@@ -33,6 +33,9 @@ configured with `base: './'` so subpath deployments work too.
 
 - **CEFR decks** for A1, A2, B1, and B2 — 3,000 northern Vietnamese words in total (800 / 800 /
   750 / 650). The C1 and C2 decks are present but intentionally empty.
+- **Randomized new-word order** — CEFR decks are shuffled across topics by default so you meet a
+  wider variety of words instead of one topic block at a time. Switch to deck order, or reshuffle,
+  from the level toolbar or Settings → Study.
 - **Word pages** with audio pronunciation, part of speech, a native-language definition, an optional
   target-language definition, and AI-generated examples with native-language translations.
 - **Translation exercises generated with AI** — example sentences and practice prompts are created
@@ -235,7 +238,9 @@ device with the same Google account reconnects to the same spreadsheet.
 - The site owner's Google account keeps edit access to each connected sheet, because the background
   bridge writes with that account. That is what makes sync work without a server. Remove the share in
   Google Drive to revoke access.
-- API keys stay on the device and never go into the sheet.
+- API keys are saved in this browser and, when Google Sheets sync is on, in your own sheet's
+  `Wordloom Settings` tab so your other devices can use them. Keep the sheet private. The legacy
+  email-only shared sheet never receives API keys.
 - Google may show an "unverified app" warning. Choose **Advanced → Continue**; the script is the one
   described below.
 
@@ -346,7 +351,7 @@ the parameter is omitted so the provider applies its own behaviour.
 
 ### Google Gemini
 
-- API key (stored only in this browser's local storage)
+- API key (saved in this browser and synced to your own Google Sheet when sync is on)
 - Free-text model name, e.g. `gemini-2.5-flash`
 - Thinking level: Auto, Minimal, Low, Medium, High
 - Gemini 2.5 models receive a mapped `thinkingBudget`; newer models receive `thinkingLevel`.
@@ -355,7 +360,8 @@ the parameter is omitted so the provider applies its own behaviour.
 ### Custom OpenAI-compatible
 
 - Base URL, e.g. `https://api.openai.com/v1`, an OpenRouter URL, or a local server
-- API key (optional, for local endpoints that don't need one)
+- API key (optional, for local endpoints that don't need one; synced to your own Google Sheet when
+  sync is on)
 - Free-text model name
 - Free-text thinking level, sent as `reasoning_effort` (for example `minimal`, `low`, `medium`, or
   `high`). Leave it blank or enter `auto` to omit the parameter and use the provider default.
@@ -366,8 +372,8 @@ Use **Test connection** to verify the provider, key, model, and thinking setting
 providers block browser-origin requests; use a CORS-enabled endpoint or a small local proxy if
 that happens.
 
-Keys are stored in plain local storage — not encrypted. Don't use a sensitive key on a shared
-computer.
+Keys are stored in plain local storage and, when Google Sheets sync is on, in your own sheet — not
+encrypted. Don't use a sensitive key on a shared computer or a shared sheet.
 
 ## Data and privacy
 
@@ -381,15 +387,16 @@ computer.
   site owner's Google account, which is why each connected sheet is shared with it. Learners can
   remove that share in Google Drive at any time.
 - The legacy email-only sheet (`TOKEN` blank) is still readable by anyone who knows an email address.
-  New Google sign-ins use a per-sheet secret instead.
+  New Google sign-ins use a per-sheet secret instead. API keys are never written to the legacy
+  shared sheet.
 - There is no Wordloom server and no analytics.
 - **Settings → Data** exports a complete JSON backup and can import it again. Deleting progress
   leaves vocabulary and settings intact. All resets require a second click.
 - Local data is kept per profile. Logging out copies the current profile to the local-only keys; it
   does not delete local data. Signing in with another Google account swaps to that account's cache
   instead of mixing accounts.
-- Backups contain any AI credentials saved in Settings. Store backup files privately. Sheets never
-  receive those credentials.
+- Backups contain any AI credentials saved in Settings. The same keys are written to your Google
+  Sheet when sync is on, so keep both the backup file and the sheet private.
 
 ## Scripts
 

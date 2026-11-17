@@ -82,6 +82,8 @@ export interface ProgressState {
 }
 
 export type ThemeMode = 'light' | 'dark' | 'system';
+/** 'random' mixes words across topics; 'deck' follows the vocabulary file. */
+export type NewWordOrder = 'random' | 'deck';
 export type AccentColor = 'jade' | 'indigo' | 'coral' | 'amber' | 'violet';
 export type AIProvider = 'gemini' | 'openai';
 /** 'google' uses Google Translate's free web TTS; 'browser' uses speechSynthesis. */
@@ -107,6 +109,10 @@ export interface Settings {
 
   // Study
   exercisesPerWord: number;
+  /** How new words are ordered inside a CEFR deck. */
+  newWordOrder: NewWordOrder;
+  /** Stable seed for the randomized order; reshuffling picks a new one. */
+  newWordSeed: number;
   showPronunciation: boolean;
   showPartOfSpeech: boolean;
   showExampleTranslations: boolean;

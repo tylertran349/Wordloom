@@ -6,6 +6,7 @@ import {
   ChevronDown,
   RotateCcw,
   Search,
+  Shuffle,
   Sparkles,
 } from 'lucide-react';
 import type { CEFRLevel } from '../types';
@@ -29,7 +30,7 @@ import {
 } from '../components/ui';
 
 type Filter = 'all' | 'new' | 'due' | 'learning' | 'review' | 'mastered';
-type SortMode = 'deck' | 'alphabetical' | 'due';
+type SortMode = 'default' | 'alphabetical' | 'due';
 
 const FILTERS: Array<{ value: Filter; label: string }> = [
   { value: 'all', label: 'All' },
@@ -50,15 +51,23 @@ function statusFor(wordId: string, cards: ReturnType<typeof useApp>['progress'][
 
 export function Levels({ level: levelProp }: { level: CEFRLevel }) {
   const level = isCEFRLevel(levelProp) ? levelProp : 'A1';
-  const { settings, progress, stats } = useApp();
+  const {
+    settings,
+    progress,
+    stats,
+    levelDecks,
+    shuffleWordOrder,
+    updateSettings,
+  } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
-  const [sort, setSort] = useState<SortMode>('deck');
+  const [sort, setSort] = useState<SortMode>('default');
 
   const levelStat = stats.levelStats.find((entry) => entry.level === level)!;
-  const words = LEVEL_WORDS[level] ?? [];
+  const words = levelDecks[level] ?? [];
+  const selectedSort = sort === 'default' ? settings.newWordOrder : sort;
   const info = LEVEL_INFO[level];
 
   const filtered = useMemo(() => {
@@ -96,11 +105,15 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
 
   const nextWord = words.find((word) => !progress.cards[word.id]) ?? words[0];
   const savedIndex = progress.levelPositions[level];
-  const resumeIndex =
-    savedIndex !== undefined && Number.isInteger(savedIndex) && words[savedIndex]
-      ? savedIndex
-      : -1;
-  const resumeWord = resumeIndex >= 0 ? words[resumeIndex] : undefined;
+  // Positions are recorded in vocabulary-file order, so the saved word stays
+  // valid when the visible deck is randomly ordered.
+  const deckWords = LEVEL_WORDS[level] ?? [];
+  const savedWord =
+    savedIndex !== undefined && Number.isInteger(savedIndex) && deckWords[savedIndex]
+      ? deckWords[savedIndex]
+      : undefined;
+  const resumeIndex = savedWord ? words.findIndex((word) => word.id === savedWord.id) : -1;
+  const resumeWord = resumeIndex >= 0 ? savedWord : undefined;
   const newTodayInLevel = words.filter((word) => {
     const card = progress.cards[word.id];
     return card && new Date(card.createdAt).toDateString() === new Date().toDateString();
@@ -240,15 +253,35 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
               <select
                 id="deck-sort"
                 className="select-input select-small"
-                value={sort}
-                onChange={(event) => setSort(event.target.value as SortMode)}
+                value={selectedSort}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value === 'random' || value === 'deck') {
+                    updateSettings({ newWordOrder: value });
+                    setSort('default');
+                    return;
+                  }
+                  setSort(value as SortMode);
+                }}
               >
+                <option value="random">Random order</option>
                 <option value="deck">Deck order</option>
                 <option value="alphabetical">A–Z</option>
                 <option value="due">Due first</option>
               </select>
               <ChevronDown size={14} className="select-chevron" aria-hidden="true" />
             </div>
+            {selectedSort === 'random' && (
+              <button
+                type="button"
+                className="icon-button"
+                onClick={shuffleWordOrder}
+                title="Shuffle new words into a different order"
+                aria-label="Shuffle new word order"
+              >
+                <Shuffle size={15} aria-hidden="true" />
+              </button>
+            )}
           </div>
         </div>
 

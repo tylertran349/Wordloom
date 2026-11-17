@@ -39,6 +39,8 @@ export const DEFAULT_SETTINGS: Settings = {
   reduceMotion: false,
 
   exercisesPerWord: 5,
+  newWordOrder: 'random',
+  newWordSeed: 20261117,
   showPronunciation: true,
   showPartOfSpeech: true,
   showExampleTranslations: true,
@@ -176,6 +178,10 @@ function normalizeSettings(raw: unknown): Settings {
 
     exercisesPerWord: Math.round(
       asNumber(source.exercisesPerWord, defaults.exercisesPerWord, 3, 10),
+    ),
+    newWordOrder: source.newWordOrder === 'deck' ? 'deck' : defaults.newWordOrder,
+    newWordSeed: Math.round(
+      asNumber(source.newWordSeed, defaults.newWordSeed, 0, 2_147_483_647),
     ),
     showPronunciation: asBoolean(source.showPronunciation, defaults.showPronunciation),
     showPartOfSpeech: asBoolean(source.showPartOfSpeech, defaults.showPartOfSpeech),

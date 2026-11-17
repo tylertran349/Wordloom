@@ -75,6 +75,15 @@ export interface SheetSnapshot {
   sheetUrl: string;
   settings: Settings;
   progress: ProgressState;
+  /**
+   * Which API-key rows exist in the sheet. This distinguishes a sheet created
+   * before keys were synced (no row) from a key the learner deliberately
+   * cleared (row with an empty value).
+   */
+  credentialRows?: {
+    geminiApiKey: boolean;
+    openaiApiKey: boolean;
+  };
 }
 
 export interface SheetReadResult {
@@ -299,10 +308,11 @@ export function hasProgressData(progress: ProgressState): boolean {
 }
 
 /**
- * API keys stay on the device that typed them. The sheet is a document the
- * learner owns and may share, so credentials never travel with it.
+ * AI keys sync only to a learner-owned sheet. The legacy shared sheet is
+ * readable by anyone who knows the email, so credentials never go there.
  */
-export function withoutSecrets(settings: Settings): Settings {
+function settingsForSheet(connection: SheetConnection, settings: Settings): Settings {
+  if (connection.kind === 'sheet') return settings;
   return { ...settings, geminiApiKey: '', openaiApiKey: '' };
 }
 
@@ -390,12 +400,17 @@ function snapshotFromPayload(
 ): SheetSnapshot | null {
   const state = payload.state;
   if (!state || !isRecord(state)) return null;
+  const rawSettings = isRecord(state.settings) ? state.settings : {};
   return {
     updatedAt: numberOr(state.updatedAt, numberOr(payload.updatedAt, 0)),
     sheetUrl:
       typeof payload.sheetUrl === 'string' && payload.sheetUrl ? payload.sheetUrl : fallbackUrl,
-    settings: parseStoredSettings(JSON.stringify(state.settings ?? {})),
+    settings: parseStoredSettings(JSON.stringify(rawSettings)),
     progress: parseStoredProgress(JSON.stringify(state.progress ?? null)),
+    credentialRows: {
+      geminiApiKey: Object.prototype.hasOwnProperty.call(rawSettings, 'geminiApiKey'),
+      openaiApiKey: Object.prototype.hasOwnProperty.call(rawSettings, 'openaiApiKey'),
+    },
   };
 }
 
@@ -451,7 +466,7 @@ export async function writeSheet(
     email: normalizeEmail(payload.email),
     deviceId: payload.deviceId,
     baseUpdatedAt: payload.baseUpdatedAt,
-    settings: withoutSecrets(payload.settings),
+    settings: settingsForSheet(connection, payload.settings),
     progress: payload.progress,
     ...(connection.kind === 'sheet'
       ? { sheetId: connection.sheetId, secret: connection.secret }
@@ -502,7 +517,7 @@ export function beaconSheet(connection: SheetConnection, payload: SheetWritePayl
       email: normalizeEmail(payload.email),
       deviceId: payload.deviceId,
       baseUpdatedAt: payload.baseUpdatedAt,
-      settings: withoutSecrets(payload.settings),
+      settings: settingsForSheet(connection, payload.settings),
       progress: payload.progress,
       ...(connection.kind === 'sheet'
         ? { sheetId: connection.sheetId, secret: connection.secret }
