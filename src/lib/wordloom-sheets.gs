@@ -251,7 +251,9 @@ function connectPage_(e) {
   // On the data deployment the script executes as the owner, so a visitor can
   // never reach this page through the public data URL.
   if (!active || active !== effective) {
-    return reply_({ ok: false, error: 'Open this page from Wordloom Settings.' });
+    return HtmlService.createHtmlOutput(connectUnavailablePage_(active)).setTitle(
+      'Wordloom - Setup needed'
+    );
   }
 
   var returnUrl = safeReturnUrl_((e && e.parameter && e.parameter.return) || '');
@@ -259,6 +261,53 @@ function connectPage_(e) {
   return HtmlService.createHtmlOutput(connectHtml_(returnUrl, nonce)).setTitle(
     'Wordloom - Connect Google Sheets'
   );
+}
+
+/** Shown when the connect deployment is set to execute as the script owner. */
+function connectUnavailablePage_(active) {
+  var message = !active
+    ? 'Google did not identify your account for this web app.'
+    : 'This web app is running as the site owner instead of you, so Wordloom will not show its Drive contents.';
+  var fix = !active
+    ? 'Set "Who has access" to "Anyone with a Google account" on the Wordloom Connect deployment.'
+    : 'Set "Execute as" to "User accessing the web app" on the Wordloom Connect deployment.';
+
+  var lines = [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    '<title>Wordloom - Setup needed</title>',
+    '<style>',
+    'body { margin: 0; padding: 32px 20px; background: #f6f4ef; color: #1d2620; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }',
+    'main { max-width: 540px; margin: 0 auto; background: #fff; border: 1px solid #e3ded3; border-radius: 16px; padding: 24px; }',
+    'h1 { font-size: 20px; margin: 0 0 10px; }',
+    'p { line-height: 1.55; margin: 0 0 12px; }',
+    '.tag { display: inline-block; background: #fdf1ef; color: #8a2f20; border: 1px solid #f2cfc8; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; margin-bottom: 14px; }',
+    'ol { margin: 0; padding-left: 20px; line-height: 1.75; }',
+    'code { background: #f1eee6; padding: 1px 5px; border-radius: 5px; }',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<main>',
+    '<span class="tag">Setup needed</span>',
+    '<h1>Wordloom could not sign you in</h1>',
+    '<p>' + message + '</p>',
+    '<p>' + fix + '</p>',
+    '<ol>',
+    '<li>In Apps Script, open <strong>Deploy &rarr; Manage deployments</strong>.</li>',
+    '<li>Edit the deployment whose URL Wordloom uses for sign-in.</li>',
+    '<li>Set <strong>Execute as</strong> to <strong>User accessing the web app</strong>.</li>',
+    '<li>Set <strong>Who has access</strong> to <strong>Anyone with a Google account</strong>.</li>',
+    '<li>Deploy, then return to <code>Settings &rarr; Google Sheets</code> and try again.</li>',
+    '</ol>',
+    '</main>',
+    '</body>',
+    '</html>'
+  ];
+
+  return lines.join('\n');
 }
 
 /** Everything the connect page needs to draw itself. */
