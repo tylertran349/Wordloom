@@ -11,7 +11,7 @@
  */
 
 const DEFAULT_BRIDGE_URL =
-  'https://script.google.com/macros/s/AKfycbw_We-Etpaz0G_dO1QF75ES1Cot95kZ57w9RcPVQqCEYvkKCMK-fN-TW22JmL_-d8Pb/exec';
+  'https://script.google.com/macros/s/AKfycbyENAWTd9ywdrEJgFvs_kdfd73QSphJS48T2KmO3jnDmx-DI4wy1ushYvTRaSDXWNxm/exec';
 const DEFAULT_SHEET_URL =
   'https://docs.google.com/spreadsheets/d/18sPZDwPeFFFpPFtjOI8UddACO8ilg5jJBDoozQ7Iek4/edit';
 
@@ -19,7 +19,7 @@ const DEFAULT_SHEET_URL =
  * The connect page URL, ending in /exec. See src/lib/wordloom-sheets.gs for the
  * Apps Script that serves it.
  */
-const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbxmJO5LOekt_MIbuuJ1UVxtnWyulEYTPfAnTwo5B2VmfgfNbryrWOjABVskeUNxApkP/exec';
+const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbxrtz5C8tJKJG2KhqETwFq3IxEQgTYe7hP5nS0iskIeY2vBL1Rq7ajKGLRBSyNYUHC_/exec';
 
 const env = import.meta.env;
 
