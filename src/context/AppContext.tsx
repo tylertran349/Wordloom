@@ -717,10 +717,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const currentEmail = sheetRef.current.email;
     if (currentEmail) {
+      // Keep this email's offline cache. Logging out only removes the
+      // email/connection association from this browser.
       saveSettings(settingsRef.current, currentEmail);
       saveProgress(progressRef.current, currentEmail);
     }
-    // Keep the current data available offline under the local-only profile.
+    // Mirror the current data to the signed-out cache so reloading shows the
+    // same progress. Nothing is deleted.
     saveSettings(settingsRef.current, '');
     saveProgress(progressRef.current, '');
     profileRef.current = '';

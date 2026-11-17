@@ -16,6 +16,7 @@ import {
   EyeOff,
   Languages,
   Loader2,
+  LogOut,
   Monitor,
   Moon,
   Palette,
@@ -59,7 +60,6 @@ import {
   WORDLOOM_BRIDGE_SOURCE,
 } from '../lib/sheetsScript';
 import {
-  LEGACY_OWNER_EMAIL,
   SHARED_SHEET_ENDPOINT,
   SHARED_SHEET_URL,
 } from '../lib/site';
@@ -237,7 +237,7 @@ export function Settings() {
   const [cacheCount, setCacheCount] = useState(() => translationCacheSize());
   const [importError, setImportError] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState<'progress' | 'settings' | 'all' | null>(null);
-  const [sheetEmailInput, setSheetEmailInput] = useState(sheetSync.email);
+  const [sheetEmailInput, setSheetEmailInput] = useState('');
   const [sheetMessage, setSheetMessage] = useState<{
     tone: 'success' | 'error' | 'info';
     text: string;
@@ -391,10 +391,6 @@ export function Settings() {
     }
   }
 
-  useEffect(() => {
-    setSheetEmailInput(sheetSync.email);
-  }, [sheetSync.email]);
-
   async function handleSheetSignIn() {
     setSheetMessage(null);
     const result = await signInSheet(sheetEmailInput);
@@ -442,14 +438,16 @@ export function Settings() {
     });
   }
 
-  function handleSheetSignOut() {
+  function handleLogOut() {
     signOutSheet();
+    setSheetEmailInput('');
     setConfirmSheetPull(false);
     setConfirmSheetPush(false);
     setSheetMessage({
       tone: 'info',
-      text: 'Sync is off. Your data is still saved in this browser.',
+      text: 'Logged out. Your data is still saved in this browser.',
     });
+    notify('Logged out of Google Sheets sync. Your data is still saved in this browser.', 'info');
   }
 
   function selectBridgeScriptText() {
@@ -536,33 +534,46 @@ export function Settings() {
             : 'Changes save in this browser. Google Sheets sync is optional.'
         }
         actions={
-          <span
-            className={cn(
-              'saved-indicator',
-              (sheetPhase === 'error' ||
-                (Boolean(sheetSync.email) && sheetPhase === 'disconnected')) &&
-                'is-error',
+          <div className="settings-head-actions">
+            <span
+              className={cn(
+                'saved-indicator',
+                (sheetPhase === 'error' ||
+                  (Boolean(sheetSync.email) && sheetPhase === 'disconnected')) &&
+                  'is-error',
+              )}
+            >
+              {sheetSync.email ? (
+                <Cloud size={14} aria-hidden="true" />
+              ) : (
+                <Check size={14} aria-hidden="true" />
+              )}
+              {sheetSync.email
+                ? sheetPhase === 'error'
+                  ? 'Needs attention'
+                  : sheetPhase === 'disconnected'
+                    ? 'Sync not set up'
+                    : sheetPhase === 'syncing'
+                      ? 'Syncing…'
+                      : sheetPhase === 'unsaved'
+                        ? 'Saving…'
+                        : sheetPhase === 'needs-decision'
+                          ? 'Choose a copy'
+                          : 'Backed up'
+                : 'Saved locally'}
+            </span>
+            {sheetSync.email && (
+              <button
+                type="button"
+                className="button button-ghost button-small"
+                onClick={handleLogOut}
+                title="Log out of Google Sheets sync. Your local data stays in this browser."
+              >
+                <LogOut size={14} aria-hidden="true" />
+                Log out
+              </button>
             )}
-          >
-            {sheetSync.email ? (
-              <Cloud size={14} aria-hidden="true" />
-            ) : (
-              <Check size={14} aria-hidden="true" />
-            )}
-            {sheetSync.email
-              ? sheetPhase === 'error'
-                ? 'Needs attention'
-                : sheetPhase === 'disconnected'
-                  ? 'Sync not set up'
-                  : sheetPhase === 'syncing'
-                    ? 'Syncing…'
-                    : sheetPhase === 'unsaved'
-                      ? 'Saving…'
-                      : sheetPhase === 'needs-decision'
-                        ? 'Choose a copy'
-                        : 'Backed up'
-              : 'Saved locally'}
-          </span>
+          </div>
         }
       />
 
@@ -588,6 +599,44 @@ export function Settings() {
         <div className="settings-panel">
           {tab === 'general' && (
             <>
+              <Section
+                title="Google Sheets account"
+                description="Sync is optional. Logging out keeps all of your data in this browser."
+              >
+                {sheetSync.email ? (
+                  <div className="account-row">
+                    <div>
+                      <strong>{sheetSync.email}</strong>
+                      <span>Signed in for Google Sheets sync. Logging out keeps your data here.</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="button button-ghost button-small"
+                      onClick={handleLogOut}
+                      title="Log out of Google Sheets sync. Your local data stays in this browser."
+                    >
+                      <LogOut size={14} aria-hidden="true" />
+                      Log out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="account-row">
+                    <div>
+                      <strong>Not logged in</strong>
+                      <span>Add an email to back up your progress across devices.</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="button button-primary button-small"
+                      onClick={() => setTab('sheets')}
+                    >
+                      Set up sync
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </Section>
+
               <Section title="Your profile" description="A small personal touch for the daily greeting.">
                 <Row
                   label="Display name"
@@ -1604,10 +1653,10 @@ export function Settings() {
                     <button
                       type="button"
                       className="text-link sheet-disconnect"
-                      onClick={handleSheetSignOut}
+                      onClick={handleLogOut}
                     >
                       <Unplug size={14} aria-hidden="true" />
-                      Stop syncing on this browser
+                      Log out of Google Sheets sync
                     </button>
                   </>
                 ) : (
@@ -1748,7 +1797,7 @@ export function Settings() {
                 <div className="inline-alert is-info">
                   <Check size={15} aria-hidden="true" />
                   <span>
-                    <strong>Switching accounts:</strong> “Stop syncing” keeps your current data on
+                    <strong>Switching accounts:</strong> “Log out” keeps your current data on
                     this browser. Adding a different email loads that email’s own progress and
                     settings instead of mixing accounts.
                   </span>
@@ -1851,9 +1900,8 @@ export function Settings() {
                     <Check size={15} aria-hidden="true" />
                     <span>
                       <strong>Updating an existing sheet?</strong> The rows already in it are moved
-                      to <strong>{LEGACY_OWNER_EMAIL || 'the sheet owner’s email'}</strong>. Nothing
-                      is deleted. If Wordloom asks which copy to keep, choose{' '}
-                      <strong>Use the sheet version</strong>.
+                      to the sheet owner’s account. Nothing is deleted. If Wordloom asks which copy
+                      to keep, choose <strong>Use the sheet version</strong>.
                     </span>
                   </div>
                   <div className="sheet-connection-meta">
@@ -1861,8 +1909,6 @@ export function Settings() {
                     <code>{SHARED_SHEET_ENDPOINT || 'Not configured'}</code>
                     <span>Spreadsheet</span>
                     <code>{SHARED_SHEET_URL || 'Not configured'}</code>
-                    <span>Existing data owner</span>
-                    <code>{LEGACY_OWNER_EMAIL || 'Not set'}</code>
                   </div>
                 </details>
               </Section>

@@ -210,7 +210,7 @@ email on another device to load the same progress.
 | **Sync now** | Compares this browser and the sheet and saves the newer copy. |
 | **Use the sheet version** | Replaces this browser's progress with the copy in the sheet. |
 | **Use this browser's version** | Replaces this email's rows in the sheet with this browser's progress. |
-| **Stop syncing on this browser** | Turns sync off here. Your data stays in this browser. |
+| **Log out** | Removes the email/Sheets link from this browser. Your local data stays. |
 
 Wordloom asks before either replacement when both copies have changes.
 
@@ -231,7 +231,7 @@ Wordloom asks before either replacement when both copies have changes.
 | --- | --- |
 | **"Google Sheets sync needs a one-time update"** | The site owner needs to update the Apps Script bridge. See **For the sheet owner** below. |
 | **"Which copy should Wordloom keep?"** | Choose **Use the sheet version** for a new device or to keep the sheet. Choose **Use this browser's version** if you studied here and the sheet is out of date. |
-| **I signed in with the wrong email** | Press **Stop syncing on this browser**, then add the correct email. |
+| **I signed in with the wrong email** | Press **Log out**, then add the correct email. |
 | **I don't see my old progress** | The old single-user data belongs to the sheet owner's email. Sign in with that address and choose **Use the sheet version**. |
 | **Sync keeps failing** | Check your internet connection and any ad blocker, then press **Sync now**. Your local data is safe. |
 
@@ -282,7 +282,8 @@ not accidentally see the owner's data.
 The first sync after the update migrates the old tabs in place:
 
 - Every tab gets an `email` column.
-- Old rows are assigned to `LEGACY_OWNER_EMAIL` (currently `tylertran349@gmail.com`).
+- Old rows are assigned to the configured legacy owner email (`LEGACY_OWNER_EMAIL` in
+  `src/lib/site.ts`).
 - A `Wordloom Users` tab lists every email, when it was first and last seen, its last device, and its
   card/review counts.
 
@@ -366,8 +367,9 @@ computer.
 - There is no Wordloom server and no analytics.
 - **Settings → Data** exports a complete JSON backup and can import it again. Deleting progress
   leaves vocabulary and settings intact. All resets require a second click.
-- Local data is kept per profile. Stopping sync copies the current profile to the local-only keys;
-  adding another email swaps to that email's cache instead of mixing accounts.
+- Local data is kept per profile. Logging out copies the current profile to the local-only keys; it
+  does not delete local data. Adding another email swaps to that email's cache instead of mixing
+  accounts.
 - Backups contain any AI credentials saved in Settings. Store backup files privately. Sheets never
   receive those credentials.
 

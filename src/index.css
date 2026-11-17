@@ -735,6 +735,12 @@ kbd {
   background: color-mix(in srgb, var(--danger) 8%, var(--surface));
   color: var(--danger);
 }
+.settings-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .section-head {
   display: flex;
@@ -3797,6 +3803,27 @@ html[data-theme='dark'] .grade-easy {
   flex-direction: column;
   gap: 0.8rem;
   min-width: 0;
+}
+.account-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.65rem 0;
+}
+.account-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.account-row strong {
+  color: var(--ink);
+  font-size: 0.72rem;
+}
+.account-row span {
+  color: var(--muted);
+  font-size: 0.61rem;
 }
 .settings-section {
   padding: 1.1rem 1.2rem;
