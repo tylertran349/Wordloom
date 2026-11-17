@@ -2390,6 +2390,16 @@ html[data-theme='dark'] .status-due {
   gap: 1rem;
   margin-bottom: 0.7rem;
 }
+/* Let the heading copy shrink before the trailing meta/actions wrap, and keep
+   that trailing group pinned to the right edge even when it does wrap. Without
+   this, a wrapping row strands the count or button on the left of the card. */
+.section-card-head > :first-child {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.section-card-head > :last-child {
+  margin-left: auto;
+}
 .section-card-head .eyebrow {
   margin-bottom: 0.15rem;
 }
@@ -2414,7 +2424,12 @@ html[data-theme='dark'] .status-due {
   gap: 0.6rem;
 }
 .examples-empty .muted-copy {
+  flex: 1 1 15rem;
+  min-width: 0;
   padding: 0;
+}
+.examples-empty .button {
+  margin-left: auto;
 }
 
 .example-list {
@@ -2526,13 +2541,6 @@ html[data-theme='dark'] .status-due {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: color-mix(in srgb, var(--surface) 45%, var(--bg));
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-.exercise:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
-  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .exercise.is-compact {
   padding: 0.8rem;
@@ -2825,8 +2833,13 @@ html[data-theme='dark'] .status-due {
 }
 .practice-footer p {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 0.3rem;
+  min-width: 0;
+}
+.practice-footer > span {
+  margin-left: auto;
 }
 
 .study-finish {
@@ -2843,6 +2856,10 @@ html[data-theme='dark'] .status-due {
 }
 .study-finish.is-added {
   border-left-color: var(--good);
+}
+.study-finish-copy {
+  flex: 1 1 18rem;
+  min-width: 0;
 }
 .study-finish-copy h2 {
   margin-top: 0.1rem;
@@ -2861,6 +2878,7 @@ html[data-theme='dark'] .status-due {
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
+  margin-left: auto;
 }
 .finish-added {
   flex-basis: 100%;
@@ -3814,8 +3832,13 @@ html[data-theme='dark'] .grade-easy {
 }
 .account-row > div {
   display: flex;
+  flex: 1 1 12rem;
   flex-direction: column;
   gap: 0.1rem;
+  min-width: 0;
+}
+.account-row > .button {
+  margin-left: auto;
 }
 .account-row strong {
   color: var(--ink);
