@@ -19,7 +19,7 @@ const DEFAULT_SHEET_URL =
  * The connect page URL, ending in /exec. Leave blank until the second web-app
  * deployment exists; Settings explains how to create it.
  */
-const DEFAULT_CONNECT_URL = '';
+const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbwTtEqB9A4dDjFa_prXych3H4eC_NIMap_fVT5N3rya94Q_2jJic4yuMP0LI0p0zt52/exec';
 const DEFAULT_LEGACY_OWNER_EMAIL = 'tylertran349@gmail.com';
 
 const env = import.meta.env;
