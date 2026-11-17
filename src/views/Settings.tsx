@@ -1722,7 +1722,7 @@ export function Settings() {
                               confirmLegacyImport ? 'button-danger-solid' : 'button-ghost',
                             )}
                             onClick={() => void handleLegacyImport()}
-                            disabled={sheetBusy || importBusy}
+                            disabled={sheetBusy || importBusy || sheetSync.pendingDecision}
                           >
                             <Download size={14} aria-hidden="true" />
                             {importBusy

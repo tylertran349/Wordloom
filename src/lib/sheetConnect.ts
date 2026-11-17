@@ -3,8 +3,9 @@ import { SHARED_CONNECT_ENDPOINT } from './site';
 
 /** sessionStorage key that tells Settings to open the Sheets tab on return. */
 const RETURNED_TAB_KEY = 'wordloom.sheets.returned';
-/** sessionStorage key for the one-time nonce that proves this tab started the flow. */
+/** One-time nonce that proves this browser started the connect flow. */
 const NONCE_KEY = 'wordloom.sheets.nonce';
+const NONCE_TTL_MS = 15 * 60 * 1000;
 
 /** Connection handed back by the Google connect page. */
 let pending: SheetConnectionInput | null = null;
@@ -23,6 +24,36 @@ function createNonce(): string {
   }
 }
 
+function storeNonce(nonce: string): void {
+  try {
+    window.localStorage.setItem(NONCE_KEY, JSON.stringify({ nonce, at: Date.now() }));
+  } catch {
+    // Without storage the return will be rejected; the user can retry.
+  }
+}
+
+/**
+ * Read and clear the nonce. localStorage (not sessionStorage) so the return
+ * link still works if it opens in a new tab; the nonce is still unguessable
+ * outside this origin.
+ */
+function takeNonce(): string {
+  try {
+    const raw = window.localStorage.getItem(NONCE_KEY);
+    if (!raw) return '';
+    window.localStorage.removeItem(NONCE_KEY);
+    const value: unknown = JSON.parse(raw);
+    if (!value || typeof value !== 'object') return '';
+    const entry = value as Record<string, unknown>;
+    const nonce = typeof entry.nonce === 'string' ? entry.nonce : '';
+    const at = typeof entry.at === 'number' ? entry.at : 0;
+    if (!nonce || Date.now() - at > NONCE_TTL_MS) return '';
+    return nonce;
+  } catch {
+    return '';
+  }
+}
+
 /**
  * Build the full-page Google sign-in URL. Wordloom returns to the same page
  * after the connect flow, so a popup (and its blockers) is never involved.
@@ -33,14 +64,10 @@ export function startSheetConnect(): string | null {
   const returnTo = `${window.location.origin}${window.location.pathname}`;
   const url = new URL(SHARED_CONNECT_ENDPOINT);
 
-  // A nonce stored in this tab proves the returned connection was started
+  // A nonce stored in this browser proves the returned connection was started
   // here, not injected through a crafted link.
   const nonce = createNonce();
-  try {
-    window.sessionStorage.setItem(NONCE_KEY, nonce);
-  } catch {
-    // Without storage the return will be rejected; the user can retry.
-  }
+  storeNonce(nonce);
 
   url.searchParams.set('page', 'connect');
   url.searchParams.set('return', returnTo);
@@ -81,14 +108,8 @@ export function captureReturningConnection(): void {
   const payload = decodePayload(raw);
   if (!payload) return;
 
-  // Reject a connection that did not originate from this tab's sign-in click.
-  let expected = '';
-  try {
-    expected = window.sessionStorage.getItem(NONCE_KEY) ?? '';
-    window.sessionStorage.removeItem(NONCE_KEY);
-  } catch {
-    expected = '';
-  }
+  // Reject a connection that did not originate from this browser's sign-in.
+  const expected = takeNonce();
   if (!expected || payload.nonce !== expected) return;
 
   pending = payload;

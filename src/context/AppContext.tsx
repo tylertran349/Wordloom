@@ -404,6 +404,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           message: 'Google Sheets sync is not set up for this site yet. Ask the site owner to finish the setup.',
         };
       }
+      // A stale autosave timer must never resolve a conflict by itself.
+      if (current.pendingDecision) {
+        return {
+          ok: false,
+          tone: 'info',
+          message: 'Choose which copy to keep first.',
+        };
+      }
+      if (!force && !current.dirty) {
+        return { ok: true, message: 'Up to date.' };
+      }
       const connection = current.connection;
       const email = current.email;
       const changedAt = current.localChangedAt;
@@ -644,6 +655,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (busyRef.current) return { ok: false, message: 'A sync check is already running. Try again in a moment.' };
       busyRef.current = true;
       setSheetBusy(true);
+      // Cancel any queued autosave from the previous account or sheet.
+      if (pushTimer.current) {
+        window.clearTimeout(pushTimer.current);
+        pushTimer.current = undefined;
+      }
 
       const previousEmail = sheetRef.current.email;
       const switching = previousEmail !== email;
@@ -829,6 +845,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       busyRef.current = true;
       setSheetBusy(true);
+      // Cancel any queued autosave from the previous account or sheet.
+      if (pushTimer.current) {
+        window.clearTimeout(pushTimer.current);
+        pushTimer.current = undefined;
+      }
 
       const previousEmail = sheetRef.current.email;
       const previousConnection = sheetRef.current.connection;
@@ -974,6 +995,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!current.connection || current.connection.kind !== 'sheet') {
         return { ok: false, message: 'Connect your own Google Sheet first.' };
       }
+      if (current.pendingDecision) {
+        return { ok: false, tone: 'info', message: 'Choose which copy to keep first.' };
+      }
       const legacy = createLegacyConnection();
       if (!legacy) {
         return { ok: false, message: 'The old shared sheet is not configured for this build.' };
@@ -990,6 +1014,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       busyRef.current = true;
       setSheetBusy(true);
       try {
+        const target = await readSheet(connection);
+        if (!sameConnection(sheetRef.current.connection, connection)) {
+          return {
+            ok: false,
+            message: 'Sync was interrupted because the spreadsheet changed. Try again.',
+          };
+        }
+        if (target.hasData) {
+          return {
+            ok: false,
+            message:
+              'Your Google Sheet already has progress. Import works on an empty sheet; use Sync now to choose which copy to keep.',
+          };
+        }
+
         const remote = await readSheet(legacy, email);
         if (!sameConnection(sheetRef.current.connection, connection)) {
           return {

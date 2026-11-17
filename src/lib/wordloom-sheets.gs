@@ -247,9 +247,9 @@ function connectPage_(e) {
 
   var returnUrl = safeReturnUrl_((e && e.parameter && e.parameter.return) || '');
   var nonce = String((e && e.parameter && e.parameter.nonce) || '').trim();
-  return HtmlService.createHtmlOutput(connectHtml_(returnUrl, nonce))
-    .setTitle('Wordloom - Connect Google Sheets')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return HtmlService.createHtmlOutput(connectHtml_(returnUrl, nonce)).setTitle(
+    'Wordloom - Connect Google Sheets'
+  );
 }
 
 /** Everything the connect page needs to draw itself. */
@@ -525,8 +525,8 @@ function listAccounts_(sheet) {
 
   function note(email) {
     var clean = normalizeEmail_(email);
-    if (!clean) return;
-    if (!counts[clean]) {
+    if (!clean) return '';
+    if (!Object.prototype.hasOwnProperty.call(counts, clean)) {
       counts[clean] = 0;
       order.push(clean);
     }
@@ -629,7 +629,7 @@ function listSheets_() {
     "mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false"
   );
   var count = 0;
-  while (files.hasNext() && count < 100) {
+  while (files.hasNext() && count < 200) {
     var file = files.next();
     count += 1;
     results.push({

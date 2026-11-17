@@ -282,7 +282,7 @@ One script, two web-app deployments.
    `src/lib/site.ts` (or `VITE_WORDLOOM_BRIDGE_URL`).
 4. **Connect deployment:** **Deploy → New deployment → Web app** again, this time choose **Execute
    as: User accessing the web app** and **Who has access: Anyone with a Google account**. Deploy and
-   authorize. Put that URL into `src/lib/site.ts` as `SHARED_CONNECT_ENDPOINT` (or
+   authorize. Put that URL into `src/lib/site.ts` as `DEFAULT_CONNECT_URL` (or
    `VITE_WORDLOOM_CONNECT_URL`).
 5. Rebuild the site.
 
