@@ -1,19 +1,35 @@
 import type { ProgressState, Settings } from '../types';
-import { parseStoredProgress, parseStoredSettings } from './storage';
+import {
+  hasStoredProfile,
+  loadProgress,
+  loadSettings,
+  parseStoredProgress,
+  parseStoredSettings,
+  saveProgress,
+  saveSettings,
+} from './storage';
+import {
+  LEGACY_OWNER_EMAIL,
+  SHARED_SHEET_ENDPOINT,
+  SHARED_SHEET_URL,
+  SHARED_SYNC_TOKEN,
+} from './site';
 
 /** Local cache of the Google Sheets connection. */
-export const SHEETS_STORAGE_KEY = 'wordloom.sheets.v1';
+const SHEETS_STORAGE_KEY = 'wordloom.sheets.v1';
 
-const BRIDGE_PATTERN =
-  /https:\/\/script\.google\.com\/(?:macros\/s|a\/macros\/[^/\s]+\/s)\/[A-Za-z0-9_-]+\/(?:exec|dev)/;
-const SHEET_PATTERN = /https:\/\/docs\.google\.com\/spreadsheets\/d\/[A-Za-z0-9_-]+/;
+/**
+ * The bridge schema that understands per-email rows. An older deployment
+ * (schema 3) would ignore the email and hand every visitor the owner's data,
+ * so refuse to read or write until the owner updates the Apps Script.
+ */
+const BRIDGE_SCHEMA = 4;
 
 const REQUEST_TIMEOUT_MS = 25_000;
 
 export interface SheetConnection {
   /** Canonical spreadsheet URL, when known. */
   sheetUrl: string;
-  spreadsheetId: string;
   /** Apps Script web app URL, ending in /exec. */
   endpoint: string;
   token: string;
@@ -21,6 +37,8 @@ export interface SheetConnection {
 
 export interface SheetSyncState {
   connection: SheetConnection | null;
+  /** The learner's email. Blank means local-only. */
+  email: string;
   deviceId: string;
   /** Server timestamp of the last remote copy this device saw. */
   lastRemoteUpdatedAt: number;
@@ -38,15 +56,11 @@ export interface SheetSyncState {
 export interface SheetSummary {
   cards: number;
   reviews: number;
-  drafts: number;
-  words: number;
-  reviewLog: number;
 }
 
 export interface SheetSnapshot {
   updatedAt: number;
   sheetUrl: string;
-  deviceId?: string;
   settings: Settings;
   progress: ProgressState;
 }
@@ -60,6 +74,7 @@ export interface SheetReadResult {
 }
 
 export interface SheetWritePayload {
+  email: string;
   settings: Settings;
   progress: ProgressState;
   deviceId: string;
@@ -77,26 +92,43 @@ export interface SheetWriteResult {
   };
 }
 
-export interface ParsedConnection {
-  connection?: SheetConnection;
-  error?: string;
-}
-
 interface BridgeStatePayload {
   state?: {
     updatedAt?: unknown;
-    deviceId?: unknown;
     settings?: unknown;
     progress?: unknown;
   };
   updatedAt?: unknown;
   sheetUrl?: unknown;
+  schema?: unknown;
   error?: unknown;
   conflict?: unknown;
   ok?: unknown;
 }
 
-export function createDeviceId(): string {
+export function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+export function isValidEmail(value: string): boolean {
+  const email = normalizeEmail(value);
+  if (!email || email.length > 200 || /\s/.test(email)) return false;
+  const at = email.indexOf('@');
+  const dot = email.lastIndexOf('.');
+  return at > 0 && dot > at + 1 && dot < email.length - 1;
+}
+
+/** The one shared connection for the site, or null when it is not configured. */
+export function createSharedConnection(): SheetConnection | null {
+  if (!SHARED_SHEET_ENDPOINT) return null;
+  return {
+    sheetUrl: SHARED_SHEET_URL,
+    endpoint: SHARED_SHEET_ENDPOINT,
+    token: SHARED_SYNC_TOKEN,
+  };
+}
+
+function createDeviceId(): string {
   try {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
       return crypto.randomUUID();
@@ -107,9 +139,10 @@ export function createDeviceId(): string {
   return `device-${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
 }
 
-export function defaultSheetSync(): SheetSyncState {
+function defaultSheetSync(): SheetSyncState {
   return {
     connection: null,
+    email: '',
     deviceId: createDeviceId(),
     lastRemoteUpdatedAt: 0,
     lastSyncedAt: null,
@@ -121,6 +154,16 @@ export function defaultSheetSync(): SheetSyncState {
   };
 }
 
+/**
+ * Upgrade path for the owner's existing device: copy the old local-only cache
+ * into the owner's per-email profile so the first load feels continuous.
+ */
+function adoptLegacyLocalProfile(email: string): void {
+  if (!email || hasStoredProfile(email)) return;
+  saveSettings(loadSettings(''), email);
+  saveProgress(loadProgress(''), email);
+}
+
 export function loadSheetSync(): SheetSyncState {
   const base = defaultSheetSync();
   try {
@@ -129,30 +172,45 @@ export function loadSheetSync(): SheetSyncState {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return base;
     const source = parsed as Record<string, unknown>;
-    const connectionRaw = source.connection;
-    let connection: SheetConnection | null = null;
-    if (connectionRaw && typeof connectionRaw === 'object') {
-      const entry = connectionRaw as Record<string, unknown>;
-      if (typeof entry.endpoint === 'string' && entry.endpoint) {
-        connection = {
-          sheetUrl: typeof entry.sheetUrl === 'string' ? entry.sheetUrl : '',
-          spreadsheetId: typeof entry.spreadsheetId === 'string' ? entry.spreadsheetId : '',
-          endpoint: entry.endpoint,
-          token: typeof entry.token === 'string' ? entry.token : '',
-        };
-      }
+    const storedConnection = isRecord(source.connection) ? source.connection : null;
+    const storedEndpoint =
+      storedConnection && typeof storedConnection.endpoint === 'string'
+        ? storedConnection.endpoint
+        : '';
+    let email = normalizeEmail(typeof source.email === 'string' ? source.email : '');
+
+    // Upgrade path for the owner's existing device: the old connection pointed
+    // at this same shared bridge, so adopt its local data into the owner's
+    // per-email profile instead of making them re-enter everything.
+    if (
+      !email &&
+      LEGACY_OWNER_EMAIL &&
+      storedEndpoint &&
+      storedEndpoint === SHARED_SHEET_ENDPOINT
+    ) {
+      email = normalizeEmail(LEGACY_OWNER_EMAIL);
+      adoptLegacyLocalProfile(email);
     }
+
+    // The old device-level connection is intentionally dropped. The site now
+    // uses one shared bridge and asks each learner for an email instead.
+    const connection = email ? createSharedConnection() : null;
     return {
       connection,
+      email,
       deviceId:
         typeof source.deviceId === 'string' && source.deviceId ? source.deviceId : base.deviceId,
-      lastRemoteUpdatedAt: numberOr(source.lastRemoteUpdatedAt, 0),
-      lastSyncedAt: source.lastSyncedAt === null ? null : numberOr(source.lastSyncedAt, 0) || null,
-      lastError: typeof source.lastError === 'string' ? source.lastError : null,
-      dirty: source.dirty === true,
-      localChangedAt: numberOr(source.localChangedAt, 0),
-      pendingDecision: source.pendingDecision === true,
-      remoteSummary: isSummary(source.remoteSummary) ? source.remoteSummary : null,
+      lastRemoteUpdatedAt: email ? numberOr(source.lastRemoteUpdatedAt, 0) : 0,
+      lastSyncedAt:
+        email && source.lastSyncedAt !== null
+          ? numberOr(source.lastSyncedAt, 0) || null
+          : null,
+      lastError: email && typeof source.lastError === 'string' ? source.lastError : null,
+      dirty: Boolean(email) && source.dirty === true,
+      localChangedAt: email ? numberOr(source.localChangedAt, 0) : 0,
+      pendingDecision: Boolean(email) && source.pendingDecision === true,
+      remoteSummary:
+        email && isSummary(source.remoteSummary) ? source.remoteSummary : null,
     };
   } catch {
     return base;
@@ -182,11 +240,6 @@ export function summarizeProgress(progress: ProgressState): SheetSummary {
   return {
     cards: Object.keys(progress.cards).length,
     reviews: progress.reviewCount,
-    drafts: Object.keys(progress.responses).length,
-    words:
-      Object.keys(progress.generatedExamples).length +
-      Object.keys(progress.generatedPractice).length,
-    reviewLog: progress.reviewLog.length,
   };
 }
 
@@ -209,64 +262,13 @@ export function withoutSecrets(settings: Settings): Settings {
   return { ...settings, geminiApiKey: '', openaiApiKey: '' };
 }
 
-export function parseConnectionInput(input: {
-  sheetUrl: string;
-  endpoint: string;
-  token: string;
-}): ParsedConnection {
-  const sheetText = input.sheetUrl.trim();
-  const endpointText = input.endpoint.trim();
-  const combined = `${sheetText}\n${endpointText}`;
-
-  const endpointMatch = endpointText.match(BRIDGE_PATTERN) ?? combined.match(BRIDGE_PATTERN);
-  const endpoint = endpointMatch?.[0] ?? '';
-  const sheetMatch = sheetText.match(SHEET_PATTERN) ?? combined.match(SHEET_PATTERN);
-  const sheetUrl = sheetMatch?.[0] ?? '';
-
-  if (!endpoint) {
-    if (/script\.google\.com/i.test(combined)) {
-      return {
-        error:
-          'That looks like the Apps Script editor URL. Copy the Web app URL from Deploy → Manage deployments; it ends in /exec.',
-      };
-    }
-    return {
-      error:
-        'Paste the Apps Script Web app URL (it starts with https://script.google.com/macros/s/ and ends in /exec).',
-    };
-  }
-
-  return {
-    connection: {
-      sheetUrl,
-      spreadsheetId: sheetUrl ? extractSpreadsheetId(sheetUrl) : '',
-      endpoint,
-      token: (input.token.trim() || combined.match(/Token:\s*(\S+)/)?.[1] || '').slice(0, 200),
-    },
-  };
-}
-
-function extractSpreadsheetId(url: string): string {
-  const match = url.match(/spreadsheets\/d\/([A-Za-z0-9_-]+)/);
-  return match?.[1] ?? '';
-}
-
 /** Fill in the sheet URL returned by the bridge after the first connection. */
 export function attachSheetUrl(
   connection: SheetConnection,
   sheetUrl: string,
 ): SheetConnection {
-  if (!sheetUrl) return connection;
-  if (connection.sheetUrl === sheetUrl && connection.spreadsheetId) return connection;
-  return { ...connection, sheetUrl, spreadsheetId: extractSpreadsheetId(sheetUrl) };
-}
-
-export function buildSyncLink(connection: SheetConnection): string {
-  const lines = ['Wordloom sync'];
-  if (connection.sheetUrl) lines.push(`Sheet: ${connection.sheetUrl}`);
-  lines.push(`Bridge: ${connection.endpoint}`);
-  if (connection.token) lines.push(`Token: ${connection.token}`);
-  return lines.join('\n');
+  if (!sheetUrl || connection.sheetUrl === sheetUrl) return connection;
+  return { ...connection, sheetUrl };
 }
 
 async function callBridge(url: string, init?: RequestInit): Promise<BridgeStatePayload> {
@@ -282,17 +284,19 @@ async function callBridge(url: string, init?: RequestInit): Promise<BridgeStateP
     });
     if (!response.ok) {
       throw new Error(
-        `The sheet bridge answered with HTTP ${response.status}. Check that the web app is deployed with access set to “Anyone”.`,
+        `Google Sheets returned an error (HTTP ${response.status}). Try again in a moment. Your data is safe in this browser.`,
       );
     }
     text = await response.text();
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('The sheet bridge did not reply in time. Check your connection and try again.');
+      throw new Error(
+        'Google Sheets took too long to respond. Check your connection and try again. Your data is safe in this browser.',
+      );
     }
     if (error instanceof TypeError) {
       throw new Error(
-        'Could not reach the Apps Script bridge. Make sure the deployment is set to “Anyone”, the URL ends in /exec, and any ad blocker is disabled for this page.',
+        'Could not reach Google Sheets. Check your internet connection and any ad blocker, then try again. Your data is safe in this browser.',
       );
     }
     throw error;
@@ -305,16 +309,16 @@ async function callBridge(url: string, init?: RequestInit): Promise<BridgeStateP
     payload = JSON.parse(text) as BridgeStatePayload;
   } catch {
     throw new Error(
-      'The sheet bridge returned a web page instead of data. Open the /exec URL in a new tab: if it asks you to sign in or authorize, redeploy with access set to “Anyone”.',
+      'Google Sheets returned an unexpected page. If you manage the sheet, check the web app deployment. Otherwise try again later. Your data is safe in this browser.',
     );
   }
 
   if (payload.ok === false && !payload.conflict) {
     const message = typeof payload.error === 'string' ? payload.error : '';
     if (message === 'unauthorized') {
-      throw new Error('The access token does not match the TOKEN in the sheet script.');
+      throw new Error('The shared sync password does not match. Ask the site owner to check the sheet setup.');
     }
-    throw new Error(message || 'The sheet bridge rejected the request.');
+    throw new Error(message || 'Google Sheets could not complete the request. Try again in a moment.');
   }
 
   return payload;
@@ -334,22 +338,34 @@ function snapshotFromPayload(
     updatedAt: numberOr(state.updatedAt, numberOr(payload.updatedAt, 0)),
     sheetUrl:
       typeof payload.sheetUrl === 'string' && payload.sheetUrl ? payload.sheetUrl : fallbackUrl,
-    deviceId: typeof state.deviceId === 'string' ? state.deviceId : undefined,
     settings: parseStoredSettings(JSON.stringify(state.settings ?? {})),
     progress: parseStoredProgress(JSON.stringify(state.progress ?? null)),
   };
 }
 
-export async function readSheet(connection: SheetConnection): Promise<SheetReadResult> {
+function assertBridgeSchema(payload: BridgeStatePayload): void {
+  if (payload.schema === undefined) return;
+  if (numberOr(payload.schema, 0) === BRIDGE_SCHEMA) return;
+  throw new Error(
+    'Google Sheets sync needs a one-time update. If you manage the sheet, open Settings → Google Sheets → Site owner setup and deploy the latest bridge. Otherwise, ask the site owner to update it. Your data is safe in this browser.',
+  );
+}
+
+export async function readSheet(
+  connection: SheetConnection,
+  email: string,
+): Promise<SheetReadResult> {
   const url = new URL(connection.endpoint);
   url.searchParams.set('action', 'read');
+  url.searchParams.set('email', normalizeEmail(email));
   if (connection.token) url.searchParams.set('token', connection.token);
   url.searchParams.set('_', String(Date.now()));
 
   const payload = await callBridge(url.toString());
+  assertBridgeSchema(payload);
   const snapshot = snapshotFromPayload(payload, connection.sheetUrl);
   if (!snapshot) {
-    throw new Error('The sheet bridge replied without any Wordloom data.');
+    throw new Error('Google Sheets returned no Wordloom data. Try again, or ask the site owner to check the sheet.');
   }
   return {
     updatedAt: snapshot.updatedAt,
@@ -367,6 +383,7 @@ export async function writeSheet(
   const body = JSON.stringify({
     action: 'write',
     token: connection.token,
+    email: normalizeEmail(payload.email),
     deviceId: payload.deviceId,
     baseUpdatedAt: payload.baseUpdatedAt,
     settings: withoutSecrets(payload.settings),
@@ -378,11 +395,12 @@ export async function writeSheet(
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body,
   });
+  assertBridgeSchema(response);
 
   if (response.conflict) {
     const snapshot = snapshotFromPayload(response, connection.sheetUrl);
     if (!snapshot) {
-      throw new Error('The sheet changed on another device, but its data could not be read.');
+      throw new Error('Google Sheets changed on another device and the new copy could not be read. Try again.');
     }
     return {
       updatedAt: snapshot.updatedAt,
@@ -411,6 +429,7 @@ export function beaconSheet(connection: SheetConnection, payload: SheetWritePayl
     const body = JSON.stringify({
       action: 'write',
       token: connection.token,
+      email: normalizeEmail(payload.email),
       deviceId: payload.deviceId,
       baseUpdatedAt: payload.baseUpdatedAt,
       settings: withoutSecrets(payload.settings),

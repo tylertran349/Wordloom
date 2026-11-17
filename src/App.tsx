@@ -14,7 +14,7 @@ import { Settings } from './views/Settings';
 
 function App() {
   const route = useRoute();
-  const { stats, sheetSync } = useApp();
+  const { stats, sheetSync, sheetPhase } = useApp();
   const key = routeKey(route);
 
   useEffect(() => {
@@ -82,7 +82,17 @@ function App() {
             <span>Wordloom · words that stick</span>
             <span className="app-foot-meta">
               {stats.studied} {pluralize(stats.studied, 'word')} in rotation ·{' '}
-              {sheetSync.connection ? 'synced to Google Sheets' : 'saved on this device'}
+              {sheetSync.email
+                ? sheetPhase === 'error'
+                  ? 'sync issue — check Settings'
+                  : sheetPhase === 'needs-decision'
+                    ? 'choose a sync copy'
+                    : sheetPhase === 'disconnected'
+                      ? 'sync not set up'
+                      : sheetPhase === 'unsaved' || sheetPhase === 'syncing'
+                        ? 'syncing…'
+                        : `backed up as ${sheetSync.email}`
+                : 'saved on this device'}
             </span>
           </footer>
         </main>

@@ -3,6 +3,7 @@ import {
   ArrowUpRight,
   BookOpen,
   Check,
+  Cloud,
   Flame,
   RotateCcw,
   Settings2,
@@ -36,7 +37,7 @@ import {
 } from '../components/ui';
 
 export function Dashboard() {
-  const { settings, stats, progress, studiedWords } = useApp();
+  const { settings, stats, progress, studiedWords, sheetSync } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const goalPercent = percent(stats.practicedToday, settings.dailyGoal);
@@ -104,6 +105,19 @@ export function Dashboard() {
           </div>
         }
       />
+
+      {!sheetSync.email && (
+        <div className="inline-alert is-info sync-prompt">
+          <Cloud size={15} aria-hidden="true" />
+          <span>
+            <strong>Your progress is saved in this browser.</strong> Add your email in{' '}
+            <AppLink to={{ name: 'settings' }} className="text-link">
+              Settings → Google Sheets
+            </AppLink>{' '}
+            to back it up across devices. Sync is optional.
+          </span>
+        </div>
+      )}
 
       <div className="dash-hero-grid">
         <section className={stats.dueNow > 0 ? 'review-hero' : 'review-hero is-caught-up'}>

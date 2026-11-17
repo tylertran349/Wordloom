@@ -15,6 +15,16 @@ import { clamp } from './utils';
 const SETTINGS_KEY = 'wordloom.settings.v1';
 const PROGRESS_KEY = 'wordloom.progress.v1';
 
+/**
+ * Local data is mirrored per profile. The blank profile is the local-only
+ * copy; an email keeps that learner's offline cache separate when somebody
+ * else signs in on the same browser.
+ */
+export function storageKeyForProfile(base: string, profile = ''): string {
+  const clean = profile.trim().toLowerCase();
+  return clean ? `${base}::${clean}` : base;
+}
+
 export const DEFAULT_SETTINGS: Settings = {
   displayName: '',
   targetLanguage: 'vi',
@@ -107,6 +117,17 @@ function asString(value: unknown, fallback = ''): string {
 function asLanguage(value: unknown, fallback: string): string {
   const code = asString(value, fallback);
   return LANGUAGES.some((language) => language.code === code) ? code : fallback;
+}
+
+/** Older sheets stored activity keys as Date strings. Normalize them to YYYY-MM-DD. */
+function normalizeDayKey(key: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(key)) return key;
+  const parsed = new Date(key);
+  if (Number.isNaN(parsed.getTime())) return key;
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function normalizeSettings(raw: unknown): Settings {
@@ -275,11 +296,15 @@ function normalizeProgress(raw: unknown): ProgressState {
 
   const activity: Record<string, DayActivity> = {};
   if (isRecord(raw.activity)) {
-    Object.entries(raw.activity).forEach(([key, value]) => {
+    Object.entries(raw.activity).forEach(([rawKey, value]) => {
       if (!isRecord(value)) return;
+      const key = normalizeDayKey(rawKey);
+      const studied = Math.round(asNumber(value.studied, 0, 0, 100_000));
+      const reviews = Math.round(asNumber(value.reviews, 0, 0, 100_000));
+      const existing = activity[key] ?? { studied: 0, reviews: 0 };
       activity[key] = {
-        studied: Math.round(asNumber(value.studied, 0, 0, 100_000)),
-        reviews: Math.round(asNumber(value.reviews, 0, 0, 100_000)),
+        studied: Math.min(100_000, existing.studied + studied),
+        reviews: Math.min(100_000, existing.reviews + reviews),
       };
     });
   }
@@ -363,20 +388,24 @@ function preserveCorruptValue(key: string): void {
   }
 }
 
-export function loadSettings(): Settings {
+export function loadSettings(profile = ''): Settings {
+  const key = storageKeyForProfile(SETTINGS_KEY, profile);
   try {
-    const raw = window.localStorage.getItem(SETTINGS_KEY);
+    const raw = window.localStorage.getItem(key);
     if (!raw) return { ...DEFAULT_SETTINGS };
     return parseStoredSettings(raw);
   } catch {
-    preserveCorruptValue(SETTINGS_KEY);
+    preserveCorruptValue(key);
     return { ...DEFAULT_SETTINGS };
   }
 }
 
-export function saveSettings(settings: Settings): boolean {
+export function saveSettings(settings: Settings, profile = ''): boolean {
   try {
-    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    window.localStorage.setItem(
+      storageKeyForProfile(SETTINGS_KEY, profile),
+      JSON.stringify(settings),
+    );
     return true;
   } catch {
     // A full or unavailable storage quota should never break the app.
@@ -384,20 +413,24 @@ export function saveSettings(settings: Settings): boolean {
   }
 }
 
-export function loadProgress(): ProgressState {
+export function loadProgress(profile = ''): ProgressState {
+  const key = storageKeyForProfile(PROGRESS_KEY, profile);
   try {
-    const raw = window.localStorage.getItem(PROGRESS_KEY);
+    const raw = window.localStorage.getItem(key);
     if (!raw) return emptyProgress();
     return parseStoredProgress(raw);
   } catch {
-    preserveCorruptValue(PROGRESS_KEY);
+    preserveCorruptValue(key);
     return emptyProgress();
   }
 }
 
-export function saveProgress(progress: ProgressState): boolean {
+export function saveProgress(progress: ProgressState, profile = ''): boolean {
   try {
-    window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    window.localStorage.setItem(
+      storageKeyForProfile(PROGRESS_KEY, profile),
+      JSON.stringify(progress),
+    );
     return true;
   } catch {
     // The session still works in memory; the provider reports the failure.
@@ -405,16 +438,17 @@ export function saveProgress(progress: ProgressState): boolean {
   }
 }
 
-export function clearStoredData(which: 'settings' | 'progress' | 'both' = 'both'): void {
+/** True when this browser already has an offline cache for the profile. */
+export function hasStoredProfile(profile: string): boolean {
+  const clean = profile.trim().toLowerCase();
+  if (!clean) return false;
   try {
-    if (which === 'settings' || which === 'both') {
-      window.localStorage.removeItem(SETTINGS_KEY);
-    }
-    if (which === 'progress' || which === 'both') {
-      window.localStorage.removeItem(PROGRESS_KEY);
-    }
+    return (
+      window.localStorage.getItem(storageKeyForProfile(SETTINGS_KEY, clean)) !== null ||
+      window.localStorage.getItem(storageKeyForProfile(PROGRESS_KEY, clean)) !== null
+    );
   } catch {
-    // No-op.
+    return false;
   }
 }
 
