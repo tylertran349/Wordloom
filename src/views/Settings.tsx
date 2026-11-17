@@ -58,7 +58,7 @@ import {
   SHARED_CONNECT_ENDPOINT,
   SHARED_SHEET_URL,
 } from '../lib/site';
-import { consumeSheetTabRequest } from '../lib/sheetConnect';
+import { clearSheetTabRequest, consumeSheetTabRequest, takeConnectError } from '../lib/sheetConnect';
 import {
   cn,
   dayKey,
@@ -240,7 +240,10 @@ export function Settings() {
   const [sheetMessage, setSheetMessage] = useState<{
     tone: 'success' | 'error' | 'info';
     text: string;
-  } | null>(null);
+  } | null>(() => {
+    const error = takeConnectError();
+    return error ? { tone: 'error', text: error } : null;
+  });
   const [confirmSheetPull, setConfirmSheetPull] = useState(false);
   const [confirmSheetPush, setConfirmSheetPush] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -295,6 +298,10 @@ export function Settings() {
               : sheetPhase === 'disconnected'
                 ? 'Sync not set up'
                 : 'Local only';
+
+  useEffect(() => {
+    clearSheetTabRequest();
+  }, []);
 
   useEffect(() => {
     setTranslationTest({ loading: false });

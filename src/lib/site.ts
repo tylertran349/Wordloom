@@ -1,10 +1,10 @@
 /**
  * Deployment-wide Google Sheets configuration.
  *
- * The data bridge belongs to the site owner. A learner's progress now lives in
- * a spreadsheet they own, shared with BRIDGE_OWNER_EMAIL so the anonymous data
- * bridge can open it. The connect page (a second deployment of the same Apps
- * Script, executed as the visiting user) handles sign-in and sheet selection.
+ * A learner's progress lives in a spreadsheet they own, shared with the owner
+ * address inside src/lib/wordloom-sheets.gs so the anonymous data bridge can
+ * open it. The connect page (a second deployment of the same Apps Script,
+ * executed as the visiting user) handles sign-in and sheet selection.
  *
  * Override any of these at build time with Vite environment variables, for
  * example VITE_WORDLOOM_BRIDGE_URL=https://script.google.com/macros/s/.../exec
@@ -20,7 +20,6 @@ const DEFAULT_SHEET_URL =
  * Apps Script that serves it.
  */
 const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbwTtEqB9A4dDjFa_prXych3H4eC_NIMap_fVT5N3rya94Q_2jJic4yuMP0LI0p0zt52/exec';
-const DEFAULT_LEGACY_OWNER_EMAIL = 'tylertran349@gmail.com';
 
 const env = import.meta.env;
 
@@ -35,24 +34,3 @@ export const SHARED_CONNECT_ENDPOINT = (env.VITE_WORDLOOM_CONNECT_URL ?? DEFAULT
 
 /** Optional token shared by the bridge and the site. Blank is the default. */
 export const SHARED_SYNC_TOKEN = (env.VITE_WORDLOOM_SYNC_TOKEN ?? '').trim();
-
-/**
- * The Google account that owns the data bridge. Every learner's sheet is
- * shared with this address so the anonymous bridge can read and write it.
- */
-export const BRIDGE_OWNER_EMAIL = (
-  env.VITE_WORDLOOM_OWNER_EMAIL ?? DEFAULT_LEGACY_OWNER_EMAIL
-)
-  .trim()
-  .toLowerCase();
-
-/**
- * Existing single-user data in the legacy sheet is adopted by this email during
- * the one-time schema migration. Keep this in sync with LEGACY_OWNER_EMAIL in
- * src/lib/wordloom-sheets.gs.
- */
-export const LEGACY_OWNER_EMAIL = (
-  env.VITE_WORDLOOM_LEGACY_OWNER_EMAIL ?? DEFAULT_LEGACY_OWNER_EMAIL
-)
-  .trim()
-  .toLowerCase();

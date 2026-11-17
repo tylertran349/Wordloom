@@ -1,14 +1,16 @@
 import { isValidEmail, type SheetConnectionInput } from './sheets';
 import { SHARED_CONNECT_ENDPOINT } from './site';
 
-/** sessionStorage key that tells Settings to open the Sheets tab on return. */
-const RETURNED_TAB_KEY = 'wordloom.sheets.returned';
+/** Whether this page load came back from the connect flow. */
+let openSheetsTab = false;
 /** One-time nonce that proves this browser started the connect flow. */
 const NONCE_KEY = 'wordloom.sheets.nonce';
-const NONCE_TTL_MS = 15 * 60 * 1000;
+const NONCE_TTL_MS = 60 * 60 * 1000;
 
 /** Connection handed back by the Google connect page. */
 let pending: SheetConnectionInput | null = null;
+/** Why a returned connection was rejected, when it was. */
+let returnError: string | null = null;
 
 export function isSheetConnectConfigured(): boolean {
   return Boolean(SHARED_CONNECT_ENDPOINT);
@@ -61,6 +63,7 @@ function takeNonce(): string {
 export function startSheetConnect(): string | null {
   if (!SHARED_CONNECT_ENDPOINT) return null;
   if (typeof window === 'undefined') return null;
+  returnError = null;
   const returnTo = `${window.location.origin}${window.location.pathname}`;
   const url = new URL(SHARED_CONNECT_ENDPOINT);
 
@@ -106,18 +109,26 @@ export function captureReturningConnection(): void {
   }
 
   const payload = decodePayload(raw);
-  if (!payload) return;
+  if (!payload) {
+    returnError = 'The Google Sheets connection could not be read. Try signing in again.';
+    markReturnedTab();
+    return;
+  }
 
   // Reject a connection that did not originate from this browser's sign-in.
   const expected = takeNonce();
-  if (!expected || payload.nonce !== expected) return;
+  if (!expected || payload.nonce !== expected) {
+    returnError = 'The Google Sheets sign-in expired or was started elsewhere. Try again.';
+    markReturnedTab();
+    return;
+  }
 
   pending = payload;
-  try {
-    window.sessionStorage.setItem(RETURNED_TAB_KEY, '1');
-  } catch {
-    // The tab just opens on General if storage is unavailable.
-  }
+  markReturnedTab();
+}
+
+function markReturnedTab(): void {
+  openSheetsTab = true;
 }
 
 /** The connection captured at startup, if any. Safe to call repeatedly. */
@@ -125,15 +136,19 @@ export function getReturningConnection(): SheetConnectionInput | null {
   return pending;
 }
 
+/** A message explaining why a returned connection was rejected, if it was. */
+export function takeConnectError(): string | null {
+  return returnError;
+}
+
 /** Whether Settings should open on the Google Sheets tab for this load. */
 export function consumeSheetTabRequest(): boolean {
-  try {
-    if (window.sessionStorage.getItem(RETURNED_TAB_KEY) !== '1') return false;
-    window.sessionStorage.removeItem(RETURNED_TAB_KEY);
-    return true;
-  } catch {
-    return false;
-  }
+  return openSheetsTab;
+}
+
+/** Clear the one-time tab request after Settings has read it. */
+export function clearSheetTabRequest(): void {
+  openSheetsTab = false;
 }
 
 function decodePayload(

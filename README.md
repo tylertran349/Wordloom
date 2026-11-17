@@ -256,20 +256,19 @@ that writes to everyone's sheets.
 
 #### Connection details
 
-The data web app URL, the connect page URL, and the owner email live in `src/lib/site.ts`. They
-can also be set at build time:
+The data web app URL and the connect page URL live in `src/lib/site.ts`. They can also be set at
+build time:
 
 ```bash
 VITE_WORDLOOM_BRIDGE_URL=https://script.google.com/macros/s/…/exec
 VITE_WORDLOOM_CONNECT_URL=https://script.google.com/macros/s/…/exec
 VITE_WORDLOOM_SHEET_URL=https://docs.google.com/spreadsheets/d/…
-VITE_WORDLOOM_OWNER_EMAIL=owner@example.com
-VITE_WORDLOOM_LEGACY_OWNER_EMAIL=owner@example.com
 VITE_WORDLOOM_SYNC_TOKEN=optional-shared-secret
 ```
 
-The origins the connect page may redirect back to are listed in
-`src/lib/wordloom-sheets.gs`, next to the owner email.
+The owner email and the origins the connect page may redirect back to are at the top of
+`src/lib/wordloom-sheets.gs`. If you set `VITE_WORDLOOM_SYNC_TOKEN`, put the same value in `TOKEN`
+in that file.
 
 #### Set up the script
 
@@ -277,7 +276,7 @@ One script, two web-app deployments.
 
 1. Create a Google Sheet (or reuse an old Wordloom sheet) and open **Extensions → Apps Script**.
 2. Delete the placeholder code, paste the contents of `src/lib/wordloom-sheets.gs`, and save.
-   Keep the owner email and allowed origins at the top of that file in sync with `src/lib/site.ts`.
+   The owner email and allowed site origins are at the top of that file.
 3. **Data deployment:** **Deploy → New deployment → Web app**, choose **Execute as: Me** and **Who
    has access: Anyone**, then deploy and authorize. Copy the URL ending in `/exec` into
    `src/lib/site.ts` (or `VITE_WORDLOOM_BRIDGE_URL`).

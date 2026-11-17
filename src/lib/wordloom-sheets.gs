@@ -25,9 +25,8 @@
  *
  * Schema 5 keeps the per-email row layout from schema 4.
  *
- * This file is pasted into the Apps Script editor as-is. Keep
- * LEGACY_OWNER_EMAIL, BRIDGE_OWNER_EMAIL, and CONNECT_ORIGINS in sync with
- * src/lib/site.ts when the deployment changes.
+ * This file is pasted into the Apps Script editor as-is. Change the owner
+ * email and allowed origins below if the deployment moves.
  */
 
 var SCHEMA = 5;
@@ -402,7 +401,13 @@ function bindSheet(payload) {
     }
 
     var meta = readGlobalMeta_(sheet);
-    var secret = String(meta.token || '') || randomSecret_();
+    var previousEmail = normalizeEmail_(meta.email || '');
+    var secret = String(meta.token || '');
+    // Keep existing devices connected, unless this sheet is being handed to a
+    // different account. Then the old secret must stop working.
+    if (!secret || (previousEmail && previousEmail !== email)) {
+      secret = randomSecret_();
+    }
 
     var existing = ensureMetaTab_(sheet);
     writeGlobalMeta_(sheet, email, secret);
