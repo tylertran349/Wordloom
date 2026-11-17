@@ -44,9 +44,9 @@ configured with `base: './'` so subpath deployments work too.
   forecast, a 12-week heat map, per-level coverage, and recent review history.
 - **Per-level resume** — Wordloom remembers the last word you opened in each CEFR deck, so the
   Resume button and deck badge take you back to that term instead of the top of the list.
-- **Optional shared Google Sheets sync** — the deployed site points at one spreadsheet owned by the
-  site owner. Each learner saves locally first, then enters an email to back up their progress into
-  that sheet. No Google Cloud project, OAuth client, or per-device Apps Script setup is needed.
+- **Optional Google Sheets sync** — each learner signs in with Google, picks or creates a
+  spreadsheet they own, and Wordloom keeps it updated in the background. No Google Cloud project,
+  OAuth client, or per-device Apps Script setup is needed.
 - **Extensive settings** for language pair, theme, accent, font size, motion, exercise count,
   hints, audio, scheduling, Google Translate behavior, AI providers, and backup/restore. Provider
   defaults (temperature, thinking) are used automatically unless you override them. Every setting
@@ -84,10 +84,12 @@ src/
     googleTranslate.ts ← free endpoint + fallback + cache
     ai.ts              ← Gemini / OpenAI-compatible client
     modelDefaults.ts   ← per-model temperature defaults and suggestions
-    site.ts            ← shared Google Sheet endpoint and legacy owner email
+    site.ts            ← data bridge, connect page, owner email, allowed origins
     storage.ts         ← defaults, normalization, backup, per-email local profiles
     sheets.ts          ← Google Sheets client + local sync state
+    sheetConnect.ts    ← Google sign-in URL + returned connection
     sheetsScript.ts    ← Apps Script bridge source shown in Settings
+    wordloom-sheets.gs ← the Apps Script itself (one file, two deployments)
     router.ts, utils.ts, speech.ts
   types.ts
   index.css
@@ -190,18 +192,30 @@ step, session limit) are editable in Settings.
 
 ## Google Sheets sync
 
-Wordloom saves everything in your browser first. Google Sheets is an optional backup: add an email and
-Wordloom copies your progress to one shared spreadsheet, so you can pick it up on another device. You
-can keep using Wordloom offline and without an email.
+Wordloom saves everything in your browser first. Google Sheets is an optional backup that lives in a
+spreadsheet you own. Signing in with Google confirms your account, then you pick an existing
+spreadsheet or create a new one. Existing Wordloom tabs and progress are kept, and other tabs in the
+sheet are never touched.
 
 ### Turn sync on
 
 1. Open **Settings → Google Sheets**.
-2. Enter the email you want to use for Wordloom.
-3. Press **Start syncing**.
+2. Press **Sign in with Google**.
+3. On Google's page, approve access, then pick a spreadsheet or create a new one.
+4. Wordloom returns to Settings and, if the sheet already has progress, asks which copy to keep.
 
-That's it. There is no password, Google sign-in, spreadsheet URL, or setup to copy. Use the same
-email on another device to load the same progress.
+There is no password, no Google Cloud project, and no spreadsheet URL to copy. Signing in on another
+device with the same Google account reconnects to the same spreadsheet.
+
+### Existing sheets and old progress
+
+- Picking a sheet that already has Wordloom tabs keeps every tab and row. If the data belongs to an
+  older email, Wordloom offers to move that progress to your Google account before connecting.
+- Other tabs in the spreadsheet are left alone.
+- Nothing is overwritten silently. When both sides have data, Wordloom shows **Use the sheet
+  version** and **Use this browser's version**.
+- **Import from the old shared sheet** in Settings copies progress saved under an email in the old
+  shared spreadsheet into your own sheet. Enter the email you used there.
 
 ### What the buttons mean
 
@@ -209,112 +223,113 @@ email on another device to load the same progress.
 | --- | --- |
 | **Sync now** | Compares this browser and the sheet and saves the newer copy. |
 | **Use the sheet version** | Replaces this browser's progress with the copy in the sheet. |
-| **Use this browser's version** | Replaces this email's rows in the sheet with this browser's progress. |
-| **Log out** | Removes the email/Sheets link from this browser. Your local data stays. |
-
-Wordloom asks before either replacement when both copies have changes.
+| **Use this browser's version** | Replaces your sheet's rows with this browser's progress. |
+| **Change** | Opens Google to pick or create another spreadsheet. |
+| **Log out** | Removes the connection from this browser. Your local data stays. The sheet remains shared with the site owner; remove that share in Google Drive if you want to revoke it. |
 
 ### Good to know
 
 - Your data is saved in this browser first. If Google is unreachable, Wordloom keeps working locally
   and tries again later.
-- Each email has its own rows in the shared sheet. Adding a different email on the same browser loads
-  that email's own progress and settings instead of mixing accounts.
-- Everyone's data lives in one spreadsheet. Email-only sync is convenient, not private
-  authentication: anyone who knows an email can open that email's data. Use an address you don't mind
-  sharing, and don't store secrets in drafts.
+- Each learner's progress lives in their own spreadsheet. Signing in with a different Google account
+  loads that account's own progress instead of mixing accounts.
+- The site owner's Google account keeps edit access to each connected sheet, because the background
+  bridge writes with that account. That is what makes sync work without a server. Remove the share in
+  Google Drive to revoke access.
 - API keys stay on the device and never go into the sheet.
+- Google may show an "unverified app" warning. Choose **Advanced → Continue**; the script is the one
+  described below.
 
 ### If something looks wrong
 
 | Problem | What to do |
 | --- | --- |
-| **"Google Sheets sync needs a one-time update"** | The site owner needs to update the Apps Script bridge. See **For the sheet owner** below. |
+| **"Google Sheets sync needs a one-time update"** | The site owner needs to update the Apps Script bridge. See **For the site owner** below. |
 | **"Which copy should Wordloom keep?"** | Choose **Use the sheet version** for a new device or to keep the sheet. Choose **Use this browser's version** if you studied here and the sheet is out of date. |
-| **I signed in with the wrong email** | Press **Log out**, then add the correct email. |
-| **I don't see my old progress** | The old single-user data belongs to the sheet owner's email. Sign in with that address and choose **Use the sheet version**. |
+| **"This spreadsheet already has Wordloom data for another account"** | Confirm the move when Google returns you to Wordloom, or pick a different sheet. |
+| **I signed in with the wrong Google account** | Press **Log out**, then sign in again. |
 | **Sync keeps failing** | Check your internet connection and any ad blocker, then press **Sync now**. Your local data is safe. |
 
-### For the sheet owner
+### For the site owner
 
-Most users never need this section. It covers the one shared spreadsheet and the Apps Script bridge
-that connects Wordloom to it.
+Most users never need this section. It covers the two Apps Script deployments and the Google account
+that writes to everyone's sheets.
 
 #### Connection details
 
-The shared web app URL, spreadsheet URL, and the email that inherits the old single-user data live in
+The data web app URL, the connect page URL, the owner email, and the allowed site origins live in
 `src/lib/site.ts`. They can also be set at build time:
 
 ```bash
 VITE_WORDLOOM_BRIDGE_URL=https://script.google.com/macros/s/…/exec
+VITE_WORDLOOM_CONNECT_URL=https://script.google.com/macros/s/…/exec
 VITE_WORDLOOM_SHEET_URL=https://docs.google.com/spreadsheets/d/…
+VITE_WORDLOOM_OWNER_EMAIL=owner@example.com
 VITE_WORDLOOM_LEGACY_OWNER_EMAIL=owner@example.com
 VITE_WORDLOOM_SYNC_TOKEN=optional-shared-secret
+VITE_WORDLOOM_ALLOWED_ORIGINS=https://example.com
 ```
 
-#### Set up a new sheet
+#### Set up the script
 
-1. Create a Google Sheet, for example at [sheets.new](https://sheets.new).
-2. In the sheet, open **Extensions → Apps Script**.
-3. Delete the placeholder code, paste the bridge from **Settings → Google Sheets → Site owner setup**,
-   and save.
-4. Open **Deploy → New deployment → Web app**. Choose **Execute as: Me** and
-   **Who has access: Anyone**, then deploy and authorize it. If Google warns that the app isn't
-   verified, choose **Advanced → Go to … (unsafe)** — the script is yours and only accesses this
-   spreadsheet.
-5. Copy the web app URL ending in `/exec` into `src/lib/site.ts` (or
-   `VITE_WORDLOOM_BRIDGE_URL`).
+One script, two web-app deployments.
 
-#### Update an existing sheet
+1. Create a Google Sheet (or reuse an old Wordloom sheet) and open **Extensions → Apps Script**.
+2. Delete the placeholder code, paste the script from **Settings → Google Sheets → Site owner
+   setup**, and save.
+3. **Data deployment:** **Deploy → New deployment → Web app**, choose **Execute as: Me** and **Who
+   has access: Anyone**, then deploy and authorize. Copy the URL ending in `/exec` into
+   `src/lib/site.ts` (or `VITE_WORDLOOM_BRIDGE_URL`).
+4. **Connect deployment:** **Deploy → New deployment → Web app** again, this time choose **Execute
+   as: User accessing the web app** and **Who has access: Anyone with a Google account**. Deploy and
+   authorize. Put that URL into `src/lib/site.ts` as `SHARED_CONNECT_ENDPOINT` (or
+   `VITE_WORDLOOM_CONNECT_URL`).
+5. Rebuild the site.
 
-1. Open the sheet and choose **Extensions → Apps Script**.
-2. Replace the code with the latest bridge script from
-   **Settings → Google Sheets → Site owner setup**.
-3. Open **Deploy → Manage deployments**, edit the existing web app, choose **New version**, and click
-   **Deploy**. Keep **Execute as: Me** and **Who has access: Anyone**.
-4. The `/exec` URL stays the same, so no frontend change is needed.
+Adding a version later keeps each deployment's URL. Use **Manage deployments → Edit → New version**
+so the owner does not have to change the site config.
 
-The site checks the bridge version and refuses to sync with the old single-user script, so users do
-not accidentally see the owner's data.
+If Apps Script will not let the same project create a second deployment with a different **Execute
+as**, create a standalone Apps Script project, paste the same script there, and use only the connect
+deployment from it. The data deployment stays on the original project.
+
+The script requests Google Drive access so it can list and share spreadsheets. Learners approve it
+once per Google account. The connect page checks that it is running as the visiting user, so the
+public data URL can never show another person's Drive contents.
 
 #### What happens to existing data
 
-The first sync after the update migrates the old tabs in place:
-
-- Every tab gets an `email` column.
-- Old rows are assigned to the configured legacy owner email (`LEGACY_OWNER_EMAIL` in
-  `src/lib/site.ts`).
-- A `Wordloom Users` tab lists every email, when it was first and last seen, its last device, and its
-  card/review counts.
-
-Nothing is deleted. On the owner's browser, enter the legacy owner email in
-**Settings → Google Sheets** and choose **Use the sheet version** if Wordloom asks. Your local data
-stays in the browser; the sheet copy keeps the migrated progress. No browser is associated with the
-owner email automatically.
+- Picking a sheet with older single-user tabs (no `email` column) migrates those rows to the signed-in
+  Google account in place.
+- Picking a sheet whose Wordloom rows belong to another email asks first, then re-keys those rows to
+  the signed-in account.
+- A sheet that already contains progress for several accounts is not merged silently; the connect
+  page asks which account's progress to move.
+- Other tabs in the sheet are never edited or deleted.
 
 #### What the sheet contains
 
-The bridge creates readable tabs with an `email` column on every row:
+The script creates readable tabs with an `email` column on every row:
 
 | Tab | Rows |
 | --- | --- |
-| `Wordloom Meta` | per-email revision, device id, review totals, per-level resume positions; global `app`/`schema` |
-| `Wordloom Settings` | every setting, JSON-encoded, per email |
-| `Wordloom Cards` | one row per scheduled word, per email |
-| `Wordloom Responses` / `Solutions` | saved drafts and revealed translations, per email |
-| `Wordloom Examples` / `Practice` | AI-generated sentences, per email |
-| `Wordloom Activity` | daily studied/review counts, per email |
-| `Wordloom Review Log` | recent review grades, per email |
-| `Wordloom Users` | email, first seen, last seen, last device, card count, review count |
+| `Wordloom Meta` | per-account revision, device id, review totals, per-level resume positions; global `schema`, `email`, and the sheet `token` |
+| `Wordloom Settings` | every setting, JSON-encoded, per account |
+| `Wordloom Cards` | one row per scheduled word, per account |
+| `Wordloom Responses` / `Solutions` | saved drafts and revealed translations, per account |
+| `Wordloom Examples` / `Practice` | AI-generated sentences, per account |
+| `Wordloom Activity` | daily studied/review counts, per account |
+| `Wordloom Review Log` | recent review grades, per account |
+| `Wordloom Users` | first seen, last seen, last device, card count, review count |
 
-Each sync rewrites only that email's rows. Editing cells by hand is not supported; change progress in
-Wordloom instead. Other learners' rows are preserved.
+Editing cells by hand is not supported; change progress in Wordloom instead.
 
 #### Limits
 
-Apps Script web apps have execution and concurrency quotas. The bridge takes a document lock and
+Apps Script web apps have execution and concurrency quotas. The bridge takes a script lock and
 rewrites only the affected tabs. That is comfortable for a personal or small-group deployment, but it
-is not a high-traffic multi-tenant backend.
+is not a high-traffic multi-tenant backend. The connect deployment also has a rate limit on new user
+authorizations, and Google caps unverified apps at roughly 100 users.
 
 ## AI providers
 
@@ -359,18 +374,20 @@ computer.
 - Local-only settings and progress: `wordloom.settings.v1`, `wordloom.progress.v1`
 - Per-email offline caches: `wordloom.settings.v1::<email>`, `wordloom.progress.v1::<email>`
 - Translation cache: `wordloom.translations.v1`
-- Google Sheets account, shared URL, and device id: `wordloom.sheets.v1`
+- Google Sheets connection, sheet id, and per-sheet secret: `wordloom.sheets.v1`
 - Translation requests go to Google (and MyMemory only if Google fails).
 - AI requests go directly to the provider you configure.
-- Sheet sync requests go to the shared Apps Script deployment baked into the build. The sheet owner
-  can see every learner's rows, and anyone who knows the `/exec` URL or an email address can read
-  that account's data when `TOKEN` is blank.
+- Sheet sync requests go to the Apps Script data bridge baked into the build. The bridge runs as the
+  site owner's Google account, which is why each connected sheet is shared with it. Learners can
+  remove that share in Google Drive at any time.
+- The legacy email-only sheet (`TOKEN` blank) is still readable by anyone who knows an email address.
+  New Google sign-ins use a per-sheet secret instead.
 - There is no Wordloom server and no analytics.
 - **Settings → Data** exports a complete JSON backup and can import it again. Deleting progress
   leaves vocabulary and settings intact. All resets require a second click.
 - Local data is kept per profile. Logging out copies the current profile to the local-only keys; it
-  does not delete local data. Adding another email swaps to that email's cache instead of mixing
-  accounts.
+  does not delete local data. Signing in with another Google account swaps to that account's cache
+  instead of mixing accounts.
 - Backups contain any AI credentials saved in Settings. Store backup files privately. Sheets never
   receive those credentials.
 

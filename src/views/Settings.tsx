@@ -60,9 +60,11 @@ import {
   WORDLOOM_BRIDGE_SOURCE,
 } from '../lib/sheetsScript';
 import {
+  SHARED_CONNECT_ENDPOINT,
   SHARED_SHEET_ENDPOINT,
   SHARED_SHEET_URL,
 } from '../lib/site';
+import { consumeSheetTabRequest } from '../lib/sheetConnect';
 import {
   cn,
   copyText,
@@ -216,6 +218,8 @@ export function Settings() {
     sheetSync,
     sheetPhase,
     sheetBusy,
+    connectSheet,
+    importLegacySheet,
     signInSheet,
     signOutSheet,
     syncSheet,
@@ -223,7 +227,7 @@ export function Settings() {
     pushSheet,
     resolveSheetConflict,
   } = useApp();
-  const [tab, setTab] = useState<Tab>('general');
+  const [tab, setTab] = useState<Tab>(() => (consumeSheetTabRequest() ? 'sheets' : 'general'));
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [showOpenAiKey, setShowOpenAiKey] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -238,6 +242,9 @@ export function Settings() {
   const [importError, setImportError] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState<'progress' | 'settings' | 'all' | null>(null);
   const [sheetEmailInput, setSheetEmailInput] = useState('');
+  const [legacyEmailInput, setLegacyEmailInput] = useState('');
+  const [confirmLegacyImport, setConfirmLegacyImport] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
   const [sheetMessage, setSheetMessage] = useState<{
     tone: 'success' | 'error' | 'info';
     text: string;
@@ -397,6 +404,25 @@ export function Settings() {
     showSheetResult(result);
   }
 
+  function handleSheetConnect() {
+    setSheetMessage(null);
+    const result = connectSheet();
+    if (!result.ok) showSheetResult(result);
+  }
+
+  async function handleLegacyImport() {
+    if (!confirmLegacyImport) {
+      setConfirmLegacyImport(true);
+      return;
+    }
+    setConfirmLegacyImport(false);
+    setImportBusy(true);
+    setSheetMessage(null);
+    const result = await importLegacySheet(legacyEmailInput);
+    setImportBusy(false);
+    showSheetResult(result);
+  }
+
   async function handleSheetSyncNow() {
     setSheetMessage(null);
     const result = await syncSheet();
@@ -441,6 +467,8 @@ export function Settings() {
   function handleLogOut() {
     signOutSheet();
     setSheetEmailInput('');
+    setLegacyEmailInput('');
+    setConfirmLegacyImport(false);
     setConfirmSheetPull(false);
     setConfirmSheetPush(false);
     setSheetMessage({
@@ -501,6 +529,8 @@ export function Settings() {
       clearTranslationCache();
       clearAllWordloomStorage();
       setSheetEmailInput('');
+      setLegacyEmailInput('');
+      setConfirmLegacyImport(false);
       setSheetMessage(null);
       setConfirmSheetPull(false);
       setConfirmSheetPush(false);
@@ -611,7 +641,11 @@ export function Settings() {
                   <div className="account-row">
                     <div>
                       <strong>{sheetSync.email}</strong>
-                      <span>Signed in for Google Sheets sync. Logging out keeps your data here.</span>
+                      <span>
+                        {sheetSync.connection?.kind === 'sheet'
+                          ? `${sheetSync.connection.name || 'Your Google Sheet'} · logging out keeps your data here.`
+                          : 'Using the old shared sheet. Logging out keeps your data here.'}
+                      </span>
                     </div>
                     <button
                       type="button"
@@ -627,7 +661,7 @@ export function Settings() {
                   <div className="account-row">
                     <div>
                       <strong>Not logged in</strong>
-                      <span>Add an email to back up your progress across devices.</span>
+                      <span>Sign in with Google to back up your progress across devices.</span>
                     </div>
                     <button
                       type="button"
@@ -1478,9 +1512,9 @@ export function Settings() {
             <>
               <Section
                 title="Sync with Google Sheets"
-                description="Wordloom saves everything in this browser first. Add an email to also back up your progress to the shared Google Sheet and continue on another device. Sync is optional."
+                description="Wordloom saves everything in this browser first. Sign in with Google to keep your progress in a spreadsheet you own, and pick it up on another device. Sync is optional."
               >
-                {sheetSync.email ? (
+                {sheetSync.connection?.kind === 'sheet' ? (
                   <>
                     <div className="storage-card sheet-card">
                       <div className="storage-icon">
@@ -1489,6 +1523,8 @@ export function Settings() {
                       <div>
                         <strong>Syncing as {sheetSync.email}</strong>
                         <span>
+                          {sheetSync.connection?.name || 'Your Google Sheet'}
+                          {' · '}
                           {sheetSync.lastSyncedAt
                             ? `Last checked ${formatShortDate(sheetSync.lastSyncedAt)} at ${formatTime(sheetSync.lastSyncedAt)}`
                             : 'Not checked yet'}
@@ -1515,11 +1551,11 @@ export function Settings() {
                       {sheetSync.pendingDecision
                         ? 'Choose which copy to keep below.'
                         : sheetBusy
-                          ? 'Syncing with Google Sheets…'
+                          ? 'Syncing with Google Sheets...'
                           : sheetSync.lastError
-                            ? 'The last sync failed. Your local data is safe — try again below.'
+                            ? 'The last sync failed. Your local data is safe - try again below.'
                             : sheetSync.dirty
-                              ? 'Saving to Google Sheets in a few seconds…'
+                              ? 'Saving to Google Sheets in a few seconds...'
                               : 'Up to date. Changes save automatically a few seconds after you stop.'}
                     </p>
 
@@ -1536,7 +1572,8 @@ export function Settings() {
                           <strong>Which copy should Wordloom keep?</strong>
                           <p>
                             This browser has {Object.keys(progress.cards).length}{' '}
-                            {pluralize(Object.keys(progress.cards).length, 'card')}. The sheet has{' '}
+                            {pluralize(Object.keys(progress.cards).length, 'card')}. The sheet
+                            has{' '}
                             {sheetSync.remoteSummary
                               ? `${sheetSync.remoteSummary.cards} cards · ${sheetSync.remoteSummary.reviews} reviews`
                               : 'saved data'}
@@ -1548,9 +1585,9 @@ export function Settings() {
                             .
                           </p>
                           <p>
-                            Choose <strong>Use the sheet version</strong> when you are setting up a
-                            new device or want the copy in the sheet. Choose{' '}
-                            <strong>Use this browser’s version</strong> if you have been studying
+                            Choose <strong>Use the sheet version</strong> when you are setting up
+                            a new device or want the copy in the sheet. Choose{' '}
+                            <strong>Use this browser's version</strong> if you have been studying
                             here and the sheet is out of date.
                           </p>
                         </div>
@@ -1571,7 +1608,7 @@ export function Settings() {
                             disabled={sheetBusy}
                           >
                             <Upload size={14} aria-hidden="true" />
-                            Use this browser’s version
+                            Use this browser's version
                           </button>
                         </div>
                       </div>
@@ -1589,16 +1626,16 @@ export function Settings() {
                         ) : (
                           <RefreshCw size={14} aria-hidden="true" />
                         )}
-                        {sheetBusy ? 'Syncing…' : 'Sync now'}
+                        {sheetBusy ? 'Syncing...' : 'Sync now'}
                       </button>
-                      {(sheetSync.connection?.sheetUrl || SHARED_SHEET_URL) && (
+                      {sheetSync.connection?.sheetUrl && (
                         <a
                           className="text-link sheet-open"
-                          href={sheetSync.connection?.sheetUrl || SHARED_SHEET_URL}
+                          href={sheetSync.connection.sheetUrl}
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Open the spreadsheet (owner access)
+                          Open your spreadsheet
                           <ExternalLink size={13} aria-hidden="true" />
                         </a>
                       )}
@@ -1612,8 +1649,8 @@ export function Settings() {
                             <strong>Use the sheet version</strong>
                             <span>
                               {confirmSheetPull
-                                ? 'This replaces this browser’s data. Click again to confirm.'
-                                : 'Replace this browser’s progress with the copy in the sheet.'}
+                                ? "This replaces this browser's data. Click again to confirm."
+                                : "Replace this browser's progress with the copy in your sheet."}
                             </span>
                           </div>
                           <button
@@ -1631,12 +1668,256 @@ export function Settings() {
                         </div>
                         <div className="data-action">
                           <div>
-                            <strong>Use this browser’s version</strong>
+                            <strong>Use this browser's version</strong>
                             <span>
                               {confirmSheetPush
-                                ? 'This replaces the sheet’s rows for this email. Click again to confirm.'
-                                : 'Replace the sheet’s rows for this email with this browser’s progress.'}
+                                ? "This replaces your sheet's rows. Click again to confirm."
+                                : "Replace your sheet's rows with this browser's progress."}
                             </span>
+                          </div>
+                          <button
+                            type="button"
+                            className={cn(
+                              'button button-small',
+                              confirmSheetPush ? 'button-danger-solid' : 'button-ghost',
+                            )}
+                            onClick={() => void handleSheetPush()}
+                            disabled={sheetBusy || sheetSync.pendingDecision}
+                          >
+                            <Upload size={14} aria-hidden="true" />
+                            {confirmSheetPush ? 'Click again to replace' : 'Replace'}
+                          </button>
+                        </div>
+                        <div className="data-action">
+                          <div>
+                            <strong>Change spreadsheet</strong>
+                            <span>
+                              Pick or create another Google Sheet. This browser keeps its local
+                              copy.
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="button button-ghost button-small"
+                            onClick={handleSheetConnect}
+                            disabled={sheetBusy}
+                          >
+                            <RefreshCw size={14} aria-hidden="true" />
+                            Change
+                          </button>
+                        </div>
+                        <div className="data-action">
+                          <div>
+                            <strong>Import from the old shared sheet</strong>
+                            <span>
+                              {confirmLegacyImport
+                                ? "This replaces this browser's data with the old copy. Click again to import."
+                                : 'Copy progress saved under an email in the old shared spreadsheet into your sheet.'}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className={cn(
+                              'button button-small',
+                              confirmLegacyImport ? 'button-danger-solid' : 'button-ghost',
+                            )}
+                            onClick={() => void handleLegacyImport()}
+                            disabled={sheetBusy || importBusy}
+                          >
+                            <Download size={14} aria-hidden="true" />
+                            {importBusy
+                              ? 'Importing...'
+                              : confirmLegacyImport
+                                ? 'Click again to import'
+                                : 'Import'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="sheet-email-form">
+                        <input
+                          className="text-input setting-input sheet-email-input"
+                          type="email"
+                          value={legacyEmailInput}
+                          placeholder={sheetSync.email || 'email used with the old sheet'}
+                          autoComplete="off"
+                          spellCheck={false}
+                          onChange={(event) => setLegacyEmailInput(event.target.value)}
+                          aria-label="Email used with the old shared sheet"
+                        />
+                      </div>
+                    </details>
+
+                    <button
+                      type="button"
+                      className="text-link sheet-disconnect"
+                      onClick={handleLogOut}
+                    >
+                      <Unplug size={14} aria-hidden="true" />
+                      Log out of Google Sheets sync
+                    </button>
+                  </>
+                ) : sheetSync.email ? (
+                  <>
+                    <div className="storage-card sheet-card">
+                      <div className="storage-icon">
+                        <Cloud size={22} aria-hidden="true" />
+                      </div>
+                      <div>
+                        <strong>Syncing as {sheetSync.email}</strong>
+                        <span>
+                          Old shared sheet
+                          {' · '}
+                          {sheetSync.lastSyncedAt
+                            ? `Last checked ${formatShortDate(sheetSync.lastSyncedAt)} at ${formatTime(sheetSync.lastSyncedAt)}`
+                            : 'Not checked yet'}
+                          {' · '}
+                          {Object.keys(progress.cards).length}{' '}
+                          {pluralize(Object.keys(progress.cards).length, 'card')} in this browser
+                        </span>
+                      </div>
+                      <span
+                        className={cn(
+                          'storage-badge',
+                          (sheetPhase === 'error' || sheetPhase === 'disconnected') &&
+                            'is-error',
+                          (sheetPhase === 'needs-decision' || sheetPhase === 'unsaved') &&
+                            'is-warn',
+                        )}
+                      >
+                        {sheetPhaseLabel}
+                      </span>
+                    </div>
+
+                    <p className="sheet-autosave">
+                      <RefreshCw size={12} aria-hidden="true" />
+                      {sheetSync.pendingDecision
+                        ? 'Choose which copy to keep below.'
+                        : sheetBusy
+                          ? 'Syncing with Google Sheets...'
+                          : sheetSync.lastError
+                            ? 'The last sync failed. Your local data is safe - try again below.'
+                            : sheetSync.dirty
+                              ? 'Saving to Google Sheets in a few seconds...'
+                              : 'Up to date. Changes save automatically a few seconds after you stop.'}
+                    </p>
+
+                    {sheetSync.lastError && !sheetMessage && !sheetSync.pendingDecision && (
+                      <div className="inline-alert is-error" role="alert">
+                        <AlertCircle size={15} aria-hidden="true" />
+                        <span>{sheetSync.lastError}</span>
+                      </div>
+                    )}
+
+                    {sheetSync.pendingDecision && (
+                      <div className="sheet-decision">
+                        <div>
+                          <strong>Which copy should Wordloom keep?</strong>
+                          <p>
+                            This browser has {Object.keys(progress.cards).length}{' '}
+                            {pluralize(Object.keys(progress.cards).length, 'card')}. The sheet
+                            has{' '}
+                            {sheetSync.remoteSummary
+                              ? `${sheetSync.remoteSummary.cards} cards · ${sheetSync.remoteSummary.reviews} reviews`
+                              : 'saved data'}
+                            .
+                          </p>
+                        </div>
+                        <div className="sheet-decision-actions">
+                          <button
+                            type="button"
+                            className="button button-primary button-small"
+                            onClick={() => void handleSheetDecision('pull')}
+                            disabled={sheetBusy}
+                          >
+                            <Download size={14} aria-hidden="true" />
+                            Use the sheet version
+                          </button>
+                          <button
+                            type="button"
+                            className="button button-ghost button-small"
+                            onClick={() => void handleSheetDecision('push')}
+                            disabled={sheetBusy}
+                          >
+                            <Upload size={14} aria-hidden="true" />
+                            Use this browser's version
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="sheet-connect-actions">
+                      <button
+                        type="button"
+                        className="button button-primary button-small"
+                        onClick={() => void handleSheetSyncNow()}
+                        disabled={sheetBusy || sheetSync.pendingDecision}
+                      >
+                        {sheetBusy ? (
+                          <Loader2 className="spin" size={14} aria-hidden="true" />
+                        ) : (
+                          <RefreshCw size={14} aria-hidden="true" />
+                        )}
+                        {sheetBusy ? 'Syncing...' : 'Sync now'}
+                      </button>
+                      {(sheetSync.connection?.sheetUrl || SHARED_SHEET_URL) && (
+                        <a
+                          className="text-link sheet-open"
+                          href={sheetSync.connection?.sheetUrl || SHARED_SHEET_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open the shared sheet (owner access)
+                          <ExternalLink size={13} aria-hidden="true" />
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="inline-alert is-info">
+                      <Cloud size={15} aria-hidden="true" />
+                      <span>
+                        <strong>This is the old shared sheet.</strong> Sign in with Google to keep
+                        your progress in a spreadsheet you own. Use Import above after connecting to
+                        bring your old rows with you.
+                      </span>
+                    </div>
+
+                    <div className="sheet-connect-actions">
+                      <button
+                        type="button"
+                        className="button button-primary button-small"
+                        onClick={handleSheetConnect}
+                        disabled={sheetBusy || !SHARED_CONNECT_ENDPOINT}
+                      >
+                        <Cloud size={14} aria-hidden="true" />
+                        Sign in with Google
+                      </button>
+                    </div>
+
+                    <details className="sheet-details">
+                      <summary>More sync options</summary>
+                      <div className="data-actions">
+                        <div className="data-action">
+                          <div>
+                            <strong>Use the sheet version</strong>
+                            <span>Replace this browser's progress with the copy in the sheet.</span>
+                          </div>
+                          <button
+                            type="button"
+                            className={cn(
+                              'button button-small',
+                              confirmSheetPull ? 'button-danger-solid' : 'button-ghost',
+                            )}
+                            onClick={() => void handleSheetPull()}
+                            disabled={sheetBusy || sheetSync.pendingDecision}
+                          >
+                            <Download size={14} aria-hidden="true" />
+                            {confirmSheetPull ? 'Click again to replace' : 'Replace'}
+                          </button>
+                        </div>
+                        <div className="data-action">
+                          <div>
+                            <strong>Use this browser's version</strong>
+                            <span>Replace this email's rows with this browser's progress.</span>
                           </div>
                           <button
                             type="button"
@@ -1669,78 +1950,119 @@ export function Settings() {
                       <div>
                         <span>1</span>
                         <p>
-                          <strong>Enter your email.</strong> Use the same address on every device.
+                          <strong>Sign in with Google.</strong> Google confirms your account. No
+                          password and no Cloud setup.
                         </p>
                       </div>
                       <div>
                         <span>2</span>
                         <p>
-                          <strong>Start syncing.</strong> Your current progress is backed up to the
-                          sheet.
+                          <strong>Pick or create a spreadsheet.</strong> Use one you already own.
+                          Existing Wordloom tabs and any progress saved under your email are kept.
+                          Other tabs are left alone.
                         </p>
                       </div>
                       <div>
                         <span>3</span>
                         <p>
-                          <strong>Pick up anywhere.</strong> Add the same email on another device.
+                          <strong>Keep it in sync.</strong> Changes save a few seconds after you
+                          stop, on every device you sign in to.
                         </p>
                       </div>
                     </div>
-                    <Row
-                      label="Email for sync"
-                      hint="No password or Google account is needed."
-                      htmlFor="sheet-email"
-                    >
-                      <div className="sheet-email-form">
-                        <input
-                          id="sheet-email"
-                          className="text-input setting-input sheet-email-input"
-                          type="email"
-                          value={sheetEmailInput}
-                          placeholder="you@example.com"
-                          autoComplete="off"
-                          spellCheck={false}
-                          onChange={(event) => setSheetEmailInput(event.target.value)}
-                          onKeyDown={(event) => {
-                            if (event.key !== 'Enter') return;
-                            event.preventDefault();
-                            void handleSheetSignIn();
-                          }}
-                        />
-                        <button
-                          type="button"
-                          className="button button-primary button-small"
-                          onClick={() => void handleSheetSignIn()}
-                          disabled={sheetBusy}
-                        >
-                          {sheetBusy ? (
-                            <Loader2 className="spin" size={14} aria-hidden="true" />
-                          ) : (
-                            <Cloud size={14} aria-hidden="true" />
-                          )}
-                          {sheetBusy ? 'Starting…' : 'Start syncing'}
-                        </button>
+
+                    <div className="sheet-connect-actions">
+                      <button
+                        type="button"
+                        className="button button-primary button-small"
+                        onClick={handleSheetConnect}
+                        disabled={sheetBusy || !SHARED_CONNECT_ENDPOINT}
+                      >
+                        <Cloud size={14} aria-hidden="true" />
+                        Sign in with Google
+                      </button>
+                    </div>
+
+                    {!SHARED_CONNECT_ENDPOINT && (
+                      <div className="inline-alert is-error">
+                        <AlertCircle size={15} aria-hidden="true" />
+                        <span>
+                          The Google sign-in page is not configured for this build. See{' '}
+                          <strong>Site owner setup</strong> below.
+                        </span>
                       </div>
-                    </Row>
+                    )}
+
                     <div className="inline-alert is-info">
                       <Check size={15} aria-hidden="true" />
                       <span>
                         <strong>Your progress is already safe in this browser.</strong> Sync is
-                        optional. If the sheet already has data for this email, Wordloom asks before
-                        replacing anything.
+                        optional. If the sheet already has data, Wordloom asks before replacing
+                        anything.
                       </span>
                     </div>
+
                     <div className="settings-note is-compact">
                       <ShieldCheck size={17} aria-hidden="true" />
                       <div>
-                        <strong>Use an email you don’t mind sharing</strong>
+                        <strong>You keep the spreadsheet</strong>
                         <p>
-                          Everyone’s data lives in one shared spreadsheet, separated by email.
-                          Anyone who knows an email can open its data, so don’t use a sensitive
-                          address or store secrets in drafts.
+                          Wordloom shares it with the site owner so the background sync can write
+                          to it. AI keys stay on this device and never go into the sheet.
                         </p>
                       </div>
                     </div>
+
+                    <details className="sheet-details">
+                      <summary>Use the old shared sheet with an email</summary>
+                      <Row
+                        label="Email for sync"
+                        hint="No password or Google account is needed."
+                        htmlFor="sheet-email"
+                      >
+                        <div className="sheet-email-form">
+                          <input
+                            id="sheet-email"
+                            className="text-input setting-input sheet-email-input"
+                            type="email"
+                            value={sheetEmailInput}
+                            placeholder="you@example.com"
+                            autoComplete="off"
+                            spellCheck={false}
+                            onChange={(event) => setSheetEmailInput(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key !== 'Enter') return;
+                              event.preventDefault();
+                              void handleSheetSignIn();
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="button button-primary button-small"
+                            onClick={() => void handleSheetSignIn()}
+                            disabled={sheetBusy}
+                          >
+                            {sheetBusy ? (
+                              <Loader2 className="spin" size={14} aria-hidden="true" />
+                            ) : (
+                              <Cloud size={14} aria-hidden="true" />
+                            )}
+                            {sheetBusy ? 'Starting...' : 'Start syncing'}
+                          </button>
+                        </div>
+                      </Row>
+                      <div className="settings-note is-compact">
+                        <AlertCircle size={17} aria-hidden="true" />
+                        <div>
+                          <strong>Email-only sync is not private</strong>
+                          <p>
+                            Everyone's data lives in one shared spreadsheet, separated by email.
+                            Anyone who knows an email can open its data. Use an address you do not
+                            mind sharing.
+                          </p>
+                        </div>
+                      </div>
+                    </details>
                   </>
                 )}
 
@@ -1770,92 +2092,90 @@ export function Settings() {
 
               <Section
                 title="How sync works"
-                description="A simple backup, not a replacement for local storage."
+                description="A spreadsheet you own, updated in the background."
               >
                 <div className="sheet-guide">
                   <div className="sheet-guide-card">
                     <span className="sheet-guide-tag">1</span>
                     <strong>Saved here first</strong>
                     <p>
-                      Wordloom always saves to this browser first. You can keep studying offline and
-                      without an email.
+                      Wordloom always saves to this browser first. You can keep studying offline
+                      and without signing in.
                     </p>
                   </div>
                   <div className="sheet-guide-card">
                     <span className="sheet-guide-tag">2</span>
-                    <strong>Optional backup</strong>
+                    <strong>Your own sheet</strong>
                     <p>
-                      If you add an email, changes are copied to the shared Google Sheet a few
-                      seconds after you stop.
+                      Google confirms your account, then you pick an existing spreadsheet or
+                      create a new one. Existing Wordloom progress is kept, and other tabs in the
+                      sheet are left alone.
                     </p>
                   </div>
                   <div className="sheet-guide-card">
                     <span className="sheet-guide-tag">3</span>
-                    <strong>Same email, same progress</strong>
+                    <strong>Same account, same progress</strong>
                     <p>
-                      Enter the same email on another device to load the same cards, drafts, and
-                      settings.
+                      Sign in on another device and Wordloom reconnects to the same spreadsheet.
+                      Google-verified email replaces the old typed email.
                     </p>
                   </div>
                 </div>
                 <div className="inline-alert is-info">
                   <Check size={15} aria-hidden="true" />
                   <span>
-                    <strong>Switching accounts:</strong> “Log out” keeps your current data on
-                    this browser. Adding a different email loads that email’s own progress and
-                    settings instead of mixing accounts.
+                    <strong>Switching accounts:</strong> logging out keeps your current data in
+                    this browser. Signing in with a different Google account loads that account's
+                    own progress and settings instead of mixing them.
                   </span>
                 </div>
               </Section>
 
               <Section
                 title="Site owner setup"
-                description="Only needed if you manage the shared spreadsheet. Regular users can ignore this section."
+                description="Only needed if you manage the Google side. Regular users can ignore this section."
               >
                 <details className="sheet-details">
-                  <summary>Set up or update the Google Sheet</summary>
+                  <summary>Set up or update the Apps Script</summary>
                   <p className="settings-muted">
-                    Wordloom needs the bridge script below to be deployed once. To update an
-                    existing sheet, replace the script and deploy a new version — the web app URL
-                    stays the same. Starting from a brand-new sheet? Use{' '}
-                    <em>Deploy → New deployment → Web app</em> instead, then put the new{' '}
-                    <code>/exec</code> URL in <code>src/lib/site.ts</code> (or{' '}
-                    <code>VITE_WORDLOOM_BRIDGE_URL</code>).
+                    One script, two web-app deployments. The <strong>data</strong> deployment
+                    writes to each learner's spreadsheet. The <strong>connect</strong> deployment
+                    signs learners in and shares the sheet they pick.
                   </p>
                   <ol className="sheet-steps">
                     <li>
-                      <strong>Open the spreadsheet.</strong> Go to the shared Wordloom Google Sheet.
+                      <strong>Paste the script.</strong> Open the existing Apps Script project,
+                      replace the code with the script below, and save.
                     </li>
                     <li>
-                      <strong>Open the script editor.</strong> Choose{' '}
-                      <em>Extensions → Apps Script</em>.
-                    </li>
-                    <li>
-                      <strong>Paste the bridge.</strong> Delete the old code, click{' '}
-                      <em>Copy bridge script</em> below, paste it in, and save.
-                    </li>
-                    <li>
-                      <strong>Deploy it.</strong> <em>Deploy → Manage deployments</em>, edit the
-                      existing web app, choose <em>New version</em>, and click <em>Deploy</em>. Keep{' '}
+                      <strong>Update the data deployment.</strong> <em>Deploy → Manage deployments
+                      → edit the existing web app → New version</em>. Keep{' '}
                       <em>Execute as: Me</em> and <em>Who has access: Anyone</em>.
                     </li>
                     <li>
-                      <strong>You’re done.</strong> The web app URL ends in <code>/exec</code> and
-                      stays the same when you add a version.
+                      <strong>Add the connect deployment.</strong> <em>Deploy → New deployment →
+                      Web app</em>. Choose <em>Execute as: User accessing the web app</em> and{' '}
+                      <em>Who has access: Anyone with a Google account</em>. Approve the consent
+                      screen.
+                    </li>
+                    <li>
+                      <strong>Copy the new URL.</strong> Put the second <code>/exec</code> URL in{' '}
+                      <code>src/lib/site.ts</code> (or <code>VITE_WORDLOOM_CONNECT_URL</code>), then
+                      rebuild the site.
                     </li>
                   </ol>
                   <p className="settings-muted">
-                    If Google asks for permission, approve it. If it warns that the app isn’t
-                    verified, choose <em>Advanced → Go to … (unsafe)</em> — the script is yours and
-                    only accesses this spreadsheet.
+                    Learners may see Google's "unverified app" warning and choose{' '}
+                    <em>Advanced → Continue</em>. The owner's Google account keeps edit access to
+                    each spreadsheet so the anonymous data deployment can write to it.
                   </p>
                   <div className="data-actions">
                     <div className="data-action">
                       <div>
-                        <strong>Bridge script</strong>
+                        <strong>Bridge and connect script</strong>
                         <span>
-                          {WORDLOOM_BRIDGE_SOURCE.split('\n').length} lines · syncs each email
-                          separately
+                          {WORDLOOM_BRIDGE_SOURCE.split('\n').length} lines · one file, two
+                          deployments
                         </span>
                       </div>
                       <div className="sheet-script-actions">
@@ -1865,7 +2185,7 @@ export function Settings() {
                           onClick={() => void copyBridgeScript()}
                         >
                           <Copy size={14} aria-hidden="true" />
-                          {bridgeCopyStatus === 'copied' ? 'Copied!' : 'Copy bridge script'}
+                          {bridgeCopyStatus === 'copied' ? 'Copied!' : 'Copy script'}
                         </button>
                         <button
                           type="button"
@@ -1891,7 +2211,7 @@ export function Settings() {
                   </div>
                   {bridgeCopyStatus === 'error' && (
                     <p className="sheet-copy-feedback" role="alert">
-                      Your browser blocked the copy. The script is shown and selected below — press
+                      Your browser blocked the copy. The script is shown and selected below - press
                       Ctrl/Cmd + C to copy it.
                     </p>
                   )}
@@ -1903,15 +2223,17 @@ export function Settings() {
                   <div className="inline-alert is-info">
                     <Check size={15} aria-hidden="true" />
                     <span>
-                      <strong>Updating an existing sheet?</strong> The rows already in it are moved
-                      to the sheet owner’s account. Nothing is deleted. If Wordloom asks which copy
-                      to keep, choose <strong>Use the sheet version</strong>.
+                      <strong>After deploying both:</strong> open the connect URL once, approve it,
+                      then sign in from Settings. If Google shows "unverified app" choose{' '}
+                      <em>Advanced → Continue</em>.
                     </span>
                   </div>
                   <div className="sheet-connection-meta">
-                    <span>Web app</span>
+                    <span>Data web app</span>
                     <code>{SHARED_SHEET_ENDPOINT || 'Not configured'}</code>
-                    <span>Spreadsheet</span>
+                    <span>Connect web app</span>
+                    <code>{SHARED_CONNECT_ENDPOINT || 'Not configured'}</code>
+                    <span>Legacy spreadsheet</span>
                     <code>{SHARED_SHEET_URL || 'Not configured'}</code>
                   </div>
                 </details>
@@ -1925,7 +2247,7 @@ export function Settings() {
                 title="Stored on this device"
                 description={
                   sheetSync.email
-                    ? `Local browser storage is the offline cache; ${sheetSync.email} also backs up this data to the shared Google Sheet.`
+                    ? `Local browser storage is the offline cache; ${sheetSync.email} also backs up this data to your Google Sheet.`
                     : 'Wordloom is local-first: vocabulary schedules, drafts, and settings live in your browser.'
                 }
               >
@@ -1957,7 +2279,7 @@ export function Settings() {
                       <span>
                         {sheetSync.email
                           ? `Syncing as ${sheetSync.email}. Manage or stop sync in the Google Sheets tab.`
-                          : 'Optional: back up your progress with your email and the shared Google Sheet.'}
+                          : 'Optional: sign in with Google to back up your progress to your own spreadsheet.'}
                       </span>
                     </div>
                     <button

@@ -10,20 +10,41 @@ import {
 const SHEETS_STORAGE_KEY = 'wordloom.sheets.v1';
 
 /**
- * The bridge schema that understands per-email rows. An older deployment
- * (schema 3) would ignore the email and hand every visitor the owner's data,
- * so refuse to read or write until the owner updates the Apps Script.
+ * Schema 5 adds per-spreadsheet connections: a sheet id plus a secret stored
+ * inside that sheet. Requests without a sheet id still use the legacy shared
+ * spreadsheet keyed by email.
  */
-const BRIDGE_SCHEMA = 4;
+const BRIDGE_SCHEMA = 5;
 
 const REQUEST_TIMEOUT_MS = 25_000;
 
+export type SheetConnectionKind = 'sheet' | 'legacy';
+
 export interface SheetConnection {
-  /** Canonical spreadsheet URL, when known. */
-  sheetUrl: string;
+  /** A learner-owned spreadsheet, or the legacy shared sheet. */
+  kind: SheetConnectionKind;
   /** Apps Script web app URL, ending in /exec. */
   endpoint: string;
+  /** Canonical spreadsheet URL, when known. */
+  sheetUrl: string;
+  /** The account email. Verified by Google for kind === 'sheet'. */
+  email: string;
+  /** Spreadsheet id for kind === 'sheet'. */
+  sheetId: string;
+  /** Per-spreadsheet secret for kind === 'sheet'. */
+  secret: string;
+  /** Spreadsheet name, when the connect page reported one. */
+  name: string;
+  /** Optional shared token for the legacy deployment. */
   token: string;
+}
+
+export interface SheetConnectionInput {
+  email: string;
+  sheetId: string;
+  sheetUrl: string;
+  secret: string;
+  name?: string;
 }
 
 export interface SheetSyncState {
@@ -93,6 +114,7 @@ interface BridgeStatePayload {
   sheetUrl?: unknown;
   schema?: unknown;
   error?: unknown;
+  code?: unknown;
   conflict?: unknown;
   ok?: unknown;
 }
@@ -109,12 +131,37 @@ export function isValidEmail(value: string): boolean {
   return at > 0 && dot > at + 1 && dot < email.length - 1;
 }
 
-/** The one shared connection for the site, or null when it is not configured. */
-export function createSharedConnection(): SheetConnection | null {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** The legacy shared connection, keyed by an email inside one spreadsheet. */
+export function createLegacyConnection(email = ''): SheetConnection | null {
   if (!SHARED_SHEET_ENDPOINT) return null;
   return {
-    sheetUrl: SHARED_SHEET_URL,
+    kind: 'legacy',
     endpoint: SHARED_SHEET_ENDPOINT,
+    sheetUrl: SHARED_SHEET_URL,
+    email: normalizeEmail(email),
+    sheetId: '',
+    secret: '',
+    name: '',
+    token: SHARED_SYNC_TOKEN,
+  };
+}
+
+/** A learner-owned spreadsheet connection, ready for the data bridge. */
+export function createSheetConnection(input: SheetConnectionInput): SheetConnection | null {
+  if (!SHARED_SHEET_ENDPOINT) return null;
+  if (!input.sheetId || !input.secret) return null;
+  return {
+    kind: 'sheet',
+    endpoint: SHARED_SHEET_ENDPOINT,
+    sheetUrl: input.sheetUrl,
+    email: normalizeEmail(input.email),
+    sheetId: input.sheetId,
+    secret: input.secret,
+    name: input.name ?? '',
     token: SHARED_SYNC_TOKEN,
   };
 }
@@ -145,6 +192,35 @@ function defaultSheetSync(): SheetSyncState {
   };
 }
 
+function readStoredConnection(value: unknown): SheetConnection | null {
+  if (!isRecord(value)) return null;
+  const kind = value.kind === 'sheet' ? 'sheet' : value.kind === 'legacy' ? 'legacy' : null;
+  if (!kind) return null;
+  const endpoint = typeof value.endpoint === 'string' ? value.endpoint.trim() : '';
+  if (!endpoint) return null;
+  const email = normalizeEmail(typeof value.email === 'string' ? value.email : '');
+  const sheetId = typeof value.sheetId === 'string' ? value.sheetId.trim() : '';
+  const secret = typeof value.secret === 'string' ? value.secret.trim() : '';
+  if (kind === 'sheet' && (!sheetId || !secret)) return null;
+  const sheetUrl =
+    typeof value.sheetUrl === 'string' && value.sheetUrl
+      ? value.sheetUrl
+      : kind === 'legacy'
+        ? SHARED_SHEET_URL
+        : '';
+  return {
+    kind,
+    endpoint,
+    sheetUrl,
+    email,
+    sheetId: kind === 'sheet' ? sheetId : '',
+    secret: kind === 'sheet' ? secret : '',
+    name: typeof value.name === 'string' ? value.name : '',
+    token:
+      typeof value.token === 'string' && value.token ? value.token : SHARED_SYNC_TOKEN,
+  };
+}
+
 export function loadSheetSync(): SheetSyncState {
   const base = defaultSheetSync();
   try {
@@ -154,9 +230,15 @@ export function loadSheetSync(): SheetSyncState {
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return base;
     const source = parsed as Record<string, unknown>;
     const email = normalizeEmail(typeof source.email === 'string' ? source.email : '');
-    // The old device-level connection is intentionally dropped. The site now
-    // uses one shared bridge and asks each learner to enter an email.
-    const connection = email ? createSharedConnection() : null;
+
+    let connection = email ? readStoredConnection(source.connection) : null;
+    if (email && !connection) {
+      // Pre-schema-5 browsers only stored an email. Keep them on the legacy
+      // shared sheet until they connect a spreadsheet of their own.
+      connection = createLegacyConnection(email);
+    }
+    if (!email) connection = null;
+
     return {
       connection,
       email,
@@ -217,8 +299,8 @@ export function hasProgressData(progress: ProgressState): boolean {
 }
 
 /**
- * API keys stay on the device that typed them. The sheet is a shared document
- * and may be visible to other people, so credentials never travel with it.
+ * API keys stay on the device that typed them. The sheet is a document the
+ * learner owns and may share, so credentials never travel with it.
  */
 export function withoutSecrets(settings: Settings): Settings {
   return { ...settings, geminiApiKey: '', openaiApiKey: '' };
@@ -233,7 +315,11 @@ export function attachSheetUrl(
   return { ...connection, sheetUrl };
 }
 
-async function callBridge(url: string, init?: RequestInit): Promise<BridgeStatePayload> {
+async function callBridge(
+  url: string,
+  kind: SheetConnectionKind,
+  init?: RequestInit,
+): Promise<BridgeStatePayload> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   let text = '';
@@ -271,23 +357,31 @@ async function callBridge(url: string, init?: RequestInit): Promise<BridgeStateP
     payload = JSON.parse(text) as BridgeStatePayload;
   } catch {
     throw new Error(
-      'Google Sheets returned an unexpected page. If you manage the sheet, check the web app deployment. Otherwise try again later. Your data is safe in this browser.',
+      'Google Sheets returned an unexpected page. If you manage the bridge, check the web app deployment. Otherwise try again later. Your data is safe in this browser.',
     );
   }
 
   if (payload.ok === false && !payload.conflict) {
     const message = typeof payload.error === 'string' ? payload.error : '';
-    if (message === 'unauthorized') {
-      throw new Error('The shared sync password does not match. Ask the site owner to check the sheet setup.');
+    const code = typeof payload.code === 'string' ? payload.code : message;
+    if (code === 'unauthorized') {
+      throw new Error(
+        kind === 'sheet'
+          ? 'This spreadsheet is no longer connected to Wordloom. Sign in with Google again from Settings.'
+          : 'The shared sync password does not match. Ask the site owner to check the sheet setup.',
+      );
     }
-    throw new Error(message || 'Google Sheets could not complete the request. Try again in a moment.');
+    if (code === 'no-access' && kind === 'sheet') {
+      throw new Error(
+        'Wordloom could not open this spreadsheet. It may have been deleted or the share was removed. Your data is safe in this browser.',
+      );
+    }
+    throw new Error(
+      message || 'Google Sheets could not complete the request. Try again in a moment.',
+    );
   }
 
   return payload;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function snapshotFromPayload(
@@ -315,19 +409,28 @@ function assertBridgeSchema(payload: BridgeStatePayload): void {
 
 export async function readSheet(
   connection: SheetConnection,
-  email: string,
+  email = connection.email,
 ): Promise<SheetReadResult> {
   const url = new URL(connection.endpoint);
   url.searchParams.set('action', 'read');
-  url.searchParams.set('email', normalizeEmail(email));
+  url.searchParams.set(
+    'email',
+    normalizeEmail(connection.kind === 'sheet' ? connection.email : email),
+  );
+  if (connection.kind === 'sheet') {
+    url.searchParams.set('sheetId', connection.sheetId);
+    url.searchParams.set('secret', connection.secret);
+  }
   if (connection.token) url.searchParams.set('token', connection.token);
   url.searchParams.set('_', String(Date.now()));
 
-  const payload = await callBridge(url.toString());
+  const payload = await callBridge(url.toString(), connection.kind);
   assertBridgeSchema(payload);
   const snapshot = snapshotFromPayload(payload, connection.sheetUrl);
   if (!snapshot) {
-    throw new Error('Google Sheets returned no Wordloom data. Try again, or ask the site owner to check the sheet.');
+    throw new Error(
+      'Google Sheets returned no Wordloom data. Try again, or check the spreadsheet in Settings.',
+    );
   }
   return {
     updatedAt: snapshot.updatedAt,
@@ -350,9 +453,12 @@ export async function writeSheet(
     baseUpdatedAt: payload.baseUpdatedAt,
     settings: withoutSecrets(payload.settings),
     progress: payload.progress,
+    ...(connection.kind === 'sheet'
+      ? { sheetId: connection.sheetId, secret: connection.secret }
+      : {}),
   });
 
-  const response = await callBridge(connection.endpoint, {
+  const response = await callBridge(connection.endpoint, connection.kind, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body,
@@ -362,7 +468,9 @@ export async function writeSheet(
   if (response.conflict) {
     const snapshot = snapshotFromPayload(response, connection.sheetUrl);
     if (!snapshot) {
-      throw new Error('Google Sheets changed on another device and the new copy could not be read. Try again.');
+      throw new Error(
+        'Google Sheets changed on another device and the new copy could not be read. Try again.',
+      );
     }
     return {
       updatedAt: snapshot.updatedAt,
@@ -396,6 +504,9 @@ export function beaconSheet(connection: SheetConnection, payload: SheetWritePayl
       baseUpdatedAt: payload.baseUpdatedAt,
       settings: withoutSecrets(payload.settings),
       progress: payload.progress,
+      ...(connection.kind === 'sheet'
+        ? { sheetId: connection.sheetId, secret: connection.secret }
+        : {}),
     });
     return navigator.sendBeacon(
       connection.endpoint,

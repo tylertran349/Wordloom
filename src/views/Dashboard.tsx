@@ -110,7 +110,7 @@ export function Dashboard() {
         <div className="inline-alert is-info sync-prompt">
           <Cloud size={15} aria-hidden="true" />
           <span>
-            <strong>Your progress is saved in this browser.</strong> Add your email in{' '}
+            <strong>Your progress is saved in this browser.</strong> Sign in with Google in{' '}
             <AppLink to={{ name: 'settings' }} className="text-link">
               Settings → Google Sheets
             </AppLink>{' '}

@@ -39,7 +39,8 @@ import { dayKey, endOfDay, formatInterval, getPracticeSentences } from '../lib/u
 import {
   attachSheetUrl,
   beaconSheet,
-  createSharedConnection,
+  createLegacyConnection,
+  createSheetConnection,
   hasProgressData,
   isValidEmail,
   loadSheetSync,
@@ -49,9 +50,15 @@ import {
   summarizeProgress,
   writeSheet,
   type SheetConnection,
+  type SheetConnectionInput,
+  type SheetReadResult,
   type SheetSnapshot,
   type SheetSyncState,
 } from '../lib/sheets';
+import {
+  getReturningConnection,
+  startSheetConnect,
+} from '../lib/sheetConnect';
 import { SHARED_SHEET_ENDPOINT } from '../lib/site';
 
 export interface LevelStat {
@@ -127,6 +134,10 @@ interface AppContextValue {
   sheetSync: SheetSyncState;
   sheetPhase: SheetPhase;
   sheetBusy: boolean;
+  /** Redirects to Google to pick or create the spreadsheet. */
+  connectSheet: () => SheetActionResult;
+  /** Replaces this browser's data with the old shared-sheet rows for an email. */
+  importLegacySheet: (legacyEmail?: string) => Promise<SheetActionResult>;
   signInSheet: (email: string) => Promise<SheetActionResult>;
   signOutSheet: () => void;
   syncSheet: () => Promise<SheetActionResult>;
@@ -221,6 +232,43 @@ function computeStats(progress: ProgressState, now = Date.now()): AppStats {
 function messageFromError(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
   return 'Something went wrong while syncing with Google Sheets. Your data is safe in this browser.';
+}
+
+/** True when two states point at the same spreadsheet and account. */
+function sameConnection(
+  current: SheetConnection | null,
+  expected: SheetConnection,
+): boolean {
+  return Boolean(
+    current &&
+      current.endpoint === expected.endpoint &&
+      current.email === expected.email &&
+      current.sheetId === expected.sheetId,
+  );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+/**
+ * The sheet share is created seconds before the first read. Retry a few times
+ * so a brand-new connection does not fail while Google catches up.
+ */
+async function readSheetWithRetry(
+  connection: SheetConnection,
+  attempts = 3,
+): Promise<SheetReadResult> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await readSheet(connection);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) await delay(1200 * (attempt + 1));
+    }
+  }
+  throw lastError;
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -318,11 +366,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pushTimer.current = undefined;
       }
       // Credentials never travel through the sheet, so keep this device's keys.
-      setSettings({
+      const nextSettings = {
         ...snapshot.settings,
         geminiApiKey: settingsRef.current.geminiApiKey,
         openaiApiKey: settingsRef.current.openaiApiKey,
-      });
+      };
+      // Update the refs now so an immediate push sends the snapshot, not the
+      // pre-import state.
+      settingsRef.current = nextSettings;
+      progressRef.current = snapshot.progress;
+      setSettings(nextSettings);
       setProgress(snapshot.progress);
       const base = connection ?? sheetRef.current.connection;
       patchSheet({
@@ -343,7 +396,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (force: boolean): Promise<SheetActionResult> => {
       const current = sheetRef.current;
       if (!current.email) {
-        return { ok: false, message: 'Add your email in Settings → Google Sheets first to turn on sync.' };
+        return { ok: false, message: 'Sign in with Google in Settings → Google Sheets first to turn on sync.' };
       }
       if (!current.connection) {
         return {
@@ -355,8 +408,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const email = current.email;
       const changedAt = current.localChangedAt;
       const isLive = () =>
-        sheetRef.current.email === email &&
-        sheetRef.current.connection?.endpoint === connection.endpoint;
+        sheetRef.current.email === email && sameConnection(sheetRef.current.connection, connection);
       try {
         let result = await writeSheet(connection, {
           email,
@@ -433,7 +485,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (force = true): Promise<SheetActionResult> => {
       const current = sheetRef.current;
       if (!current.email) {
-        return { ok: false, message: 'Add your email in Settings → Google Sheets first to turn on sync.' };
+        return { ok: false, message: 'Sign in with Google in Settings → Google Sheets first to turn on sync.' };
       }
       if (!current.connection) {
         return {
@@ -447,8 +499,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const email = current.email;
       try {
         const remote = await readSheet(current.connection, email);
-        if (sheetRef.current.email !== email) {
-          return { ok: false, message: 'Sync was interrupted because the account changed. Try again.' };
+        if (!sameConnection(sheetRef.current.connection, current.connection)) {
+          return { ok: false, message: 'Sync was interrupted because the spreadsheet changed. Try again.' };
         }
         if (!remote.hasData) {
           return {
@@ -482,7 +534,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const syncSheet = useCallback(async (): Promise<SheetActionResult> => {
     const current = sheetRef.current;
     if (!current.email) {
-      return { ok: false, message: 'Add your email in Settings → Google Sheets first to turn on sync.' };
+      return { ok: false, message: 'Sign in with Google in Settings → Google Sheets first to turn on sync.' };
     }
     if (!current.connection) {
       return {
@@ -499,8 +551,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const email = current.email;
     try {
       const remote = await readSheet(current.connection, email);
-      if (sheetRef.current.email !== email) {
-        return { ok: false, message: 'Sync was interrupted because the account changed. Try again.' };
+      if (!sameConnection(sheetRef.current.connection, current.connection)) {
+        return { ok: false, message: 'Sync was interrupted because the spreadsheet changed. Try again.' };
       }
       const connection = attachSheetUrl(current.connection, remote.sheetUrl);
       const dirty = sheetRef.current.dirty;
@@ -582,7 +634,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!isValidEmail(email)) {
         return { ok: false, message: 'Enter a valid email address, for example you@example.com.' };
       }
-      const connection = createSharedConnection();
+      const connection = createLegacyConnection(email);
       if (!SHARED_SHEET_ENDPOINT || !connection) {
         return {
           ok: false,
@@ -739,6 +791,240 @@ export function AppProvider({ children }: { children: ReactNode }) {
       remoteSummary: null,
     });
   }, [patchSheet]);
+
+  const connectSheet = useCallback((): SheetActionResult => {
+    const url = startSheetConnect();
+    if (!url) {
+      return {
+        ok: false,
+        message:
+          'Google sign-in is not configured for this build. Follow Site owner setup in Settings, then add the connect web app URL.',
+      };
+    }
+    // The return trip reloads the app, so persist everything first.
+    saveSettings(settingsRef.current, profileRef.current);
+    saveProgress(progressRef.current, profileRef.current);
+    window.location.assign(url);
+    return { ok: true, message: 'Opening Google...' };
+  }, []);
+
+  /**
+   * Finish a Google sign-in. The connect page hands back the verified email,
+   * spreadsheet id, secret, and URL, so this runs after the app reloads.
+   */
+  const completeSheetConnection = useCallback(
+    async (input: SheetConnectionInput): Promise<SheetActionResult> => {
+      const connection = createSheetConnection(input);
+      if (!connection) {
+        return {
+          ok: false,
+          message:
+            'Google Sheets sync is not set up for this site yet. Ask the site owner to finish the setup.',
+        };
+      }
+      const email = connection.email;
+      if (busyRef.current) {
+        return { ok: false, message: 'A sync check is already running. Try again in a moment.' };
+      }
+
+      busyRef.current = true;
+      setSheetBusy(true);
+
+      const previousEmail = sheetRef.current.email;
+      const previousConnection = sheetRef.current.connection;
+      const switching = previousEmail !== email;
+      const hasNewProfile = switching && hasStoredProfile(email);
+      // Local-only use and the old email-based sheet both keep this browser's
+      // progress as the candidate for the new Google account. A stored profile
+      // for the Google account still wins when it exists.
+      const carryLocal =
+        switching && !hasNewProfile && (!previousEmail || previousConnection?.kind === 'legacy');
+      let nextSettings = settingsRef.current;
+      let nextProgress = progressRef.current;
+
+      if (switching) {
+        if (previousEmail) {
+          // Keep the old profile on disk either way.
+          saveSettings(settingsRef.current, previousEmail);
+          saveProgress(progressRef.current, previousEmail);
+        }
+        if (carryLocal) {
+          nextSettings = settingsRef.current;
+          nextProgress = progressRef.current;
+        } else if (hasNewProfile) {
+          nextSettings = loadSettings(email);
+          nextProgress = loadProgress(email);
+        } else {
+          nextSettings = { ...DEFAULT_SETTINGS };
+          nextProgress = emptyProgress();
+        }
+      }
+
+      try {
+        const epoch = disconnectEpoch.current;
+        if (switching) {
+          profileRef.current = email;
+          settingsRef.current = nextSettings;
+          progressRef.current = nextProgress;
+          setSettings(nextSettings);
+          setProgress(nextProgress);
+          saveSettings(nextSettings, email);
+          saveProgress(nextProgress, email);
+        }
+
+        patchSheet({
+          email,
+          connection,
+          lastRemoteUpdatedAt: 0,
+          lastSyncedAt: null,
+          lastError: null,
+          dirty: false,
+          localChangedAt: 0,
+          pendingDecision: false,
+          remoteSummary: null,
+        });
+
+        let remote: SheetReadResult;
+        try {
+          remote = await readSheetWithRetry(connection);
+        } catch (error) {
+          const message = messageFromError(error);
+          patchSheet({ lastError: message });
+          return {
+            ok: false,
+            message: `${message} Press Sync now in a moment to retry.`,
+          };
+        }
+        if (disconnectEpoch.current !== epoch) {
+          return { ok: false, message: 'The sign-in was cancelled. Try again.' };
+        }
+
+        const label = connection.name || 'your spreadsheet';
+
+        if (!remote.hasData) {
+          const hadProgress = hasProgressData(progressRef.current);
+          patchSheet({ lastRemoteUpdatedAt: remote.updatedAt });
+          if (!hadProgress) {
+            return {
+              ok: true,
+              message: `Connected to ${email}. Changes save to ${label} automatically.`,
+            };
+          }
+          patchSheet({ dirty: true, localChangedAt: Date.now() });
+          const result = await performPush(true);
+          return {
+            ok: result.ok,
+            message: result.ok
+              ? `Connected. Backed up this browser's progress to ${label}.`
+              : result.message,
+          };
+        }
+
+        if (!hasProgressData(progressRef.current)) {
+          applySheetSnapshot(remote.snapshot, connection);
+          return {
+            ok: true,
+            message: `Connected to ${email}. Loaded ${remote.summary.cards} ${
+              remote.summary.cards === 1 ? 'card' : 'cards'
+            } from ${label}.`,
+          };
+        }
+
+        patchSheet({
+          lastRemoteUpdatedAt: remote.updatedAt,
+          localChangedAt: Math.max(sheetRef.current.localChangedAt, Date.now()),
+          pendingDecision: true,
+          remoteSummary: remote.summary,
+          lastError: null,
+        });
+        return {
+          ok: true,
+          tone: 'info',
+          message: `Connected to ${email}. ${label} already has data - choose which copy to keep.`,
+        };
+      } finally {
+        busyRef.current = false;
+        setSheetBusy(false);
+      }
+    },
+    [applySheetSnapshot, patchSheet, performPush],
+  );
+
+  // The connect page sends the app back with a fragment; apply it once.
+  const returningConnection = useRef<SheetConnectionInput | null>(getReturningConnection());
+  const completeConnectionRef = useRef(completeSheetConnection);
+  completeConnectionRef.current = completeSheetConnection;
+
+  useEffect(() => {
+    const pending = returningConnection.current;
+    if (!pending) return;
+    returningConnection.current = null;
+    void completeConnectionRef.current(pending).then((result) => {
+      notify(result.message, result.ok ? 'success' : result.tone === 'info' ? 'info' : 'error');
+    });
+  }, [notify]);
+
+  /**
+   * Copy progress from the legacy shared sheet into the learner's own sheet.
+   * Reuses the normal read + push path, so conflicts stay explicit.
+   */
+  const importLegacySheet = useCallback(
+    async (legacyEmail?: string): Promise<SheetActionResult> => {
+      const current = sheetRef.current;
+      if (!current.connection || current.connection.kind !== 'sheet') {
+        return { ok: false, message: 'Connect your own Google Sheet first.' };
+      }
+      const legacy = createLegacyConnection();
+      if (!legacy) {
+        return { ok: false, message: 'The old shared sheet is not configured for this build.' };
+      }
+      const email = normalizeEmail(legacyEmail || current.email);
+      if (!isValidEmail(email)) {
+        return { ok: false, message: 'Enter the email you used with the old shared sheet.' };
+      }
+      if (busyRef.current) {
+        return { ok: false, message: 'A sync check is already running. Try again in a moment.' };
+      }
+
+      const connection = current.connection;
+      busyRef.current = true;
+      setSheetBusy(true);
+      try {
+        const remote = await readSheet(legacy, email);
+        if (!sameConnection(sheetRef.current.connection, connection)) {
+          return {
+            ok: false,
+            message: 'Sync was interrupted because the spreadsheet changed. Try again.',
+          };
+        }
+        if (!remote.hasData) {
+          return {
+            ok: false,
+            message: `The old shared sheet has no saved progress for ${email}.`,
+          };
+        }
+        applySheetSnapshot(remote.snapshot, connection);
+        patchSheet({ dirty: true, localChangedAt: Date.now() });
+        const result = await performPush(true);
+        return result.ok
+          ? {
+              ok: true,
+              message: `Imported ${remote.summary.cards} ${
+                remote.summary.cards === 1 ? 'card' : 'cards'
+              } from ${email} into ${connection.name || 'your sheet'}.`,
+            }
+          : result;
+      } catch (error) {
+        const message = messageFromError(error);
+        patchSheet({ lastError: message });
+        return { ok: false, message };
+      } finally {
+        busyRef.current = false;
+        setSheetBusy(false);
+      }
+    },
+    [applySheetSnapshot, patchSheet, performPush],
+  );
 
   const resolveSheetConflict = useCallback(
     async (choice: 'pull' | 'push'): Promise<SheetActionResult> => {
@@ -1167,6 +1453,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     sheetSync,
     sheetPhase,
     sheetBusy,
+    connectSheet,
+    importLegacySheet,
     signInSheet,
     signOutSheet,
     syncSheet,
