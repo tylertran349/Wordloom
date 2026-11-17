@@ -19,7 +19,7 @@ const DEFAULT_SHEET_URL =
  * The connect page URL, ending in /exec. See src/lib/wordloom-sheets.gs for the
  * Apps Script that serves it.
  */
-const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbwTtEqB9A4dDjFa_prXych3H4eC_NIMap_fVT5N3rya94Q_2jJic4yuMP0LI0p0zt52/exec';
+const DEFAULT_CONNECT_URL = 'https://script.google.com/macros/s/AKfycbxmJO5LOekt_MIbuuJ1UVxtnWyulEYTPfAnTwo5B2VmfgfNbryrWOjABVskeUNxApkP/exec';
 
 const env = import.meta.env;
 
