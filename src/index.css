@@ -3138,12 +3138,26 @@ html[data-theme='dark'] .status-due {
   justify-content: space-between;
   gap: 1rem;
 }
+.review-card-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
 .review-card-meta {
   color: var(--faint);
   font-size: 0.54rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+.review-remove-button {
+  color: var(--muted);
+}
+.review-remove-button:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--line));
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 .review-front {
   display: flex;

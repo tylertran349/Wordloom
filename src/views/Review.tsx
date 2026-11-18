@@ -7,6 +7,7 @@ import {
   Flame,
   RotateCcw,
   Sparkles,
+  Trash2,
   Trophy,
 } from 'lucide-react';
 import type { ReviewGrade, VocabWord } from '../types';
@@ -27,6 +28,7 @@ import {
 } from '../lib/srs';
 import {
   AppLink,
+  ConfirmDialog,
   EmptyState,
   LevelBadge,
   PageHeader,
@@ -66,6 +68,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
     dueWords,
     studiedWords,
     gradeCard,
+    removeStudied,
     stats,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
@@ -85,6 +88,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
   const [revealed, setRevealed] = useState(false);
   const [counts, setCounts] = useState<GradeCounts>(emptyCounts);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState(false);
   // A fresh random seed per card, so the example and exercise vary between
   // reviews but stay fixed while the learner works through this card.
   const [picks, setPicks] = useState(() => ({
@@ -126,6 +130,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
   useEffect(() => {
     setPicks({ example: Math.random(), exercise: Math.random() });
     dismissError();
+    setConfirmRemove(false);
   }, [current?.id, index, queue, dismissError]);
 
   const exercise = useMemo(() => {
@@ -150,6 +155,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
     setRevealed(false);
     setCounts(emptyCounts);
     setSummary(null);
+    setConfirmRemove(false);
     window.scrollTo({ top: 0, behavior: settings.reduceMotion ? 'auto' : 'smooth' });
   }
 
@@ -170,6 +176,27 @@ export function Review({ practice = false }: { practice?: boolean }) {
     window.setTimeout(() => {
       gradeLock.current = false;
     }, 260);
+  }
+
+  function handleRemoveCurrent() {
+    if (!current) return;
+    const removedId = current.id;
+    setConfirmRemove(false);
+    removeStudied(removedId);
+    const nextQueue = queue.filter((word) => word.id !== removedId);
+    setQueue(nextQueue);
+    if (nextQueue.length === 0) {
+      const reviewed = counts.again + counts.hard + counts.good + counts.easy;
+      // Only show the completion summary when something was actually graded;
+      // otherwise fall back to the normal "nothing due" empty state.
+      if (reviewed > 0) setSummary({ counts, total: reviewed });
+    } else {
+      // The next card shifts into this index; if we removed the last card,
+      // land on the new end of the queue.
+      setIndex((value) => Math.min(value, nextQueue.length - 1));
+      setRevealed(false);
+    }
+    window.scrollTo({ top: 0, behavior: settings.reduceMotion ? 'auto' : 'smooth' });
   }
 
   useEffect(() => {
@@ -201,7 +228,7 @@ export function Review({ practice = false }: { practice?: boolean }) {
       ) {
         return;
       }
-      if (summary) return;
+      if (summary || confirmRemove) return;
       if (event.code === 'Space' && !revealed && current) {
         if (targetElement?.closest('button, a')) return;
         event.preventDefault();
@@ -220,12 +247,12 @@ export function Review({ practice = false }: { practice?: boolean }) {
     return () => window.removeEventListener('keydown', onKeyDown);
     // Rebind when the visible card or reveal state changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed, current?.id, index, summary, counts]);
+  }, [revealed, current?.id, index, summary, counts, confirmRemove]);
 
   const strongCount = summary ? summary.counts.good + summary.counts.easy : 0;
   const strongPercent = summary ? percent(strongCount, summary.total) : 0;
 
-  if (queue.length === 0) {
+  if (queue.length === 0 && !summary) {
     return (
       <div className="view review-view">
         <PageHeader
@@ -419,9 +446,19 @@ export function Review({ practice = false }: { practice?: boolean }) {
                 <span className="chip chip-quiet">{current.partOfSpeech}</span>
               )}
             </div>
-            <span className="review-card-meta">
-              {target.label} → {native.label}
-            </span>
+            <div className="review-card-head-actions">
+              <span className="review-card-meta">
+                {target.label} → {native.label}
+              </span>
+              <button
+                type="button"
+                className="button button-ghost button-small review-remove-button"
+                onClick={() => setConfirmRemove(true)}
+              >
+                <Trash2 size={13} aria-hidden="true" />
+                Remove from queue
+              </button>
+            </div>
           </div>
 
           <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -573,6 +610,22 @@ export function Review({ practice = false }: { practice?: boolean }) {
           </span>
         </div>
       </div>
+
+      {confirmRemove && current && (
+        <ConfirmDialog
+          title="Remove this word from the review queue?"
+          description={
+            <p>
+              “{current.term}” will stop appearing in reviews and its schedule will be cleared.
+              Your generated examples are kept, and you can add it to the queue again at any time.
+            </p>
+          }
+          confirmLabel="Yes, remove it"
+          cancelLabel="Keep it"
+          onCancel={() => setConfirmRemove(false)}
+          onConfirm={handleRemoveCurrent}
+        />
+      )}
     </div>
   );
 }
