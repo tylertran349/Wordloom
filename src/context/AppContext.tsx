@@ -137,6 +137,10 @@ interface AppContextValue {
   exportBackup: () => BackupFile;
   resetProgress: () => void;
   recordLevelPosition: (level: CEFRLevel, index: number) => void;
+  /** Word pages opened this session, oldest first, without duplicates. */
+  wordHistory: string[];
+  /** Record that the learner opened a word page. */
+  recordWordVisit: (wordId: string) => void;
   notify: (message: string, tone?: ToastMessage['tone']) => void;
   toast: ToastMessage | null;
   dismissToast: () => void;
@@ -297,6 +301,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
   const [settings, setSettings] = useState<Settings>(() => loadSettings(initial.email));
   const [progress, setProgress] = useState<ProgressState>(() => loadProgress(initial.email));
+  // Session-only trail of opened word pages. It powers the "previous" links
+  // so they follow what the learner actually looked at, not the deck order.
+  const [wordHistory, setWordHistory] = useState<string[]>([]);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
   const [clock, setClock] = useState(() => Date.now());
@@ -1366,6 +1373,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [markLocalChange],
   );
 
+  const recordWordVisit = useCallback((wordId: string) => {
+    setWordHistory((current) => {
+      const last = current[current.length - 1];
+      if (last === wordId) return current;
+      // Returning to the page we just came from drops that page from the
+      // trail, so repeated "previous" presses keep walking backwards.
+      if (current[current.length - 2] === wordId) return current.slice(0, -1);
+      // Any other visit moves the word to the end of the trail.
+      return [...current.filter((id) => id !== wordId), wordId].slice(-50);
+    });
+  }, []);
+
   const stats = useMemo(() => computeStats(progress, clock), [progress, clock]);
 
   const dueWords = useMemo(
@@ -1432,6 +1451,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     exportBackup,
     resetProgress,
     recordLevelPosition,
+    wordHistory,
+    recordWordVisit,
     notify,
     toast,
     dismissToast,

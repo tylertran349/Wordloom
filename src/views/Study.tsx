@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -64,6 +64,8 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     recordLevelPosition,
     markSeen,
     levelDecks,
+    wordHistory,
+    recordWordVisit,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
@@ -101,19 +103,32 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const generated = word ? progress.generatedPractice[word.id] ?? [] : [];
   const examples = word ? progress.generatedExamples[word.id] ?? [] : [];
   const sentences = useMemo(() => getStudySentences(generated), [generated]);
-  // With a randomized study order, every "next" navigation picks a fresh
-  // random unstudied word instead of following the fixed deck sequence.
-  const randomNext = useMemo(() => {
-    if (settings.newWordOrder !== 'random' || !word) return undefined;
-    return pickNextNewWord(
-      deck,
-      'random',
-      progress.cards,
-      progress.seenWords,
-      word.id,
+  // The "next" link always points at a genuinely new word in the learner's
+  // chosen order: the next unseen word in deck order, or a fresh random
+  // unseen word. Progress is intentionally not a dependency here because the
+  // current word is marked seen on mount, which would otherwise re-roll the
+  // random pick and make the label change under the learner.
+  const next = useMemo(() => {
+    if (!word) return undefined;
+    if (settings.newWordOrder === 'random') {
+      return pickNextNewWord(
+        deck,
+        'random',
+        progress.cards,
+        progress.seenWords,
+        word.id,
+      );
+    }
+    const after = index >= 0 ? deck.slice(index + 1) : deck;
+    // Look forward through the deck first, then fall back to any remaining
+    // new word (for example after jumping into the middle of a deck) so the
+    // link stays usable until every new word has been seen.
+    return (
+      pickNextNewWord(after, 'deck', progress.cards, progress.seenWords, word.id) ??
+      pickNextNewWord(deck, 'deck', progress.cards, progress.seenWords, word.id)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [word?.id, settings.newWordOrder, deck, progress.cards, progress.seenWords]);
+  }, [word?.id, settings.newWordOrder, deck]);
 
   useEffect(() => {
     if (word && settings.autoplayAudio) {
@@ -140,6 +155,14 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     if (!word) return;
     markSeen(word.id);
   }, [word?.id, markSeen]);
+
+  // Track the order word pages are opened so "previous" can return to the
+  // word the learner actually looked at before this one. A layout effect keeps
+  // the trail update out of the painted frame during navigation.
+  useLayoutEffect(() => {
+    if (!word) return;
+    recordWordVisit(word.id);
+  }, [word?.id, recordWordVisit]);
 
   // Remember where the learner stopped, per CEFR deck. Positions are stored in
   // vocabulary-file order so a randomized study order does not invalidate them.
@@ -176,9 +199,10 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     );
   }
 
-  const previous = index > 0 ? deck[index - 1] : undefined;
-  const positionalNext = index >= 0 && index < deck.length - 1 ? deck[index + 1] : undefined;
-  const next = settings.newWordOrder === 'random' ? randomNext ?? positionalNext : positionalNext;
+  const previousId = [...wordHistory]
+    .reverse()
+    .find((id) => id !== word.id && WORD_BY_ID[id]);
+  const previous = previousId ? WORD_BY_ID[previousId] : undefined;
   const levelStat = stats.levelStats.find((entry) => entry.level === word.level);
   const status = statusForCard(card, Date.now());
   const filled = sentences.filter((sentence, exerciseIndex) =>
@@ -217,7 +241,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
         <div className="word-pager">
           {previous ? (
             <AppLink
-              to={{ name: 'word', level: word.level, wordId: previous.id }}
+              to={{ name: 'word', level: previous.level, wordId: previous.id }}
               className="icon-button"
               aria-label={`Previous word: ${previous.term}`}
               title={`Previous: ${previous.term}`}
@@ -538,7 +562,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
           <div className="word-bottom-nav">
             {previous ? (
               <AppLink
-                to={{ name: 'word', level: word.level, wordId: previous.id }}
+                to={{ name: 'word', level: previous.level, wordId: previous.id }}
                 className="word-bottom-link"
               >
                 <ChevronLeft size={16} aria-hidden="true" />
@@ -564,7 +588,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
             ) : (
               <AppLink to={{ name: 'level', level: word.level }} className="word-bottom-link is-next">
                 <span>
-                  <small>End of deck</small>
+                  <small>All caught up</small>
                   <strong>Back to {word.level}</strong>
                 </span>
                 <ArrowRight size={16} aria-hidden="true" />
