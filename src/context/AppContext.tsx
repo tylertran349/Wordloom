@@ -11,6 +11,7 @@ import {
 import type {
   BackupFile,
   CEFRLevel,
+  CustomWord,
   ExampleSentence,
   ProgressState,
   ReviewGrade,
@@ -18,9 +19,14 @@ import type {
   SRSCard,
   ToastMessage,
   VocabWord,
+  WordEdit,
+  WordInput,
 } from '../types';
 import { CEFR_LEVELS } from '../types';
-import { ALL_WORDS, LEVEL_WORDS, WORD_BY_ID } from '../data/vocabulary';
+import {
+  ALL_WORDS as BUILTIN_WORDS,
+  WORD_BY_ID as BUILTIN_WORD_BY_ID,
+} from '../data/vocabulary';
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -69,6 +75,12 @@ import {
   startSheetConnect,
 } from '../lib/sheetConnect';
 import { SHARED_SHEET_ENDPOINT } from '../lib/site';
+import {
+  createCustomWordId,
+  MAX_CUSTOM_WORDS,
+  normalizeTermKey,
+  type ImportedWordEntry,
+} from '../lib/wordImport';
 
 export interface LevelStat {
   level: CEFRLevel;
@@ -105,20 +117,72 @@ export interface SheetActionResult {
   tone?: 'success' | 'error' | 'info';
 }
 
+export interface ImportWordsOptions {
+  /** Extra tags applied to every word in the batch. */
+  tags?: string[];
+  /** Origin shown on the imported-word list. */
+  source?: string;
+}
+
+export interface ImportWordsResult {
+  added: number;
+  skipped: number;
+  duplicateTerms: string[];
+}
+
+export interface WordActionResult {
+  ok: boolean;
+  message: string;
+  /** Set when a word was created or updated. */
+  id?: string;
+}
+
 interface AppContextValue {
   settings: Settings;
   updateSettings: (patch: Partial<Settings>) => void;
   resetSettings: () => void;
   progress: ProgressState;
   stats: AppStats;
-  dueWords: typeof ALL_WORDS;
-  studiedWords: typeof ALL_WORDS;
+  dueWords: VocabWord[];
+  studiedWords: VocabWord[];
+  /** Built-in plus custom words, in CEFR order. */
+  allWords: VocabWord[];
+  wordById: Record<string, VocabWord>;
+  /** Built-in plus custom words, grouped by CEFR level. */
+  levelWords: Record<CEFRLevel, VocabWord[]>;
+  levelCounts: Record<CEFRLevel, number>;
+  customWords: CustomWord[];
+  wordEdits: Record<string, WordEdit>;
+  hiddenWords: string[];
+  hiddenWordsByLevel: Record<CEFRLevel, number>;
+  /** Normalized terms that a new or imported word cannot reuse. */
+  reservedTermKeys: Set<string>;
   /** Vocab words in the learner's chosen order, per CEFR level. */
   levelDecks: Record<CEFRLevel, VocabWord[]>;
   /** Every word in study order: CEFR levels, then the chosen order within each. */
   studyOrder: VocabWord[];
   /** Re-rolls the randomized new-word order. */
   shuffleWordOrder: () => void;
+  /** Adds a hand-written word to a CEFR deck. */
+  addWord: (input: WordInput) => WordActionResult;
+  /** Edits an imported or built-in word while keeping its study progress. */
+  updateWord: (wordId: string, input: WordInput) => WordActionResult;
+  /** Deletes a custom word, or hides a built-in one. */
+  deleteWord: (wordId: string) => WordActionResult;
+  /** Removes changes to one built-in word and restores its original text. */
+  resetWordEdit: (wordId: string) => void;
+  /** Removes every built-in word edit. */
+  resetWordEdits: () => void;
+  /** Restores hidden built-in words, optionally only one CEFR level. */
+  restoreHiddenWords: (level?: CEFRLevel) => void;
+  /** Adds parsed words to a CEFR deck, skipping terms that already exist. */
+  importWords: (
+    entries: ImportedWordEntry[],
+    level: CEFRLevel,
+    options?: ImportWordsOptions,
+  ) => ImportWordsResult;
+  removeCustomWord: (id: string) => void;
+  clearCustomWords: () => void;
   markStudied: (wordId: string) => boolean;
   removeStudied: (wordId: string) => boolean;
   gradeCard: (wordId: string, grade: ReviewGrade) => void;
@@ -192,14 +256,19 @@ function computeStreak(activity: ProgressState['activity']): number {
   return streak;
 }
 
-function computeStats(progress: ProgressState, now = Date.now()): AppStats {
+function computeStats(
+  progress: ProgressState,
+  wordById: Record<string, VocabWord>,
+  levelWords: Record<CEFRLevel, VocabWord[]>,
+  now = Date.now(),
+): AppStats {
   const today = dayKey(now);
   const dayEnd = endOfDay(now).getTime();
-  const cards = Object.values(progress.cards).filter((card) => Boolean(WORD_BY_ID[card.wordId]));
+  const cards = Object.values(progress.cards).filter((card) => Boolean(wordById[card.wordId]));
   const todayActivity = progress.activity[today] ?? { studied: 0, reviews: 0 };
 
   const levelStats = CEFR_LEVELS.map((level) => {
-    const words = LEVEL_WORDS[level];
+    const words = levelWords[level];
     const levelCards = words
       .map((word) => progress.cards[word.id])
       .filter((card): card is SRSCard => Boolean(card));
@@ -243,6 +312,63 @@ function computeStats(progress: ProgressState, now = Date.now()): AppStats {
   };
 }
 
+function normalizeWordTags(tags: string[] | undefined): string[] {
+  const result: string[] = [];
+  const seen = new Set<string>();
+  (tags ?? []).forEach((tag) => {
+    const cleaned = tag.replace(/\s+/g, ' ').trim().slice(0, 30);
+    const key = cleaned.toLowerCase();
+    if (!cleaned || seen.has(key) || result.length >= 8) return;
+    seen.add(key);
+    result.push(cleaned);
+  });
+  return result;
+}
+
+function cleanText(value: string | undefined, max: number): string {
+  return (value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+/**
+ * Merge a learner's edit into a built-in word. Empty optional values clear the
+ * field, while a missing value leaves the original in place.
+ */
+function applyWordEdit(word: VocabWord, edit: WordEdit | undefined): VocabWord {
+  if (!edit) return word;
+  const optional = (
+    value: string | undefined,
+    fallback: string | undefined,
+  ): string | undefined => {
+    if (value === undefined) return fallback;
+    return value.trim() || undefined;
+  };
+  return {
+    ...word,
+    term: edit.term?.trim() || word.term,
+    definition: edit.definition?.trim() || word.definition,
+    partOfSpeech: optional(edit.partOfSpeech, word.partOfSpeech),
+    pronunciation: optional(edit.pronunciation, word.pronunciation),
+    definitionTarget: optional(edit.definitionTarget, word.definitionTarget),
+    tags: edit.tags ?? word.tags,
+    level: edit.level ?? word.level,
+  };
+}
+
+type TermClash = {
+  word: VocabWord;
+  reason: 'visible' | 'hidden' | 'reserved';
+};
+
+function clashMessage(clash: TermClash): string {
+  if (clash.reason === 'hidden') {
+    return `“${clash.word.term}” is hidden from your decks. Restore it in Settings → Data instead.`;
+  }
+  if (clash.reason === 'reserved') {
+    return `“${clash.word.term}” is reserved by the built-in deck. Use a different term or reset that word's edit.`;
+  }
+  return `“${clash.word.term}” already exists in ${clash.word.level}.`;
+}
+
 function messageFromError(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
   return 'Something went wrong while syncing with Google Sheets. Your data is safe in this browser.';
@@ -251,6 +377,15 @@ function messageFromError(error: unknown): string {
 /** True when the learner has entered at least one AI API key. */
 function hasApiKeys(settings: Settings): boolean {
   return Boolean(settings.geminiApiKey.trim() || settings.openaiApiKey.trim());
+}
+
+/** True when this browser has custom words or built-in edits worth uploading. */
+function hasVocabularyChanges(settings: Settings): boolean {
+  return (
+    settings.customWords.length > 0 ||
+    Object.keys(settings.wordEdits).length > 0 ||
+    settings.hiddenWords.length > 0
+  );
 }
 
 /** True when two states point at the same spreadsheet and account. */
@@ -333,7 +468,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetSettings = useCallback(() => {
-    setSettings({ ...DEFAULT_SETTINGS });
+    // Vocabulary changes are user content, not preferences, so restoring
+    // defaults must not delete custom words, edits, or hidden-word choices.
+    setSettings((current) => ({
+      ...DEFAULT_SETTINGS,
+      customWords: current.customWords,
+      wordEdits: current.wordEdits,
+      hiddenWords: current.hiddenWords,
+    }));
     markLocalChangeRef.current();
   }, []);
 
@@ -552,6 +694,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         patchSheet({ connection, lastError: null });
         if (
           hasProgressData(progressRef.current) ||
+          hasVocabularyChanges(settingsRef.current) ||
           dirty ||
           (connection.kind === 'sheet' && hasApiKeys(settingsRef.current))
         ) {
@@ -696,7 +839,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
 
         if (!remote.hasData) {
-          const hadProgress = hasProgressData(progressRef.current);
+          const hadProgress =
+            hasProgressData(progressRef.current) || hasVocabularyChanges(settingsRef.current);
           patchSheet({
             dirty: true,
             localChangedAt: Date.now(),
@@ -706,7 +850,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ok: result.ok,
             message: result.ok
               ? hadProgress
-                ? `Backed up this browser’s progress to ${email}.`
+                ? `Backed up this browser’s data to ${email}.`
                 : `You’re syncing as ${email}. Changes will be backed up automatically.`
               : result.message,
           };
@@ -873,7 +1017,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const label = connection.name || 'your spreadsheet';
 
         if (!remote.hasData) {
-          const hadProgress = hasProgressData(progressRef.current);
+          const hadProgress =
+            hasProgressData(progressRef.current) || hasVocabularyChanges(settingsRef.current);
           const hadApiKey = hasApiKeys(settingsRef.current);
           patchSheet({ lastRemoteUpdatedAt: remote.updatedAt });
           if (!hadProgress && !hadApiKey) {
@@ -888,7 +1033,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ok: result.ok,
             message: result.ok
               ? hadProgress
-                ? `Connected. Backed up this browser's progress to ${label}.`
+                ? `Connected. Backed up this browser's data to ${label}.`
                 : `Connected. Saved this browser's AI key to ${label}.`
               : result.message,
           };
@@ -1152,6 +1297,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const customWords = settings.customWords;
+
+  // Imported and hand-written words join the generated deck; built-in words
+  // can carry learner edits or be hidden. Built-in vocabulary always wins a
+  // term collision, so hand-edited storage cannot shadow an existing word.
+  const allWords = useMemo<VocabWord[]>(() => {
+    const hidden = new Set(settings.hiddenWords);
+    const takenIds = new Set(BUILTIN_WORDS.map((word) => word.id));
+    const takenTerms = new Set(BUILTIN_WORDS.map((word) => normalizeTermKey(word.term)));
+    const builtIn = BUILTIN_WORDS.filter((word) => !hidden.has(word.id)).map((word) =>
+      applyWordEdit(word, settings.wordEdits[word.id]),
+    );
+    const imported: VocabWord[] = [];
+    customWords.forEach((word) => {
+      const termKey = normalizeTermKey(word.term);
+      if (takenIds.has(word.id) || takenTerms.has(termKey)) return;
+      takenIds.add(word.id);
+      takenTerms.add(termKey);
+      imported.push({
+        id: word.id,
+        term: word.term,
+        definition: word.definition,
+        partOfSpeech: word.partOfSpeech,
+        pronunciation: word.pronunciation,
+        definitionTarget: word.definitionTarget,
+        tags: word.tags,
+        level: word.level,
+      });
+    });
+    return [...builtIn, ...imported];
+  }, [customWords, settings.wordEdits, settings.hiddenWords]);
+
+  const wordById = useMemo<Record<string, VocabWord>>(
+    () => Object.fromEntries(allWords.map((word) => [word.id, word])),
+    [allWords],
+  );
+
+  const levelWords = useMemo<Record<CEFRLevel, VocabWord[]>>(
+    () =>
+      Object.fromEntries(
+        CEFR_LEVELS.map((level) => [
+          level,
+          allWords.filter((word) => word.level === level),
+        ]),
+      ) as Record<CEFRLevel, VocabWord[]>,
+    [allWords],
+  );
+
+  const levelCounts = useMemo<Record<CEFRLevel, number>>(
+    () =>
+      Object.fromEntries(
+        CEFR_LEVELS.map((level) => [level, levelWords[level].length]),
+      ) as Record<CEFRLevel, number>,
+    [levelWords],
+  );
+
+  const hiddenWordsByLevel = useMemo<Record<CEFRLevel, number>>(() => {
+    const counts = Object.fromEntries(
+      CEFR_LEVELS.map((level) => [level, 0]),
+    ) as Record<CEFRLevel, number>;
+    settings.hiddenWords.forEach((id) => {
+      const word = BUILTIN_WORD_BY_ID[id];
+      if (!word) return;
+      const level = settings.wordEdits[id]?.level ?? word.level;
+      counts[level] += 1;
+    });
+    return counts;
+  }, [settings.hiddenWords, settings.wordEdits]);
+
+  const reservedTermKeys = useMemo(() => {
+    const keys = new Set(BUILTIN_WORDS.map((word) => normalizeTermKey(word.term)));
+    allWords.forEach((word) => keys.add(normalizeTermKey(word.term)));
+    settings.hiddenWords.forEach((id) => {
+      const word = BUILTIN_WORD_BY_ID[id];
+      if (!word) return;
+      keys.add(normalizeTermKey(applyWordEdit(word, settings.wordEdits[id]).term));
+    });
+    return keys;
+  }, [allWords, settings.hiddenWords, settings.wordEdits]);
+
   const srsConfig = useMemo(
     () => ({
       startingEase: settings.startingEase,
@@ -1172,14 +1397,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const levelDecks = useMemo(() => {
     const decks = {} as Record<CEFRLevel, VocabWord[]>;
     CEFR_LEVELS.forEach((level) => {
-      const words = LEVEL_WORDS[level] ?? [];
+      const words = levelWords[level] ?? [];
       decks[level] =
         settings.newWordOrder === 'random'
           ? seededShuffle(words, hashString(level) ^ settings.newWordSeed)
           : words;
     });
     return decks;
-  }, [settings.newWordOrder, settings.newWordSeed]);
+  }, [levelWords, settings.newWordOrder, settings.newWordSeed]);
 
   const studyOrder = useMemo(
     () => CEFR_LEVELS.flatMap((level) => levelDecks[level]),
@@ -1190,6 +1415,407 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updateSettings({ newWordSeed: Math.floor(Math.random() * 2_147_483_647) });
     notify('New word order shuffled.', 'info');
   }, [notify, updateSettings]);
+
+  // Resume positions are stored as deck indexes. Adding words at the end is
+  // safe, but hiding, deleting, moving, or restoring a word can shift every
+  // later index. Clear the affected level so "Resume" never lands on the
+  // wrong word.
+  const clearLevelResume = useCallback((levels: CEFRLevel[]) => {
+    if (levels.length === 0) return;
+    setProgress((current) => {
+      let changed = false;
+      const levelPositions = { ...current.levelPositions };
+      levels.forEach((level) => {
+        if (levelPositions[level] !== undefined) {
+          delete levelPositions[level];
+          changed = true;
+        }
+      });
+      return changed ? { ...current, levelPositions } : current;
+    });
+  }, []);
+
+  const importWords = useCallback(
+    (
+      entries: ImportedWordEntry[],
+      level: CEFRLevel,
+      options: ImportWordsOptions = {},
+    ): ImportWordsResult => {
+      const takenIds = new Set(allWords.map((word) => word.id));
+      const takenTerms = new Set(reservedTermKeys);
+      const fresh: CustomWord[] = [];
+      const duplicateTerms: string[] = [];
+      const existingCount = settings.customWords.length;
+      let skipped = 0;
+      const now = Date.now();
+
+      entries.forEach((entry) => {
+        if (existingCount + fresh.length >= MAX_CUSTOM_WORDS) {
+          skipped += 1;
+          return;
+        }
+        const term = entry.term.replace(/\s+/g, ' ').trim().slice(0, 120);
+        const definition = entry.definition
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 600);
+        if (!term || !definition) {
+          skipped += 1;
+          return;
+        }
+        const termKey = normalizeTermKey(term);
+        if (takenTerms.has(termKey)) {
+          duplicateTerms.push(term);
+          skipped += 1;
+          return;
+        }
+        takenTerms.add(termKey);
+
+        const id = createCustomWordId(term, takenIds);
+        takenIds.add(id);
+
+        const tags: string[] = [];
+        const seenTags = new Set<string>();
+        [...['imported'], ...(options.tags ?? []), ...entry.tags].forEach((tag) => {
+          const cleaned = tag.replace(/\s+/g, ' ').trim().slice(0, 30);
+          const key = cleaned.toLowerCase();
+          if (!cleaned || seenTags.has(key) || tags.length >= 8) return;
+          seenTags.add(key);
+          tags.push(cleaned);
+        });
+
+        fresh.push({
+          id,
+          term,
+          definition,
+          level,
+          partOfSpeech: entry.partOfSpeech?.trim().slice(0, 40) || undefined,
+          pronunciation: entry.pronunciation?.trim().slice(0, 80) || undefined,
+          definitionTarget:
+            entry.definitionTarget?.trim().slice(0, 600) || undefined,
+          tags,
+          importedAt: now,
+          ...(options.source ? { source: options.source.slice(0, 80) } : {}),
+        });
+      });
+
+      if (fresh.length > 0) {
+        setSettings((current) => ({
+          ...current,
+          customWords: [...current.customWords, ...fresh],
+        }));
+        markLocalChangeRef.current();
+      }
+
+      return { added: fresh.length, skipped, duplicateTerms };
+    },
+    [allWords, reservedTermKeys, settings.customWords],
+  );
+
+  const removeCustomWord = useCallback((id: string) => {
+    const removed = settings.customWords.find((word) => word.id === id);
+    setSettings((current) => {
+      if (!current.customWords.some((word) => word.id === id)) return current;
+      return {
+        ...current,
+        customWords: current.customWords.filter((word) => word.id !== id),
+      };
+    });
+    if (removed) clearLevelResume([removed.level]);
+    markLocalChangeRef.current();
+  }, [clearLevelResume, settings.customWords]);
+
+  // Look across visible words (including edits), hidden built-ins, and the
+  // built-in deck's original terms, so two words can never share a term and a
+  // reset edit cannot resurrect a duplicate.
+  const findTermClash = useCallback(
+    (termKey: string, excludeId?: string): TermClash | undefined => {
+      const visible = allWords.find(
+        (word) => word.id !== excludeId && normalizeTermKey(word.term) === termKey,
+      );
+      if (visible) return { word: visible, reason: 'visible' };
+
+      for (const id of settings.hiddenWords) {
+        if (id === excludeId) continue;
+        const base = BUILTIN_WORD_BY_ID[id];
+        if (!base) continue;
+        const word = applyWordEdit(base, settings.wordEdits[id]);
+        if (normalizeTermKey(word.term) === termKey) {
+          return { word, reason: 'hidden' };
+        }
+      }
+
+      const reserved = BUILTIN_WORDS.find(
+        (word) => word.id !== excludeId && normalizeTermKey(word.term) === termKey,
+      );
+      if (reserved) {
+        return {
+          word: reserved,
+          reason: settings.hiddenWords.includes(reserved.id) ? 'hidden' : 'reserved',
+        };
+      }
+      return undefined;
+    },
+    [allWords, settings.hiddenWords, settings.wordEdits],
+  );
+
+  const addWord = useCallback(
+    (input: WordInput): WordActionResult => {
+      const term = cleanText(input.term, 120);
+      const definition = cleanText(input.definition, 600);
+      if (!term || !definition) {
+        return { ok: false, message: 'A word needs both a term and a meaning.' };
+      }
+
+      const clash = findTermClash(normalizeTermKey(term));
+      if (clash) {
+        return { ok: false, message: clashMessage(clash) };
+      }
+      if (settings.customWords.length >= MAX_CUSTOM_WORDS) {
+        return {
+          ok: false,
+          message: `Your custom word collection is full (${MAX_CUSTOM_WORDS.toLocaleString()} words). Remove a word before adding another.`,
+        };
+      }
+
+      const id = createCustomWordId(term, new Set(allWords.map((word) => word.id)));
+      const word: CustomWord = {
+        id,
+        term,
+        definition,
+        level: input.level,
+        partOfSpeech: cleanText(input.partOfSpeech, 40) || undefined,
+        pronunciation: cleanText(input.pronunciation, 80) || undefined,
+        definitionTarget: cleanText(input.definitionTarget, 600) || undefined,
+        tags: normalizeWordTags(input.tags),
+        importedAt: Date.now(),
+        source: 'Added by hand',
+      };
+      setSettings((current) => ({
+        ...current,
+        customWords: [...current.customWords, word],
+      }));
+      markLocalChangeRef.current();
+      return { ok: true, message: `Added “${term}” to ${input.level}.`, id };
+    },
+    [allWords, findTermClash, settings.customWords],
+  );
+
+  const updateWord = useCallback(
+    (wordId: string, input: WordInput): WordActionResult => {
+      const currentWord = wordById[wordId] ?? BUILTIN_WORD_BY_ID[wordId];
+      if (!currentWord) {
+        return { ok: false, message: 'That word is no longer in the deck.' };
+      }
+
+      const term = cleanText(input.term, 120);
+      const definition = cleanText(input.definition, 600);
+      if (!term || !definition) {
+        return { ok: false, message: 'A word needs both a term and a meaning.' };
+      }
+
+      const clash = findTermClash(normalizeTermKey(term), wordId);
+      if (clash) {
+        return { ok: false, message: clashMessage(clash) };
+      }
+
+      const partOfSpeech = cleanText(input.partOfSpeech, 40);
+      const pronunciation = cleanText(input.pronunciation, 80);
+      const definitionTarget = cleanText(input.definitionTarget, 600);
+      const tags = normalizeWordTags(input.tags);
+
+      if (settings.customWords.some((word) => word.id === wordId)) {
+        setSettings((current) => ({
+          ...current,
+          customWords: current.customWords.map((word) =>
+            word.id === wordId
+              ? {
+                  ...word,
+                  term,
+                  definition,
+                  level: input.level,
+                  partOfSpeech: partOfSpeech || undefined,
+                  pronunciation: pronunciation || undefined,
+                  definitionTarget: definitionTarget || undefined,
+                  tags,
+                }
+              : word,
+          ),
+        }));
+      } else {
+        const base = BUILTIN_WORD_BY_ID[wordId];
+        const baseTags = base?.tags ?? [];
+        const matchesOriginal =
+          Boolean(base) &&
+          term === base.term &&
+          definition === base.definition &&
+          (partOfSpeech || undefined) === base.partOfSpeech &&
+          (pronunciation || undefined) === base.pronunciation &&
+          (definitionTarget || undefined) === base.definitionTarget &&
+          input.level === base.level &&
+          tags.length === baseTags.length &&
+          tags.every((tag, index) => tag === baseTags[index]);
+
+        if (matchesOriginal) {
+          // Saving a built-in word unchanged should not leave a spurious
+          // "Edited" badge behind. If an older edit exists, drop it.
+          if (settings.wordEdits[wordId]) {
+            const previousLevel = settings.wordEdits[wordId]?.level;
+            setSettings((current) => {
+              if (current.wordEdits[wordId] === undefined) return current;
+              const wordEdits = { ...current.wordEdits };
+              delete wordEdits[wordId];
+              return { ...current, wordEdits };
+            });
+            if (previousLevel && previousLevel !== base.level) {
+              clearLevelResume([base.level, previousLevel]);
+            }
+            markLocalChangeRef.current();
+          }
+          return { ok: true, message: `Saved “${term}”.`, id: wordId };
+        }
+
+        const edit: WordEdit = {
+          term,
+          definition,
+          level: input.level,
+          partOfSpeech,
+          pronunciation,
+          definitionTarget,
+          tags,
+        };
+        setSettings((current) => ({
+          ...current,
+          wordEdits: { ...current.wordEdits, [wordId]: edit },
+        }));
+      }
+      markLocalChangeRef.current();
+      const moved = currentWord.level !== input.level;
+      if (moved) clearLevelResume([currentWord.level, input.level]);
+      return {
+        ok: true,
+        message: moved
+          ? `Saved “${term}” and moved it to ${input.level}.`
+          : `Saved “${term}”.`,
+        id: wordId,
+      };
+    },
+    [
+      wordById,
+      findTermClash,
+      settings.customWords,
+      settings.wordEdits,
+      clearLevelResume,
+    ],
+  );
+
+  const deleteWord = useCallback(
+    (wordId: string): WordActionResult => {
+      const word = wordById[wordId] ?? BUILTIN_WORD_BY_ID[wordId];
+      if (!word) {
+        return { ok: false, message: 'That word is no longer in the deck.' };
+      }
+
+      if (settings.customWords.some((entry) => entry.id === wordId)) {
+        setSettings((current) => ({
+          ...current,
+          customWords: current.customWords.filter((entry) => entry.id !== wordId),
+        }));
+        clearLevelResume([word.level]);
+        markLocalChangeRef.current();
+        return { ok: true, message: `Deleted “${word.term}”.` };
+      }
+
+      if (!BUILTIN_WORD_BY_ID[wordId] || settings.hiddenWords.includes(wordId)) {
+        return { ok: false, message: 'That word is no longer in the deck.' };
+      }
+      setSettings((current) => ({
+        ...current,
+        hiddenWords: current.hiddenWords.includes(wordId)
+          ? current.hiddenWords
+          : [...current.hiddenWords, wordId],
+      }));
+      clearLevelResume([word.level]);
+      markLocalChangeRef.current();
+      return {
+        ok: true,
+        message: `Removed “${word.term}” from the ${word.level} deck. You can restore it in Settings → Data.`,
+      };
+    },
+    [wordById, settings.customWords, settings.hiddenWords, clearLevelResume],
+  );
+
+  const resetWordEdit = useCallback(
+    (wordId: string) => {
+      const edit = settings.wordEdits[wordId];
+      const base = BUILTIN_WORD_BY_ID[wordId];
+      if (edit?.level && base && edit.level !== base.level) {
+        clearLevelResume([base.level, edit.level]);
+      }
+      setSettings((current) => {
+        if (current.wordEdits[wordId] === undefined) return current;
+        const wordEdits = { ...current.wordEdits };
+        delete wordEdits[wordId];
+        return { ...current, wordEdits };
+      });
+      markLocalChangeRef.current();
+    },
+    [settings.wordEdits, clearLevelResume],
+  );
+
+  const resetWordEdits = useCallback(() => {
+    const levels = new Set<CEFRLevel>();
+    Object.entries(settings.wordEdits).forEach(([id, edit]) => {
+      if (!edit.level) return;
+      const base = BUILTIN_WORD_BY_ID[id];
+      if (base && edit.level === base.level) return;
+      levels.add(edit.level);
+      if (base) levels.add(base.level);
+    });
+    if (levels.size > 0) clearLevelResume([...levels]);
+    setSettings((current) => {
+      if (Object.keys(current.wordEdits).length === 0) return current;
+      return { ...current, wordEdits: {} };
+    });
+    markLocalChangeRef.current();
+  }, [settings.wordEdits, clearLevelResume]);
+
+  const restoreHiddenWords = useCallback(
+    (level?: CEFRLevel) => {
+      const affected = new Set<CEFRLevel>();
+      settings.hiddenWords.forEach((id) => {
+        const base = BUILTIN_WORD_BY_ID[id];
+        if (!base) return;
+        const hiddenLevel = settings.wordEdits[id]?.level ?? base.level;
+        if (!level || hiddenLevel === level) affected.add(hiddenLevel);
+      });
+      if (affected.size > 0) clearLevelResume([...affected]);
+      setSettings((current) => ({
+        ...current,
+        hiddenWords: level
+          ? current.hiddenWords.filter((id) => {
+              const word = BUILTIN_WORD_BY_ID[id];
+              if (!word) return false;
+              return (current.wordEdits[id]?.level ?? word.level) !== level;
+            })
+          : [],
+      }));
+      markLocalChangeRef.current();
+    },
+    [settings.hiddenWords, settings.wordEdits, clearLevelResume],
+  );
+
+  const clearCustomWords = useCallback(() => {
+    const levels = new Set<CEFRLevel>(
+      settings.customWords.map((word) => word.level),
+    );
+    if (levels.size > 0) clearLevelResume([...levels]);
+    setSettings((current) => {
+      if (current.customWords.length === 0) return current;
+      return { ...current, customWords: [] };
+    });
+    markLocalChangeRef.current();
+  }, [settings.customWords, clearLevelResume]);
 
   const markStudied = useCallback(
     (wordId: string): boolean => {
@@ -1385,34 +2011,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const stats = useMemo(() => computeStats(progress, clock), [progress, clock]);
+  const stats = useMemo(
+    () => computeStats(progress, wordById, levelWords, clock),
+    [progress, wordById, levelWords, clock],
+  );
 
   const dueWords = useMemo(
     () =>
-      ALL_WORDS.filter((word) => isDue(progress.cards[word.id], clock)).sort(
+      allWords.filter((word) => isDue(progress.cards[word.id], clock)).sort(
         (a, b) => (progress.cards[a.id]?.due ?? 0) - (progress.cards[b.id]?.due ?? 0),
       ),
-    [progress.cards, clock],
+    [allWords, progress.cards, clock],
   );
 
   const studiedWords = useMemo(
     () =>
-      ALL_WORDS.filter((word) => Boolean(progress.cards[word.id])).sort(
+      allWords.filter((word) => Boolean(progress.cards[word.id])).sort(
         (a, b) => (progress.cards[a.id]?.due ?? 0) - (progress.cards[b.id]?.due ?? 0),
       ),
-    [progress.cards],
+    [allWords, progress.cards],
   );
 
   const getPractice = useCallback(
     (wordId: string) => {
-      const word = WORD_BY_ID[wordId];
+      const word = wordById[wordId];
       if (!word) return [];
       return getPracticeSentences(
         Math.max(20, settings.exercisesPerWord),
         progress.generatedPractice[wordId] ?? [],
       );
     },
-    [progress.generatedPractice, settings.exercisesPerWord],
+    [wordById, progress.generatedPractice, settings.exercisesPerWord],
   );
 
   const getCard = useCallback(
@@ -1438,9 +2067,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     stats,
     dueWords,
     studiedWords,
+    allWords,
+    wordById,
+    levelWords,
+    levelCounts,
+    customWords,
+    wordEdits: settings.wordEdits,
+    hiddenWords: settings.hiddenWords,
+    hiddenWordsByLevel,
+    reservedTermKeys,
     levelDecks,
     studyOrder,
     shuffleWordOrder,
+    addWord,
+    updateWord,
+    deleteWord,
+    resetWordEdit,
+    resetWordEdits,
+    restoreHiddenWords,
+    importWords,
+    removeCustomWord,
+    clearCustomWords,
     markStudied,
     removeStudied,
     gradeCard,

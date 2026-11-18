@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Volume2 } from 'lucide-react';
 import type { CEFRLevel, DayActivity } from '../types';
 import type { Route } from '../types';
@@ -256,7 +257,7 @@ export function ConfirmDialog({
     };
   }, []);
 
-  return (
+  return createPortal(
     <div
       className="confirm-backdrop"
       onClick={(event) => {
@@ -291,7 +292,8 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

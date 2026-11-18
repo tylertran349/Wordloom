@@ -32,7 +32,6 @@ import {
   Volume2,
 } from 'lucide-react';
 import type { AccentColor, Settings as SettingsType, ThemeMode } from '../types';
-import { ALL_WORDS } from '../data/vocabulary';
 import { getLanguage, getVoiceSample, LANGUAGES } from '../data/languages';
 import { useApp, type SheetActionResult } from '../context/AppContext';
 import {
@@ -205,9 +204,16 @@ export function Settings() {
     resetSettings,
     shuffleWordOrder,
     progress,
+    allWords,
+    customWords,
+    wordEdits,
+    hiddenWords,
     importBackup,
     exportBackup,
     resetProgress,
+    clearCustomWords,
+    resetWordEdits,
+    restoreHiddenWords,
     notify,
     sheetSync,
     sheetPhase,
@@ -248,7 +254,7 @@ export function Settings() {
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const deviceBytes = getStorageFootprint(settings, progress);
-  const previewWord = ALL_WORDS[0];
+  const previewWord = allWords[0];
   const geminiThinking =
     GEMINI_THINKING_LEVELS.find((option) => option.value === settings.geminiThinking) ??
     GEMINI_THINKING_LEVELS[0];
@@ -450,6 +456,9 @@ export function Settings() {
       signOutSheet();
       resetProgress();
       resetSettings();
+      clearCustomWords();
+      resetWordEdits();
+      restoreHiddenWords();
       clearTranslationCache();
       clearAllWordloomStorage();
       setSheetEmailInput('');
@@ -1974,8 +1983,80 @@ export function Settings() {
               </Section>
 
               <Section
+                title="Vocabulary management"
+                description="Add, edit, or remove words directly in any CEFR deck. Changes here apply to the built-in word list and sync with your settings."
+              >
+                <div className="data-actions">
+                  <div className="data-action">
+                    <div>
+                      <strong>Custom words</strong>
+                      <span>
+                        {customWords.length > 0
+                          ? `${customWords.length} ${pluralize(customWords.length, 'word')} imported or added by hand.`
+                          : 'Add words by hand in a deck, or import a Quizlet, CSV, JSON, or plain-text list.'}
+                      </span>
+                    </div>
+                    <AppLink to={{ name: 'import' }} className="button button-ghost button-small">
+                      <Upload size={14} aria-hidden="true" />
+                      {customWords.length > 0 ? 'Manage' : 'Import'}
+                    </AppLink>
+                  </div>
+                  <div className="data-action">
+                    <div>
+                      <strong>Edited built-in words</strong>
+                      <span>
+                        {Object.keys(wordEdits).length > 0
+                          ? `${Object.keys(wordEdits).length} built-in ${pluralize(Object.keys(wordEdits).length, 'word')} edited in place.`
+                          : 'No built-in words have been edited.'}
+                      </span>
+                    </div>
+                    {Object.keys(wordEdits).length > 0 && (
+                      <button
+                        type="button"
+                        className="button button-ghost button-small"
+                        onClick={() => {
+                          resetWordEdits();
+                          notify('Built-in words restored to their original text.', 'info');
+                        }}
+                      >
+                        <RotateCcw size={14} aria-hidden="true" />
+                        Reset edits
+                      </button>
+                    )}
+                  </div>
+                  <div className="data-action">
+                    <div>
+                      <strong>Hidden built-in words</strong>
+                      <span>
+                        {hiddenWords.length > 0
+                          ? `${hiddenWords.length} built-in ${pluralize(hiddenWords.length, 'word')} hidden from decks. Study progress is kept.`
+                          : 'No built-in words are hidden.'}
+                      </span>
+                    </div>
+                    {hiddenWords.length > 0 && (
+                      <button
+                        type="button"
+                        className="button button-ghost button-small"
+                        onClick={() => {
+                          restoreHiddenWords();
+                          notify('Hidden built-in words restored to their decks.', 'info');
+                        }}
+                      >
+                        <RotateCcw size={14} aria-hidden="true" />
+                        Restore all
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="settings-muted">
+                  Open any CEFR deck to use the pencil and trash buttons beside each word. Deleting a
+                  built-in word hides it; deleting a custom word removes it from your collection.
+                </p>
+              </Section>
+
+              <Section
                 title="Backup and restore"
-                description="Export a single JSON file containing your settings, study schedule, and review history."
+                description="Export a single JSON file containing your settings, custom words, word edits, study schedule, and review history."
               >
                 <div className="data-actions">
                   <div className="data-action">
@@ -2051,7 +2132,7 @@ export function Settings() {
                 <div className="danger-row">
                   <div>
                     <strong>Reset settings</strong>
-                    <span>Restore defaults for theme, study, scheduling, translation, and AI.</span>
+                    <span>Restore defaults for theme, study, scheduling, translation, and AI. Custom words and deck edits are kept.</span>
                   </div>
                   <button
                     type="button"
@@ -2065,7 +2146,7 @@ export function Settings() {
                 <div className="danger-row">
                   <div>
                     <strong>Erase everything</strong>
-                    <span>Progress, settings, and cached translations, back to a fresh install. Vocabulary is untouched.</span>
+                    <span>Progress, settings, custom words, built-in edits, and cached translations, back to a fresh install. Built-in vocabulary is restored.</span>
                   </div>
                   <button
                     type="button"
@@ -2099,7 +2180,12 @@ export function Settings() {
                   <div><span>Native language</span><strong>{native.label}</strong></div>
                   <div>
                     <span>Vocabulary</span>
-                    <strong>{ALL_WORDS.length.toLocaleString()} words · A1–B2</strong>
+                    <strong>
+                      {allWords.length.toLocaleString()} words
+                      {customWords.length > 0
+                        ? ` · ${customWords.length.toLocaleString()} imported`
+                        : ''}
+                    </strong>
                   </div>
                 </div>
                 <div className="about-links">

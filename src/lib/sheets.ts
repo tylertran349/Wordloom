@@ -296,10 +296,84 @@ export function hasProgressData(progress: ProgressState): boolean {
 /**
  * AI keys sync only to a learner-owned sheet. The legacy shared sheet is
  * readable by anyone who knows the email, so credentials never go there.
+ *
+ * Vocabulary changes travel with settings, but a single spreadsheet cell is
+ * limited to 50,000 characters. Custom words, built-in edits, and hidden-word
+ * ids are split into chunks that are reassembled on read, so large imports
+ * still sync cleanly.
  */
-function settingsForSheet(connection: SheetConnection, settings: Settings): Settings {
-  if (connection.kind === 'sheet') return settings;
-  return { ...settings, geminiApiKey: '', openaiApiKey: '' };
+const CHUNKED_SETTINGS = ['customWords', 'wordEdits', 'hiddenWords'] as const;
+const CHUNK_SIZE = 18_000;
+
+function hasChunkableValue(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  if (value && typeof value === 'object') return Object.keys(value).length > 0;
+  return value !== undefined && value !== null;
+}
+
+function packSettingsForSheet(settings: Settings): Record<string, unknown> {
+  const packed: Record<string, unknown> = { ...settings };
+  CHUNKED_SETTINGS.forEach((field) => {
+    const value = packed[field];
+    delete packed[field];
+    if (!hasChunkableValue(value)) return;
+
+    const json = JSON.stringify(value);
+    const count = Math.ceil(json.length / CHUNK_SIZE);
+    packed[`${field}ChunkCount`] = count;
+    for (let index = 0; index < count; index += 1) {
+      packed[`${field}Chunk${index}`] = json.slice(
+        index * CHUNK_SIZE,
+        (index + 1) * CHUNK_SIZE,
+      );
+    }
+  });
+  return packed;
+}
+
+function unpackSettingsFromSheet(raw: Record<string, unknown>): Record<string, unknown> {
+  const next: Record<string, unknown> = { ...raw };
+
+  CHUNKED_SETTINGS.forEach((field) => {
+    // A sheet written by an older/newer build may already carry the field.
+    if (next[field] !== undefined) return;
+
+    const count = Number(next[`${field}ChunkCount`]);
+    if (!Number.isInteger(count) || count <= 0 || count > 1_000) return;
+
+    let json = '';
+    for (let index = 0; index < count; index += 1) {
+      const chunk = next[`${field}Chunk${index}`];
+      if (typeof chunk !== 'string') return;
+      json += chunk;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(json);
+    } catch {
+      return;
+    }
+
+    delete next[`${field}ChunkCount`];
+    for (let index = 0; index < count; index += 1) {
+      delete next[`${field}Chunk${index}`];
+    }
+    next[field] = parsed;
+  });
+
+  return next;
+}
+
+function settingsForSheet(
+  connection: SheetConnection,
+  settings: Settings,
+): Record<string, unknown> {
+  const safe =
+    connection.kind === 'sheet'
+      ? settings
+      : { ...settings, geminiApiKey: '', openaiApiKey: '' };
+  return packSettingsForSheet(safe);
 }
 
 /** Fill in the sheet URL returned by the bridge after the first connection. */
@@ -386,7 +460,9 @@ function snapshotFromPayload(
 ): SheetSnapshot | null {
   const state = payload.state;
   if (!state || !isRecord(state)) return null;
-  const rawSettings = isRecord(state.settings) ? state.settings : {};
+  const rawSettings = unpackSettingsFromSheet(
+    isRecord(state.settings) ? state.settings : {},
+  );
   return {
     updatedAt: numberOr(state.updatedAt, numberOr(payload.updatedAt, 0)),
     sheetUrl:

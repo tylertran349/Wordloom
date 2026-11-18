@@ -26,6 +26,9 @@ export function parseHash(hash: string): Route {
     return { name: 'review', practice: parts[1] === 'practice' };
   }
   if (parts[0] === 'progress') return { name: 'progress' };
+  if (parts[0] === 'import') {
+    return { name: 'import', level: isCEFRLevel(parts[1]) ? parts[1] : undefined };
+  }
   if (parts[0] === 'settings') return { name: 'settings' };
   return { name: 'dashboard' };
 }
@@ -42,6 +45,8 @@ export function routeToHash(route: Route): string {
       return route.practice ? '#/review/practice' : '#/review';
     case 'progress':
       return '#/progress';
+    case 'import':
+      return route.level ? `#/import/${route.level}` : '#/import';
     case 'settings':
       return '#/settings';
     default:
@@ -66,6 +71,8 @@ export function routeKey(route: Route): string {
       return `level:${route.level}`;
     case 'review':
       return route.practice ? 'review:practice' : 'review';
+    case 'import':
+      return `import:${route.level ?? 'any'}`;
     default:
       return route.name;
   }

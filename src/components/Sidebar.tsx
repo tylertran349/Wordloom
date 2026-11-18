@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   RotateCcw,
   Settings as SettingsIcon,
+  Upload,
 } from 'lucide-react';
 import type { Route } from '../types';
 import { CEFR_LEVELS } from '../types';
@@ -90,6 +91,14 @@ export function Sidebar({ route }: { route: Route }) {
         >
           <BarChart3 size={18} className="nav-icon" aria-hidden="true" />
           <span className="nav-label">Progress</span>
+        </AppLink>
+        <AppLink
+          to={{ name: 'import' }}
+          className={cn('nav-item', route.name === 'import' && 'is-active')}
+          aria-current={route.name === 'import' ? 'page' : undefined}
+        >
+          <Upload size={18} className="nav-icon" aria-hidden="true" />
+          <span className="nav-label">Import</span>
         </AppLink>
 
         <span className="side-label side-label-spaced">Levels</span>

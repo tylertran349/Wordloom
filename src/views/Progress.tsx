@@ -11,7 +11,6 @@ import {
   Trophy,
 } from 'lucide-react';
 import { LEVEL_INFO } from '../data/levels';
-import { WORD_BY_ID } from '../data/vocabulary';
 import { useApp } from '../context/AppContext';
 import { getLanguage } from '../data/languages';
 import {
@@ -34,10 +33,10 @@ import {
 } from '../components/ui';
 
 export function Progress() {
-  const { settings, progress, stats, studiedWords } = useApp();
+  const { settings, progress, stats, studiedWords, wordById } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const today = startOfDay();
-  const cards = Object.values(progress.cards).filter((card) => Boolean(WORD_BY_ID[card.wordId]));
+  const cards = Object.values(progress.cards).filter((card) => Boolean(wordById[card.wordId]));
 
   const activityDays = Array.from({ length: 14 }, (_, index) => {
     const date = addDays(today, index - 13);
@@ -71,7 +70,7 @@ export function Progress() {
   });
 
   const recentReviews = progress.reviewLog
-    .filter((entry) => Boolean(WORD_BY_ID[entry.wordId]))
+    .filter((entry) => Boolean(wordById[entry.wordId]))
     .slice(0, 10);
   const averagePerDay = periodTotal > 0 ? periodTotal / 14 : 0;
   const averageLabel =
@@ -344,7 +343,7 @@ export function Progress() {
         ) : (
           <div className="review-history">
             {recentReviews.map((entry, index) => {
-              const word = WORD_BY_ID[entry.wordId];
+              const word = wordById[entry.wordId];
               if (!word) return null;              return (
                 <AppLink
                   key={`${entry.wordId}-${entry.at}-${index}`}

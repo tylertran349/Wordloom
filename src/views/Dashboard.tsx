@@ -13,7 +13,6 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react';
-import { ALL_WORDS, LEVEL_COUNTS, WORD_BY_ID } from '../data/vocabulary';
 import { LEVEL_INFO } from '../data/levels';
 import { useApp } from '../context/AppContext';
 import { getLanguage } from '../data/languages';
@@ -42,14 +41,23 @@ import { GenerateContentButtons } from '../components/GenerateContentButtons';
 import { useWordContentGeneration } from '../hooks/useWordContentGeneration';
 
 export function Dashboard() {
-  const { settings, stats, progress, studiedWords, studyOrder, sheetSync } = useApp();
+  const {
+    settings,
+    stats,
+    progress,
+    studiedWords,
+    studyOrder,
+    allWords,
+    wordById,
+    sheetSync,
+  } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const goalPercent = percent(stats.practicedToday, settings.dailyGoal);
   const goalMet = stats.practicedToday >= settings.dailyGoal;
 
   const lastStudiedWord = progress.lastStudied
-    ? WORD_BY_ID[progress.lastStudied.wordId]
+    ? wordById[progress.lastStudied.wordId]
     : undefined;
   // In a randomized study order each pick is a fresh random word instead of
   // the next entry in a fixed shuffle.
@@ -58,7 +66,7 @@ export function Dashboard() {
       pickNextNewWord(studyOrder, settings.newWordOrder, progress.cards, progress.seenWords),
     [studyOrder, settings.newWordOrder, progress.cards, progress.seenWords],
   );
-  const focusWord = nextNewWord ?? lastStudiedWord ?? studyOrder[0] ?? ALL_WORDS[0];
+  const focusWord = nextNewWord ?? lastStudiedWord ?? studyOrder[0] ?? allWords[0];
   const focusLabel = nextNewWord
     ? stats.studied === 0
       ? 'Start here'
@@ -88,7 +96,7 @@ export function Dashboard() {
   }).reduce((total, value) => total + value, 0);
   const displayName = settings.displayName.trim() || 'learner';
 
-  if (ALL_WORDS.length === 0) {
+  if (allWords.length === 0) {
     return (
       <div className="view">
         <PageHeader
@@ -99,7 +107,13 @@ export function Dashboard() {
         <EmptyState
           icon={<BookOpen size={24} />}
           title="Your word lists are empty"
-          description="Each CEFR level accepts an array of words in src/data/vocabulary.ts. Add a few entries and they will appear here automatically."
+          description="Every word is hidden or removed. Open a CEFR deck to add a word by hand or import a list, or restore hidden built-ins in Settings → Data."
+          action={
+            <AppLink to={{ name: 'level', level: 'A1' }} className="button button-primary">
+              <BookOpen size={15} aria-hidden="true" />
+              Open a deck
+            </AppLink>
+          }
         />
       </div>
     );
@@ -358,7 +372,7 @@ export function Dashboard() {
             <div className="continue-side-footer">
               <TrendingUp size={14} aria-hidden="true" />
               <span>
-                {studiedWords.length} of {ALL_WORDS.length} words in your rotation
+                {studiedWords.length} of {allWords.length} words in your rotation
               </span>
             </div>
           </div>
@@ -386,7 +400,7 @@ export function Dashboard() {
               </div>
               <div className="level-card-title">
                 <strong>{LEVEL_INFO[level.level].subtitle}</strong>
-                <span>{LEVEL_COUNTS[level.level]} words</span>
+                <span>{level.total} words</span>
               </div>
               <div className="level-card-foot">
                 <span>{level.studied} studied</span>
@@ -404,7 +418,7 @@ export function Dashboard() {
         <StatCard
           label="Words in rotation"
           value={stats.studied}
-          hint={`of ${ALL_WORDS.length} across all levels`}
+          hint={`of ${allWords.length} across all levels`}
           icon={<BookOpen size={16} />}
         />
         <StatCard

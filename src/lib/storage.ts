@@ -1,5 +1,6 @@
 import type {
   BackupFile,
+  CustomWord,
   DayActivity,
   ExampleSentence,
   ProgressState,
@@ -7,10 +8,16 @@ import type {
   ReviewLogEntry,
   Settings,
   SRSCard,
+  WordEdit,
 } from '../types';
 import { LANGUAGES } from '../data/languages';
 import { CEFR_LEVELS } from '../types';
 import { clamp } from './utils';
+import {
+  createCustomWordId,
+  MAX_CUSTOM_WORDS,
+  normalizeTermKey,
+} from './wordImport';
 
 const SETTINGS_KEY = 'wordloom.settings.v1';
 const PROGRESS_KEY = 'wordloom.progress.v1';
@@ -73,6 +80,10 @@ export const DEFAULT_SETTINGS: Settings = {
   temperature: 0.7,
   aiFeedback: true,
   aiExercises: true,
+
+  customWords: [],
+  wordEdits: {},
+  hiddenWords: [],
 };
 
 export function emptyProgress(): ProgressState {
@@ -130,6 +141,144 @@ function normalizeDayKey(key: string): string {
   const month = String(parsed.getMonth() + 1).padStart(2, '0');
   const day = String(parsed.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function normalizeCustomTags(value: unknown): string[] {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? value.split(/[,;|]/)
+      : [];
+  const seen = new Set<string>();
+  const tags: string[] = [];
+  raw.forEach((tag) => {
+    if (typeof tag !== 'string') return;
+    const cleaned = tag.replace(/\s+/g, ' ').trim().slice(0, 30);
+    const key = cleaned.toLowerCase();
+    if (!cleaned || seen.has(key) || tags.length >= 8) return;
+    seen.add(key);
+    tags.push(cleaned);
+  });
+  return tags;
+}
+
+/**
+ * Custom words are user data, so they are repaired rather than rejected:
+ * a missing id is regenerated from the term, duplicate terms are dropped, and
+ * oversized or malformed fields are trimmed. This keeps hand-edited storage
+ * and older sheets usable.
+ */
+function normalizeCustomWords(raw: unknown): CustomWord[] {
+  if (!Array.isArray(raw)) return [];
+  const words: CustomWord[] = [];
+  const ids = new Set<string>();
+  const terms = new Set<string>();
+
+  raw.slice(0, MAX_CUSTOM_WORDS).forEach((value) => {
+    if (!isRecord(value)) return;
+    const term = asString(value.term).replace(/\s+/g, ' ').trim().slice(0, 120);
+    const definition = asString(value.definition)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 600);
+    const level = value.level;
+    if (!term || !definition || !(CEFR_LEVELS as string[]).includes(level as string)) return;
+
+    const termKey = normalizeTermKey(term);
+    if (terms.has(termKey)) return;
+    terms.add(termKey);
+
+    let id = asString(value.id).trim().slice(0, 140);
+    if (!id.startsWith('custom-') || ids.has(id)) {
+      id = createCustomWordId(term, ids);
+    }
+    ids.add(id);
+
+    const importedAt = asNumber(value.importedAt, 0, 0, Number.MAX_SAFE_INTEGER);
+    words.push({
+      id,
+      term,
+      definition,
+      level: level as CustomWord['level'],
+      partOfSpeech: asString(value.partOfSpeech).trim().slice(0, 40) || undefined,
+      pronunciation: asString(value.pronunciation).trim().slice(0, 80) || undefined,
+      definitionTarget:
+        asString(value.definitionTarget).trim().slice(0, 600) || undefined,
+      tags: normalizeCustomTags(value.tags),
+      ...(importedAt > 0 ? { importedAt } : {}),
+      ...(asString(value.source).trim()
+        ? { source: asString(value.source).trim().slice(0, 80) }
+        : {}),
+    });
+  });
+
+  return words;
+}
+
+/**
+ * A built-in word edit only stores the fields the learner changed. Missing
+ * optional strings are left untouched; explicitly empty strings clear a field.
+ */
+function normalizeWordEdit(raw: unknown): WordEdit | null {
+  if (!isRecord(raw)) return null;
+  const edit: WordEdit = {};
+
+  const term = asString(raw.term).replace(/\s+/g, ' ').trim().slice(0, 120);
+  if (term) edit.term = term;
+  const definition = asString(raw.definition)
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 600);
+  if (definition) edit.definition = definition;
+
+  const textField = (key: 'partOfSpeech' | 'pronunciation' | 'definitionTarget', max: number) => {
+    if (!(key in raw)) return;
+    const value = raw[key];
+    if (typeof value !== 'string') return;
+    edit[key] = value.replace(/\s+/g, ' ').trim().slice(0, max);
+  };
+  textField('partOfSpeech', 40);
+  textField('pronunciation', 80);
+  textField('definitionTarget', 600);
+
+  if (Array.isArray(raw.tags) || typeof raw.tags === 'string') {
+    edit.tags = normalizeCustomTags(raw.tags);
+  }
+
+  const level = raw.level;
+  if (typeof level === 'string' && (CEFR_LEVELS as string[]).includes(level)) {
+    edit.level = level as WordEdit['level'];
+  }
+
+  return Object.keys(edit).length > 0 ? edit : null;
+}
+
+function normalizeWordEdits(raw: unknown): Record<string, WordEdit> {
+  if (!isRecord(raw)) return {};
+  const edits: Record<string, WordEdit> = {};
+  Object.entries(raw)
+    .slice(0, MAX_CUSTOM_WORDS)
+    .forEach(([wordId, value]) => {
+      const id = wordId.trim().slice(0, 140);
+      if (!id) return;
+      const edit = normalizeWordEdit(value);
+      if (edit) edits[id] = edit;
+    });
+  return edits;
+}
+
+function normalizeHiddenWords(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const words: string[] = [];
+  const seen = new Set<string>();
+  raw.slice(0, MAX_CUSTOM_WORDS).forEach((value) => {
+    if (typeof value !== 'string') return;
+    const id = value.trim().slice(0, 140);
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    words.push(id);
+  });
+  return words;
 }
 
 function normalizeSettings(raw: unknown): Settings {
@@ -231,6 +380,9 @@ function normalizeSettings(raw: unknown): Settings {
     temperature: storedTemperature,
     aiFeedback: asBoolean(source.aiFeedback, defaults.aiFeedback),
     aiExercises: asBoolean(source.aiExercises, defaults.aiExercises),
+    customWords: normalizeCustomWords(source.customWords),
+    wordEdits: normalizeWordEdits(source.wordEdits),
+    hiddenWords: normalizeHiddenWords(source.hiddenWords),
   };
 }
 

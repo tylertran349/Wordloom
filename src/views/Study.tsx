@@ -17,7 +17,6 @@ import {
   Volume2,
 } from 'lucide-react';
 import type { VocabWord } from '../types';
-import { LEVEL_WORDS, WORD_BY_ID } from '../data/vocabulary';
 import { LEVEL_INFO } from '../data/levels';
 import { navigate } from '../lib/router';
 import { useApp } from '../context/AppContext';
@@ -64,12 +63,14 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     recordLevelPosition,
     markSeen,
     levelDecks,
+    levelWords,
+    wordById,
     wordHistory,
     recordWordVisit,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
-  const word = WORD_BY_ID[wordId];
+  const word = wordById[wordId];
   const deck = word ? levelDecks[word.level] ?? [] : [];
   const index = word ? deck.findIndex((entry) => entry.id === word.id) : -1;
   const {
@@ -168,7 +169,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   // vocabulary-file order so a randomized study order does not invalidate them.
   useEffect(() => {
     if (!word) return;
-    const levelDeck = LEVEL_WORDS[word.level] ?? [];
+    const levelDeck = levelWords[word.level] ?? [];
     recordLevelPosition(
       word.level,
       levelDeck.findIndex((entry) => entry.id === word.id),
@@ -183,7 +184,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
         <PageHeader
           eyebrow="Word not found"
           title="That word is not in the deck"
-          description="It may have been renamed in src/data/vocabulary.ts, or the link may be out of date."
+          description="It may have been removed from your custom words, or the link may be out of date."
         />
         <EmptyState
           icon={<BookOpen size={24} />}
@@ -201,8 +202,8 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
 
   const previousId = [...wordHistory]
     .reverse()
-    .find((id) => id !== word.id && WORD_BY_ID[id]);
-  const previous = previousId ? WORD_BY_ID[previousId] : undefined;
+    .find((id) => id !== word.id && wordById[id]);
+  const previous = previousId ? wordById[previousId] : undefined;
   const levelStat = stats.levelStats.find((entry) => entry.level === word.level);
   const status = statusForCard(card, Date.now());
   const filled = sentences.filter((sentence, exerciseIndex) =>

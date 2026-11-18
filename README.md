@@ -33,6 +33,13 @@ configured with `base: './'` so subpath deployments work too.
 
 - **CEFR decks** for A1, A2, B1, and B2 — 3,000 northern Vietnamese words in total (800 / 800 /
   750 / 650). The C1 and C2 decks are present but intentionally empty.
+- **Import your own word lists** — paste a Quizlet export, drop a CSV or TSV, reuse a JSON list, or
+  write plain `term - definition` text. Imported words join any CEFR deck and then behave exactly
+  like built-in words: study pages, reviews, progress, backups, and Google Sheets sync all include
+  them.
+- **Manage words in every deck** — add a word by hand, edit any word in place, and delete words you
+  no longer want. Built-in words keep their study progress when edited, and deleted built-ins can be
+  restored without losing their schedule.
 - **Randomized new-word order** — by default the next word you study is picked fresh at random from
   the words you have not studied yet, so every pick feels like a new draw instead of a fixed
   sequence. Deck order follows the vocabulary file instead; you can switch in the level toolbar or
@@ -78,6 +85,7 @@ src/
   views/
     Dashboard.tsx
     Levels.tsx
+    Import.tsx         ← Quizlet / CSV / JSON / plain-text word-list import
     Study.tsx          ← word detail + AI-generated translation exercises
     Review.tsx         ← spaced-repetition session
     Progress.tsx
@@ -85,6 +93,7 @@ src/
   components/
     TranslationExercise.tsx
     SolutionReveal.tsx
+    WordEditor.tsx      ← add/edit word form used by every CEFR deck
     Sidebar.tsx, Toast.tsx, ui.tsx
   context/AppContext.tsx
   lib/
@@ -96,6 +105,7 @@ src/
     storage.ts         ← defaults, normalization, backup, per-email local profiles
     sheets.ts          ← Google Sheets client + local sync state
     sheetConnect.ts    ← Google sign-in URL + returned connection
+    wordImport.ts      ← Quizlet / CSV / TSV / JSON / plain-text list parser
     wordloom-sheets.gs ← the Apps Script to paste into Google (one file, two deployments)
     router.ts, utils.ts, speech.ts
   types.ts
@@ -148,11 +158,71 @@ only when you ask for them — use the **Generate examples** button to create th
 kind of content, and both are available wherever examples or exercises appear.
 
 The built-in deck covers A1–B2 everyday northern Vietnamese, with extra weight on conversation,
-work, services, and texting shortcuts. C1 and C2 are left empty by design.
+work, services, and texting shortcuts. C1 and C2 ship empty, ready for imported lists or new corpus
+entries.
 
 > Changing the language pair in Settings changes translation direction, speech, and exercise
 > labels. It does **not** translate the vocabulary content. The built-in content is Vietnamese
 > with English definitions. Add a separate content set if you want another target language.
+
+## Importing word lists
+
+Open **Import** in the sidebar, or press **Import** on any CEFR level page. Paste text or drop a
+file, check the preview, choose the deck the words belong to, and press **Import**. Parsing happens
+in the browser; the file or pasted text is never uploaded.
+
+### Supported formats
+
+| Source | What to do |
+| --- | --- |
+| **Quizlet** | Open a set, choose **Export**, then paste the copied text. One `term<TAB>definition` pair per line is read automatically. |
+| **CSV / TSV** | Drop a `.csv` or `.tsv` file, or paste cells straight from Excel or Google Sheets. Comma, tab, and semicolon delimiters are detected; quoted commas and quoted newlines are supported. |
+| **JSON** | Use an array of objects such as `[{ "term": "xin chào", "definition": "hello" }]`, an array of arrays, or a wrapper object with a `words`, `terms`, `items`, or `data` array. |
+| **Plain text** | One pair per line separated by ` - `, ` – `, ` — `, ` = `, `;`, a vertical bar, or `: `. |
+
+CSV/TSV columns are read in this order:
+
+```text
+term, definition, part of speech, tags
+```
+
+A header row is optional. Recognised header names include `term`/`word`/`front`/`prompt`,
+`definition`/`meaning`/`back`/`translation`, `part of speech`/`pos`, `pronunciation`/`ipa`, and
+`tags`/`topics`. Unknown extra columns are ignored.
+
+### What happens to duplicates
+
+- Terms already in the built-in deck or in your imported words are skipped, never overwritten.
+  The preview marks them **In deck** before you import.
+- Repeats inside one paste are collapsed.
+- Imported ids are derived from the term, so removing a word and importing it again restores its
+  study progress. Removing an imported word does not delete its schedule or generated exercises.
+- **Tags for this list** adds the same tags to every word in the batch. Every import also receives
+  an `imported` tag so it is easy to spot in a deck.
+
+Imported words are saved with your settings. That means they are included in JSON backups and, when
+Google Sheets sync is on, in the `Wordloom Settings` tab of your own sheet. Large lists are split
+across several setting rows automatically, so a few hundred Quizlet terms still fit comfortably.
+
+## Managing words in a deck
+
+Every CEFR level is editable from the deck page:
+
+- **Add word** in the level header opens a form for the term, meaning, CEFR level, part of speech,
+  pronunciation, target-language definition, and tags. The new word is saved with your custom words
+  and appears immediately in the deck.
+- **Edit** (pencil) on any row opens the same form. Editing a custom word changes it directly.
+  Editing a built-in word stores an override and keeps the word's id, so its study progress, due
+  date, generated examples, and review history stay attached. Use **Reset to original** in the
+  editor to remove the override.
+- **Delete** (trash) removes a custom word, or hides a built-in word from the deck. Hidden built-in
+  words keep their study progress. Restore them from the banner at the top of the level or from
+  **Settings → Data → Vocabulary management**, where you can also reset every built-in edit at once.
+- Changing a word's CEFR level moves it to that deck while keeping its study progress.
+
+Custom words, built-in edits, and hidden-word ids are saved with your settings, so they are
+included in JSON backups and Google Sheets sync. The app prevents two words from sharing the same
+term; a renamed built-in word also reserves its original term until the edit is reset.
 
 ## How the exercises work
 
@@ -333,7 +403,7 @@ The script creates readable tabs with an `email` column on every row:
 | Tab | Rows |
 | --- | --- |
 | `Wordloom Meta` | per-account revision, device id, review totals, per-level resume positions; global `schema`, `email`, and the sheet `token` |
-| `Wordloom Settings` | every setting, JSON-encoded, per account |
+| `Wordloom Settings` | every setting, JSON-encoded, per account; custom words, built-in edits, and hidden-word ids are stored here too (split across rows when large) |
 | `Wordloom Cards` | one row per scheduled word, per account |
 | `Wordloom Solutions` | cached Google Translate solutions, per account |
 | `Wordloom Seen` | every opened word, per account; seen-but-skipped words are never offered as new |
@@ -393,6 +463,8 @@ encrypted. Don't use a sensitive key on a shared computer or a shared sheet.
 ## Data and privacy
 
 - Local-only settings and progress: `wordloom.settings.v1`, `wordloom.progress.v1`
+- Custom words, built-in word edits, and hidden-word ids live inside `wordloom.settings.v1` (and
+  the per-email copy), so they are included in backups and sheet sync.
 - Per-email offline caches: `wordloom.settings.v1::<email>`, `wordloom.progress.v1::<email>`
 - Translation cache: `wordloom.translations.v1`
 - Google Sheets connection, sheet id, and per-sheet secret: `wordloom.sheets.v1`
@@ -406,7 +478,7 @@ encrypted. Don't use a sensitive key on a shared computer or a shared sheet.
   shared sheet.
 - There is no Wordloom server and no analytics.
 - **Settings → Data** exports a complete JSON backup and can import it again. Deleting progress
-  leaves vocabulary and settings intact. All resets require a second click.
+  leaves vocabulary, custom words, and word edits intact. All resets require a second click.
 - Local data is kept per profile. Logging out copies the current profile to the local-only keys; it
   does not delete local data. Signing in with another Google account swaps to that account's cache
   instead of mixing accounts.
@@ -430,5 +502,5 @@ client-side.
 
 ---
 
-Built to be filled with words. Add your own decks in `src/data/corpus/` and run
-`npm run vocab:build`.
+Built to be filled with words. Import a list in the app, or add your own decks in
+`src/data/corpus/` and run `npm run vocab:build`.

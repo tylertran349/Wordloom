@@ -7,6 +7,7 @@ import { Sidebar } from './components/Sidebar';
 import { ToastHost } from './components/Toast';
 import { Dashboard } from './views/Dashboard';
 import { Levels } from './views/Levels';
+import { Import } from './views/Import';
 import { Study } from './views/Study';
 import { Review } from './views/Review';
 import { Progress } from './views/Progress';
@@ -33,7 +34,9 @@ function App() {
               ? 'Review'
               : route.name === 'progress'
                 ? 'Progress'
-                : 'Settings';
+                : route.name === 'import'
+                  ? 'Import words'
+                  : 'Settings';
     document.title = `Wordloom · ${suffix}`;
   }, [route]);
 
@@ -57,6 +60,9 @@ function App() {
       break;
     case 'progress':
       content = <Progress />;
+      break;
+    case 'import':
+      content = <Import initialLevel={route.level} />;
       break;
     case 'settings':
       content = <Settings />;

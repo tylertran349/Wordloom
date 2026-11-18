@@ -4,15 +4,18 @@ import {
   BookOpen,
   Check,
   ChevronDown,
+  Pencil,
+  Plus,
   RotateCcw,
   Search,
   Shuffle,
   Sparkles,
+  Trash2,
+  Upload,
 } from 'lucide-react';
-import type { CEFRLevel } from '../types';
+import type { CEFRLevel, VocabWord, WordInput } from '../types';
 import { CEFR_LEVELS } from '../types';
 import { LEVEL_INFO } from '../data/levels';
-import { LEVEL_WORDS } from '../data/vocabulary';
 import { useApp } from '../context/AppContext';
 import { getLanguage } from '../data/languages';
 import {
@@ -25,11 +28,13 @@ import {
 } from '../lib/utils';
 import {
   AppLink,
+  ConfirmDialog,
   EmptyState,
   PageHeader,
   ProgressRing,
   SpeakerButton,
 } from '../components/ui';
+import { WordEditor } from '../components/WordEditor';
 
 type Filter = 'all' | 'new' | 'due' | 'learning' | 'review' | 'mastered';
 type SortMode = 'default' | 'alphabetical' | 'due';
@@ -59,6 +64,22 @@ function statusFor(
   return { key: 'review' as const, label: 'Reviewing' };
 }
 
+type EditorState =
+  | { mode: 'add'; level: CEFRLevel }
+  | { mode: 'edit'; word: VocabWord };
+
+function editorValues(level: CEFRLevel, word?: VocabWord): WordInput {
+  return {
+    term: word?.term ?? '',
+    definition: word?.definition ?? '',
+    level: word?.level ?? level,
+    partOfSpeech: word?.partOfSpeech ?? '',
+    pronunciation: word?.pronunciation ?? '',
+    definitionTarget: word?.definitionTarget ?? '',
+    tags: word?.tags ?? [],
+  };
+}
+
 export function Levels({ level: levelProp }: { level: CEFRLevel }) {
   const level = isCEFRLevel(levelProp) ? levelProp : 'A1';
   const {
@@ -66,14 +87,25 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
     progress,
     stats,
     levelDecks,
+    levelWords,
+    customWords,
+    hiddenWordsByLevel,
+    addWord,
+    updateWord,
+    deleteWord,
+    resetWordEdit,
+    restoreHiddenWords,
     shuffleWordOrder,
     updateSettings,
+    notify,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<SortMode>('default');
+  const [editor, setEditor] = useState<EditorState | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<VocabWord | null>(null);
 
   const levelStat = stats.levelStats.find((entry) => entry.level === level)!;
   const words = levelDecks[level] ?? [];
@@ -126,7 +158,7 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
   const savedIndex = progress.levelPositions[level];
   // Positions are recorded in vocabulary-file order, so the saved word stays
   // valid when the visible deck is randomly ordered.
-  const deckWords = LEVEL_WORDS[level] ?? [];
+  const deckWords = levelWords[level] ?? [];
   const savedWord =
     savedIndex !== undefined && Number.isInteger(savedIndex) && deckWords[savedIndex]
       ? deckWords[savedIndex]
@@ -137,6 +169,46 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
     const card = progress.cards[word.id];
     return card && new Date(card.createdAt).toDateString() === new Date().toDateString();
   }).length;
+
+  function handleEditorSave(input: WordInput) {
+    if (!editor) {
+      return { ok: false, message: 'The word editor is not open.' };
+    }
+    const result =
+      editor.mode === 'add' ? addWord(input) : updateWord(editor.word.id, input);
+    if (result.ok) {
+      if (editor.mode === 'add' && input.level === level) {
+        setQuery(input.term.trim());
+        setFilter('all');
+      }
+      setEditor(null);
+      notify(result.message);
+    }
+    return result;
+  }
+
+  function handleDeleteWord() {
+    if (!deleteTarget) return;
+    const result = deleteWord(deleteTarget.id);
+    notify(result.message, result.ok ? 'info' : 'error');
+    setDeleteTarget(null);
+  }
+
+  function handleRestoreHidden() {
+    const count = hiddenWordsByLevel[level];
+    if (count === 0) return;
+    restoreHiddenWords(level);
+    notify(`Restored ${count} ${pluralize(count, 'word')} to ${level}.`, 'info');
+  }
+
+  function handleResetEdit() {
+    if (!editor || editor.mode !== 'edit') return;
+    resetWordEdit(editor.word.id);
+    setEditor(null);
+    notify('Restored the original word text.', 'info');
+  }
+
+  const isCustom = (wordId: string) => customWords.some((word) => word.id === wordId);
 
   return (
     <div className="view">
@@ -161,6 +233,18 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                 {levelStat.due} due
               </AppLink>
             )}
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => setEditor({ mode: 'add', level })}
+            >
+              <Plus size={15} aria-hidden="true" />
+              Add word
+            </button>
+            <AppLink to={{ name: 'import', level }} className="button button-ghost">
+              <Upload size={15} aria-hidden="true" />
+              Import
+            </AppLink>
             {nextWord ? (
               <AppLink
                 to={{
@@ -241,6 +325,19 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
         </div>
       </section>
 
+      {hiddenWordsByLevel[level] > 0 && (
+        <div className="inline-alert is-info level-hidden-alert">
+          <RotateCcw size={15} aria-hidden="true" />
+          <span>
+            {hiddenWordsByLevel[level]} built-in{' '}
+            {pluralize(hiddenWordsByLevel[level], 'word')} hidden in this deck.{' '}
+            <button type="button" className="text-link" onClick={handleRestoreHidden}>
+              Restore {hiddenWordsByLevel[level] === 1 ? 'it' : 'them'}
+            </button>
+          </span>
+        </div>
+      )}
+
       <section className="word-deck">
         <div className="deck-toolbar">
           <div className="search-box">
@@ -311,19 +408,53 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
             icon={<BookOpen size={24} />}
             title={`No ${level} words yet`}
             description={
-              level === 'C1' || level === 'C2' ? (
+              hiddenWordsByLevel[level] > 0 ? (
                 <>
-                  This deck is intentionally empty. The built-in 3,000-word set covers A1–B2. Add
-                  C1 or C2 entries in <code>src/data/corpus/</code> and run{' '}
+                  Every built-in {level} word is hidden. Restore them, add a word by hand, or import
+                  a list. Study progress is kept while words are hidden.
+                </>
+              ) : level === 'C1' || level === 'C2' ? (
+                <>
+                  This deck ships empty. Add a word to {level}, import your own list from Quizlet, a
+                  CSV, or plain text, or add entries to <code>src/data/corpus/</code> and run{' '}
                   <code>npm run vocab:build</code>.
                 </>
               ) : (
                 <>
-                  Add entries to the corpus in <code>src/data/corpus/</code> and run{' '}
-                  <code>npm run vocab:build</code>. Each level is a plain array of words; examples
-                  and exercises are generated with AI.
+                  Add a word by hand, import a word list, or add entries to the corpus in{' '}
+                  <code>src/data/corpus/</code> and run <code>npm run vocab:build</code>. Imported
+                  words are studied and reviewed alongside the built-in deck.
                 </>
               )
+            }
+            action={
+              <div className="empty-button-row">
+                {hiddenWordsByLevel[level] > 0 && (
+                  <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={handleRestoreHidden}
+                  >
+                    <RotateCcw size={15} aria-hidden="true" />
+                    Restore hidden words
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={cn(
+                    'button',
+                    hiddenWordsByLevel[level] > 0 ? 'button-ghost' : 'button-primary',
+                  )}
+                  onClick={() => setEditor({ mode: 'add', level })}
+                >
+                  <Plus size={15} aria-hidden="true" />
+                  Add {level} word
+                </button>
+                <AppLink to={{ name: 'import', level }} className="button button-ghost">
+                  <Upload size={15} aria-hidden="true" />
+                  Import a list
+                </AppLink>
+              </div>
             }
           />
         ) : filtered.length === 0 ? (
@@ -359,6 +490,7 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                 const status = statusFor(word.id, progress.cards, progress.seenWords);
                 const due = card && card.due <= Date.now();
                 const exampleCount = progress.generatedExamples[word.id]?.length ?? 0;
+                const custom = isCustom(word.id);
                 return (
                   <div className="word-row" key={word.id}>
                     <AppLink
@@ -381,6 +513,14 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                           >
                             {status.label}
                           </span>
+                          {settings.wordEdits[word.id] && (
+                            <span
+                              className="status-pill status-edited"
+                              title="This built-in word has been edited"
+                            >
+                              Edited
+                            </span>
+                          )}
                           {resumeWord?.id === word.id && (
                             <span className="status-pill status-resume">
                               Resume · #{resumeIndex + 1}
@@ -416,12 +556,34 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                         </span>
                       </div>
                     </AppLink>
-                    <SpeakerButton
-                      className="word-row-audio"
-                      text={word.term}
-                      lang={target.tts}
-                      label={`Hear ${word.term}`}
-                    />
+                    <div className="word-row-actions">
+                      <button
+                        type="button"
+                        className="icon-button word-row-action"
+                        title="Edit word"
+                        aria-label={`Edit ${word.term}`}
+                        onClick={() => setEditor({ mode: 'edit', word })}
+                      >
+                        <Pencil size={14} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-button word-row-action word-row-remove"
+                        title={custom ? 'Delete word' : 'Remove from deck'}
+                        aria-label={
+                          custom ? `Delete ${word.term}` : `Remove ${word.term} from the deck`
+                        }
+                        onClick={() => setDeleteTarget(word)}
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
+                      <SpeakerButton
+                        className="word-row-audio"
+                        text={word.term}
+                        lang={target.tts}
+                        label={`Hear ${word.term}`}
+                      />
+                    </div>
                   </div>
                 );
               })}
@@ -444,6 +606,57 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
           </AppLink>
         )}
       </div>
+
+      {editor && (
+        <WordEditor
+          key={editor.mode === 'add' ? `add-${editor.level}` : `edit-${editor.word.id}`}
+          mode={editor.mode}
+          initial={
+            editor.mode === 'add'
+              ? editorValues(editor.level)
+              : editorValues(editor.word.level, editor.word)
+          }
+          isCustom={editor.mode === 'edit' && isCustom(editor.word.id)}
+          canReset={
+            editor.mode === 'edit' &&
+            !isCustom(editor.word.id) &&
+            Boolean(settings.wordEdits[editor.word.id])
+          }
+          onCancel={() => setEditor(null)}
+          onSave={handleEditorSave}
+          onReset={editor.mode === 'edit' ? handleResetEdit : undefined}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={
+            isCustom(deleteTarget.id)
+              ? 'Delete this word?'
+              : 'Remove this word from the deck?'
+          }
+          description={
+            <p>
+              {isCustom(deleteTarget.id) ? (
+                <>
+                  “{deleteTarget.term}” will be removed from your custom words. Its study progress
+                  and generated exercises are kept in case you add or import it again.
+                </>
+              ) : (
+                <>
+                  “{deleteTarget.term}” will be hidden from the {deleteTarget.level} deck and
+                  counts. Study progress is kept, and you can restore hidden words here or in
+                  Settings → Data.
+                </>
+              )}
+            </p>
+          }
+          confirmLabel={isCustom(deleteTarget.id) ? 'Delete word' : 'Remove from deck'}
+          cancelLabel="Keep it"
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteWord}
+        />
+      )}
     </div>
   );
 }

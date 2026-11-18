@@ -27,6 +27,45 @@ export interface VocabWord extends VocabEntry {
   level: CEFRLevel;
 }
 
+/**
+ * A word the learner imported from a list (Quizlet export, CSV, JSON, or
+ * plain text) or added by hand. Custom words live beside the built-in deck:
+ * they are stored with settings, sync with Google Sheets, and take part in
+ * study and review exactly like built-in words.
+ */
+export interface CustomWord extends VocabEntry {
+  level: CEFRLevel;
+  /** Unix timestamp in milliseconds; omitted for words restored from older data. */
+  importedAt?: number;
+  /** Human-readable origin, for example a file name or “Quizlet / TSV”. */
+  source?: string;
+}
+
+/**
+ * A change made to a built-in word. The id stays the same, so study progress
+ * remains attached. Empty optional strings deliberately clear a field.
+ */
+export interface WordEdit {
+  term?: string;
+  definition?: string;
+  partOfSpeech?: string;
+  pronunciation?: string;
+  definitionTarget?: string;
+  tags?: string[];
+  level?: CEFRLevel;
+}
+
+/** Values submitted by the add/edit word form. */
+export interface WordInput {
+  term: string;
+  definition: string;
+  partOfSpeech?: string;
+  pronunciation?: string;
+  definitionTarget?: string;
+  tags?: string[];
+  level: CEFRLevel;
+}
+
 export type ReviewGrade = 'again' | 'hard' | 'good' | 'easy';
 
 export type CardStatus = 'learning' | 'review' | 'mastered';
@@ -155,6 +194,13 @@ export interface Settings {
   temperature: number;
   aiFeedback: boolean;
   aiExercises: boolean;
+
+  /** Words imported from lists or added by hand. */
+  customWords: CustomWord[];
+  /** Changes to built-in words, keyed by their stable word id. */
+  wordEdits: Record<string, WordEdit>;
+  /** Built-in word ids the learner removed from their decks. */
+  hiddenWords: string[];
 }
 
 export interface SRSConfig {
@@ -191,4 +237,5 @@ export type Route =
   | { name: 'word'; level: CEFRLevel; wordId: string }
   | { name: 'review'; practice?: boolean }
   | { name: 'progress' }
+  | { name: 'import'; level?: CEFRLevel }
   | { name: 'settings' };
