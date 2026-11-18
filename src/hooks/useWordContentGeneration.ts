@@ -13,8 +13,6 @@ export interface WordContentGeneration {
   error: string | null;
   generateExamples: () => Promise<void>;
   generateSentences: () => Promise<void>;
-  /** Generate examples once for a word the learner is studying for the first time. */
-  autoGenerateExamples: () => void;
   dismissError: () => void;
 }
 
@@ -28,15 +26,12 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
   const [generatingExamples, setGeneratingExamples] = useState(false);
   const [generatingSentences, setGeneratingSentences] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const autoAttempted = useRef(new Set<string>());
   const pending = useRef({ examples: false, sentences: false });
 
   const wordId = word?.id;
   const canGenerate = settings.aiExercises && hasAiCredentials(settings);
   const existingExamples = wordId ? progress.generatedExamples[wordId] ?? [] : [];
   const existingSentences = wordId ? progress.generatedPractice[wordId] ?? [] : [];
-  const hasExamples = existingExamples.length > 0;
-  const isNewWord = wordId ? !progress.cards[wordId] : false;
 
   const generateExamplesFn = useCallback(async () => {
     if (!word || !canGenerate || pending.current.examples) return;
@@ -104,14 +99,6 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
     }
   }, [word, canGenerate, settings, existingSentences, addGeneratedExercises, notify]);
 
-  const autoGenerateExamples = useCallback(() => {
-    if (!word || !canGenerate || !isNewWord || hasExamples || autoAttempted.current.has(word.id)) {
-      return;
-    }
-    autoAttempted.current.add(word.id);
-    void generateExamplesFn();
-  }, [word, canGenerate, isNewWord, hasExamples, generateExamplesFn]);
-
   const dismissError = useCallback(() => setError(null), []);
 
   return {
@@ -121,7 +108,6 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
     error,
     generateExamples: generateExamplesFn,
     generateSentences: generateSentencesFn,
-    autoGenerateExamples,
     dismissError,
   };
 }

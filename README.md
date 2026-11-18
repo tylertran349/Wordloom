@@ -142,10 +142,10 @@ them to keep the corpus compact. Every word page has a text-to-speech button, an
 definition is the primary gloss.
 
 The decks are vocabulary only. Example sentences and translation exercises are not stored in the
-data file: they are generated with AI and cached in your browser's progress. When AI features are
-enabled, opening a word you have not studied yet generates its example sentences automatically.
-Anywhere examples or exercises appear, a **Generate examples** button and a **Generate exercises**
-button let you create more of each kind independently.
+data file: they are generated with AI and cached in your browser's progress. Examples are generated
+only when you ask for them — use the **Generate examples** button to create them, and the
+**Generate exercises** button to create translation exercises. Each button generates only its own
+kind of content, and both are available wherever examples or exercises appear.
 
 The built-in deck covers A1–B2 everyday northern Vietnamese, with extra weight on conversation,
 work, services, and texting shortcuts. C1 and C2 are left empty by design.
@@ -159,9 +159,9 @@ work, services, and texting shortcuts. C1 and C2 are left empty by design.
 1. Read the word, meaning, and AI-generated examples. Text-to-speech uses Google Translate's free
    web voice by default, so the pronunciation sounds consistent on every device; you can switch to
    your browser's built-in voice in Settings for offline use.
-2. Example sentences are generated automatically for new words. Use **Generate examples** or
-   **Generate exercises** wherever they appear to add more of either kind; the two requests are
-   separate and cached, so existing content comes back on later visits.
+2. Click **Generate examples** in the Examples card to create example sentences, and
+   **Generate exercises** in the translation card to create practice sentences. The two requests
+   are separate and cached, so existing content comes back on later visits.
 3. Write your translation for each prompt. Answers are never saved or pre-filled; they disappear
    when you leave the page.
 4. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,

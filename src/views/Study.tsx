@@ -77,7 +77,6 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     error: generateError,
     generateExamples,
     generateSentences,
-    autoGenerateExamples,
     dismissError,
   } = useWordContentGeneration(word);
   const [revealedExamples, setRevealedExamples] = useState<Set<number>>(new Set());
@@ -141,12 +140,6 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     if (!word) return;
     markSeen(word.id);
   }, [word?.id, markSeen]);
-
-  // A newly studied word gets its example sentences automatically. The hook
-  // attempts this once per word and only when no examples are saved yet.
-  useEffect(() => {
-    autoGenerateExamples();
-  }, [autoGenerateExamples]);
 
   // Remember where the learner stopped, per CEFR deck. Positions are stored in
   // vocabulary-file order so a randomized study order does not invalidate them.
@@ -354,6 +347,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                   <GenerateContentButtons
                     small
                     className="is-end"
+                    showGenerateExercises={false}
                     onGenerateExamples={() => void generateExamples()}
                     onGenerateSentences={() => void generateSentences()}
                     generatingExamples={generatingExamples}
@@ -366,7 +360,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
               <div className="examples-empty">
                 <p className="muted-copy">
                   {canGenerate
-                    ? 'New words get examples automatically. Use the buttons above to generate more.'
+                    ? 'Use Generate examples above to create example sentences with AI.'
                     : 'Examples are generated with AI once you connect a provider in Settings.'}
                 </p>
               </div>
@@ -437,6 +431,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                   <GenerateContentButtons
                     small
                     className="is-end"
+                    showGenerateExamples={false}
                     onGenerateExamples={() => void generateExamples()}
                     onGenerateSentences={() => void generateSentences()}
                     generatingExamples={generatingExamples}
