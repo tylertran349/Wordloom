@@ -33,6 +33,7 @@ import {
   parseStoredSettings,
   saveProgress,
   saveSettings,
+  scrubAllStoredProgress,
   storageKeyForProfile,
 } from '../lib/storage';
 import { createCard, isDue, scheduleCard } from '../lib/srs';
@@ -127,7 +128,11 @@ interface AppContextValue {
   markStudied: (wordId: string) => boolean;
   removeStudied: (wordId: string) => boolean;
   gradeCard: (wordId: string, grade: ReviewGrade) => void;
-  setResponse: (wordId: string, exerciseKey: string, text: string) => void;
+  /**
+   * Mark a word as seen. Words that were seen but never added to the review
+   * queue are skipped when the app picks new words to study.
+   */
+  markSeen: (wordId: string) => void;
   setSolution: (wordId: string, exerciseKey: string, solution: string) => void;
   addGeneratedExercises: (
     wordId: string,
@@ -292,7 +297,10 @@ async function readSheetWithRetry(
 
 export function AppProvider({ children }: { children: ReactNode }) {
   // Read the sync config first: it tells us which local profile to open.
+  // Any stored traces of previously typed translation attempts are removed
+  // before the active profile is read.
   const [initial] = useState(() => {
+    scrubAllStoredProgress();
     const sync = loadSheetSync();
     return { sync, email: sync.email };
   });
@@ -1426,14 +1434,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [srsConfig, markLocalChange],
   );
 
-  const setResponse = useCallback((wordId: string, exerciseKey: string, text: string) => {
-    const key = `${wordId}::${exerciseKey}`;
-    markLocalChange();
-    setProgress((current) => ({
-      ...current,
-      responses: { ...current.responses, [key]: text },
-    }));
-  }, [markLocalChange]);
+  const markSeen = useCallback(
+    (wordId: string) => {
+      // No-op when the word is already known, so revisiting a page does not
+      // schedule a sync for nothing.
+      if (progressRef.current.seenWords[wordId]) return;
+      markLocalChange();
+      setProgress((current) => {
+        if (current.seenWords[wordId]) return current;
+        return {
+          ...current,
+          seenWords: { ...current.seenWords, [wordId]: Date.now() },
+        };
+      });
+    },
+    [markLocalChange],
+  );
 
   const setSolution = useCallback((wordId: string, exerciseKey: string, solution: string) => {
     const key = `${wordId}::${exerciseKey}`;
@@ -1568,7 +1584,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     markStudied,
     removeStudied,
     gradeCard,
-    setResponse,
+    markSeen,
     setSolution,
     addGeneratedExercises,
     importBackup,

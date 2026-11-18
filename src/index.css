@@ -991,6 +991,11 @@ kbd {
   background: var(--accent-soft);
   color: var(--accent-strong);
 }
+.status-seen {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--faint);
+}
 .status-dot {
   width: 5px;
   height: 5px;
@@ -2641,12 +2646,6 @@ html[data-theme='dark'] .status-due {
   margin-top: 0.28rem;
   color: var(--faint);
   font-size: 0.53rem;
-}
-.exercise-saved {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.18rem;
-  color: var(--good);
 }
 .exercise-actions {
   display: flex;

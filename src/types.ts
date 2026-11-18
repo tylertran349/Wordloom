@@ -63,8 +63,6 @@ export interface DayActivity {
 export interface ProgressState {
   version: 1;
   cards: Record<string, SRSCard>;
-  /** Draft answers keyed by `${wordId}::${exerciseKey}`. */
-  responses: Record<string, string>;
   /** Cached translation solutions keyed by `${wordId}::${exerciseKey}`. */
   solutions: Record<string, string>;
   /** AI-generated example sentences, keyed by word id. */
@@ -78,6 +76,12 @@ export interface ProgressState {
   strongReviewCount: number;
   /** Last deck index the learner opened, per CEFR level. */
   levelPositions: Record<string, number>;
+  /**
+   * Words the learner has opened, keyed by word id with the last-opened
+   * timestamp. Words that were seen but never added to the review queue are
+   * not "new" anymore and are skipped when the app picks new words to study.
+   */
+  seenWords: Record<string, number>;
   lastStudied?: { wordId: string; at: number };
 }
 

@@ -2121,7 +2121,7 @@ export function Settings() {
                 description={
                   sheetSync.email
                     ? `Local browser storage is the offline cache; ${sheetSync.email} also backs up this data to your Google Sheet.`
-                    : 'Wordloom is local-first: vocabulary schedules, drafts, and settings live in your browser.'
+                    : 'Wordloom is local-first: vocabulary schedules and settings live in your browser.'
                 }
               >
                 <div className="storage-card">
@@ -2130,10 +2130,10 @@ export function Settings() {
                     <strong>{formatBytes(deviceBytes)}</strong>
                     <span>
                       {progress.reviewCount} {pluralize(progress.reviewCount, 'review')} ·{' '}
-                      {Object.keys(progress.responses).length}{' '}
-                      {pluralize(Object.keys(progress.responses).length, 'draft')} ·{' '}
                       {Object.keys(progress.cards).length}{' '}
-                      {pluralize(Object.keys(progress.cards).length, 'card')}
+                      {pluralize(Object.keys(progress.cards).length, 'card')} ·{' '}
+                      {Object.keys(progress.seenWords).length}{' '}
+                      {pluralize(Object.keys(progress.seenWords).length, 'seen word')}
                     </span>
                   </div>
                   <span className={cn('storage-badge', sheetSync.email && 'is-cloud')}>
@@ -2169,7 +2169,7 @@ export function Settings() {
 
               <Section
                 title="Backup and restore"
-                description="Export a single JSON file containing your settings, study schedule, drafts, and review history."
+                description="Export a single JSON file containing your settings, study schedule, and review history."
               >
                 <div className="data-actions">
                   <div className="data-action">
@@ -2231,7 +2231,7 @@ export function Settings() {
                 <div className="danger-row">
                   <div>
                     <strong>Reset study progress</strong>
-                    <span>Clear cards, review history, drafts, activity, and AI-generated exercises. Settings and vocabulary stay.</span>
+                    <span>Clear cards, review history, activity, seen-word tracking, and AI-generated exercises. Settings and vocabulary stay.</span>
                   </div>
                   <button
                     type="button"

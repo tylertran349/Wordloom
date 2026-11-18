@@ -10,11 +10,11 @@ import {
 const SHEETS_STORAGE_KEY = 'wordloom.sheets.v1';
 
 /**
- * Schema 5 adds per-spreadsheet connections: a sheet id plus a secret stored
- * inside that sheet. Requests without a sheet id still use the legacy shared
- * spreadsheet keyed by email.
+ * Schema 6 adds the "Wordloom Seen" tab: every word the learner has opened,
+ * synced across devices. Requests without a sheet id still use the legacy
+ * shared spreadsheet keyed by email.
  */
-const BRIDGE_SCHEMA = 5;
+const BRIDGE_SCHEMA = 6;
 
 const REQUEST_TIMEOUT_MS = 25_000;
 
@@ -299,10 +299,10 @@ export function summarizeProgress(progress: ProgressState): SheetSummary {
 export function hasProgressData(progress: ProgressState): boolean {
   return (
     Object.keys(progress.cards).length > 0 ||
-    Object.keys(progress.responses).length > 0 ||
     Object.keys(progress.solutions).length > 0 ||
     Object.keys(progress.generatedExamples).length > 0 ||
     Object.keys(progress.generatedPractice).length > 0 ||
+    Object.keys(progress.seenWords).length > 0 ||
     progress.reviewLog.length > 0
   );
 }

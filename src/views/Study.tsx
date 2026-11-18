@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -63,6 +63,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     notify,
     stats,
     recordLevelPosition,
+    markSeen,
     levelDecks,
   } = useApp();
   const target = getLanguage(settings.targetLanguage);
@@ -76,6 +77,19 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const [justAdded, setJustAdded] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [jumpValue, setJumpValue] = useState(() => String(index + 1));
+  // Session-only record of which exercises have a typed answer. Typed
+  // answers are never persisted, so this lives and dies with the page.
+  const [draftedKeys, setDraftedKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const reportDraft = useCallback((key: string, drafted: boolean) => {
+    setDraftedKeys((current) => {
+      const has = current.has(key);
+      if (drafted === has) return current;
+      const next = new Set(current);
+      if (drafted) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }, []);
 
   const card = word ? progress.cards[word.id] : undefined;
   const generated = word ? progress.generatedPractice[word.id] ?? [] : [];
@@ -100,6 +114,13 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   useEffect(() => {
     setJumpValue(String(index + 1));
   }, [index, wordId]);
+
+  // Opening a word page counts as seeing it. Seen words that the learner
+  // never adds to the queue are not offered as new words again.
+  useEffect(() => {
+    if (!word) return;
+    markSeen(word.id);
+  }, [word?.id, markSeen]);
 
   // Remember where the learner stopped, per CEFR deck. Positions are stored in
   // vocabulary-file order so a randomized study order does not invalidate them.
@@ -140,11 +161,9 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const next = index >= 0 && index < deck.length - 1 ? deck[index + 1] : undefined;
   const levelStat = stats.levelStats.find((entry) => entry.level === word.level);
   const status = statusForCard(card, Date.now());
-  const filled = sentences.filter((sentence, exerciseIndex) => {
-    const answer =
-      progress.responses[`${word.id}::study-${exerciseIndex}-${hashString(sentence)}`] ?? '';
-    return answer.trim().length > 0;
-  }).length;
+  const filled = sentences.filter((sentence, exerciseIndex) =>
+    draftedKeys.has(`${word.id}:study-${exerciseIndex}-${hashString(sentence)}`),
+  ).length;
   const practicePercent = percent(filled, sentences.length);
   const canUseAi = hasAiCredentials(settings);
 
@@ -489,16 +508,20 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
               </p>
             ) : (
               <div className="exercise-list">
-                {sentences.map((sentence, exerciseIndex) => (
-                  <TranslationExercise
-                    key={`${word.id}-${exerciseIndex}-${hashString(sentence)}`}
-                    word={word}
-                    sentence={sentence}
-                    index={exerciseIndex}
-                    total={sentences.length}
-                    exerciseKey={`study-${exerciseIndex}-${hashString(sentence)}`}
-                  />
-                ))}
+                {sentences.map((sentence, exerciseIndex) => {
+                  const draftKey = `${word.id}:study-${exerciseIndex}-${hashString(sentence)}`;
+                  return (
+                    <TranslationExercise
+                      key={`${word.id}-${exerciseIndex}-${hashString(sentence)}`}
+                      word={word}
+                      sentence={sentence}
+                      index={exerciseIndex}
+                      total={sentences.length}
+                      exerciseKey={`study-${exerciseIndex}-${hashString(sentence)}`}
+                      onDraftChange={(drafted) => reportDraft(draftKey, drafted)}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -706,8 +729,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
           description={
             <p>
               “{word.term}” will stop appearing in reviews and its schedule will be cleared. Your
-              drafts and generated examples are kept, and you can add it to the queue again at any
-              time.
+              generated examples are kept, and you can add it to the queue again at any time.
             </p>
           }
           confirmLabel="Yes, remove it"

@@ -35,12 +35,15 @@ configured with `base: './'` so subpath deployments work too.
   750 / 650). The C1 and C2 decks are present but intentionally empty.
 - **Randomized new-word order** — CEFR decks are shuffled across topics by default so you meet a
   wider variety of words instead of one topic block at a time. Switch to deck order, or reshuffle,
-  from the level toolbar or Settings → Study.
+  from the level toolbar or Settings → Study. Words you have opened but chose not to add to the
+  review queue are remembered as seen and are skipped when Wordloom picks your next new word, so
+  you never get re-served a word you already passed over.
 - **Word pages** with audio pronunciation, part of speech, a native-language definition, an optional
   target-language definition, and AI-generated examples with native-language translations.
 - **Translation exercises generated with AI** — example sentences and practice prompts are created
-  for each word on demand, with free-text inputs, saved drafts, and a **Reveal with Google
-  Translate** button on every exercise. Solutions and direct links open without an API key.
+  for each word on demand, with free-text inputs (your typed answers are never saved, synced, or
+  pre-filled — they live only on screen), and a **Reveal with Google Translate** button on every
+  exercise. Solutions and direct links open without an API key.
 - **Spaced repetition** (SM-2 style) for every studied word, with Again / Hard / Good / Easy
   grading, interval previews, due queues, extra practice, and review history.
 - **Progress dashboard** with streaks, daily goals, a 14-day activity chart, a 7-day due
@@ -156,7 +159,8 @@ work, services, and texting shortcuts. C1 and C2 are left empty by design.
 2. Press **Generate with AI** on a word page to create a set of example sentences and
    native-language practice prompts. Generation is cached, so the same exercises come back on
    later visits.
-3. Write your translation for each prompt. Drafts are saved automatically.
+3. Write your translation for each prompt. Answers are never saved or pre-filled; they disappear
+   when you leave the page.
 4. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,
    play it aloud, or open the same sentence on translate.google.com. A direct link is always
    available when the fetch fails. The reveal also checks whether the solution visibly contains
@@ -306,6 +310,11 @@ public data URL can never show another person's Drive contents.
 
 - Picking a sheet with older single-user tabs (no `email` column) migrates those rows to the signed-in
   Google account in place.
+- The legacy `Wordloom Responses` tab is deleted (or wiped) the next time the sheet is read or written.
+  Typed translation attempts were never meant to be kept, and they are not stored anywhere anymore.
+- Schema 6 adds the `Wordloom Seen` tab, which syncs the set of opened-but-skipped words. Re-paste
+  the latest script and deploy a new version to bring an existing sheet up to date; missing tabs are
+  created automatically on the next sync.
 - Picking a sheet whose Wordloom rows belong to another email asks first, then re-keys those rows to
   the signed-in account.
 - A sheet that already contains progress for several accounts is not merged silently; the connect
@@ -321,7 +330,8 @@ The script creates readable tabs with an `email` column on every row:
 | `Wordloom Meta` | per-account revision, device id, review totals, per-level resume positions; global `schema`, `email`, and the sheet `token` |
 | `Wordloom Settings` | every setting, JSON-encoded, per account |
 | `Wordloom Cards` | one row per scheduled word, per account |
-| `Wordloom Responses` / `Solutions` | saved drafts and revealed translations, per account |
+| `Wordloom Solutions` | cached Google Translate solutions, per account |
+| `Wordloom Seen` | every opened word, per account; seen-but-skipped words are never offered as new |
 | `Wordloom Examples` / `Practice` | AI-generated sentences, per account |
 | `Wordloom Activity` | daily studied/review counts, per account |
 | `Wordloom Review Log` | recent review grades, per account |

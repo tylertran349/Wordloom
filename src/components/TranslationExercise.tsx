@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -35,6 +35,7 @@ export function TranslationExercise({
   total,
   compact = false,
   hideCounter = false,
+  onDraftChange,
 }: {
   word: VocabWord;
   sentence: string;
@@ -43,23 +44,34 @@ export function TranslationExercise({
   total: number;
   compact?: boolean;
   hideCounter?: boolean;
+  /** Notified with whether a non-empty answer exists, for session-only counters. */
+  onDraftChange?: (drafted: boolean) => void;
 }) {
-  const {
-    settings,
-    progress,
-    setResponse,
-    notify,
-  } = useApp();
+  const { settings, notify } = useApp();
   const native = getLanguage(settings.nativeLanguage);
   const target = getLanguage(settings.targetLanguage);
   const inputId = useId();
-  const storageKey = `${word.id}::${exerciseKey}`;
-  const answer = progress.responses[storageKey] ?? '';
+  // Typed answers live only in memory for as long as this exercise is shown.
+  // They are never auto-populated, saved, or synced anywhere.
+  const [answer, setAnswer] = useState('');
   const [checking, setChecking] = useState(false);
   const [feedback, setFeedback] = useState<{ answer: string; data: AiFeedback } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const canUseAi = settings.aiFeedback && hasAiCredentials(settings);
   const visibleFeedback = feedback && feedback.answer === answer ? feedback.data : null;
+  const onDraftChangeRef = useRef(onDraftChange);
+  onDraftChangeRef.current = onDraftChange;
+
+  useEffect(() => {
+    onDraftChangeRef.current?.(answer.trim().length > 0);
+  }, [answer]);
+
+  useEffect(
+    () => () => {
+      onDraftChangeRef.current?.(false);
+    },
+    [],
+  );
 
   async function checkWithAi() {
     if (!answer.trim()) {
@@ -123,7 +135,7 @@ export function TranslationExercise({
         className="exercise-input lang-target"
         lang={target.code}
         value={answer}
-        onChange={(event) => setResponse(word.id, exerciseKey, event.target.value)}
+        onChange={(event) => setAnswer(event.target.value)}
         placeholder={`Write your ${target.label} translation…`}
         rows={compact ? 2 : 3}
         aria-describedby={`${inputId}-sentence`}
@@ -131,12 +143,11 @@ export function TranslationExercise({
         autoCapitalize="sentences"
       />
       <div className="exercise-meta">
-        <span>{wordCount > 0 ? `${wordCount} ${wordCount === 1 ? 'word' : 'words'}` : 'Your answer is saved automatically'}</span>
-        {visualCheck(answer) && (
-          <span className="exercise-saved">
-            <CheckCircle2 size={13} aria-hidden="true" /> Draft saved
-          </span>
-        )}
+        <span>
+          {wordCount > 0
+            ? `${wordCount} ${wordCount === 1 ? 'word' : 'words'}`
+            : 'Answers stay on this screen and are never saved'}
+        </span>
       </div>
 
       <div className="exercise-actions">
@@ -196,8 +207,4 @@ export function TranslationExercise({
       )}
     </article>
   );
-}
-
-function visualCheck(answer: string): boolean {
-  return answer.trim().length > 2;
 }

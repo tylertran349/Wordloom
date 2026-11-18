@@ -41,9 +41,17 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
   { value: 'mastered', label: 'Mastered' },
 ];
 
-function statusFor(wordId: string, cards: ReturnType<typeof useApp>['progress']['cards']) {
+function statusFor(
+  wordId: string,
+  cards: ReturnType<typeof useApp>['progress']['cards'],
+  seenWords: ReturnType<typeof useApp>['progress']['seenWords'],
+) {
   const card = cards[wordId];
-  if (!card) return { key: 'new' as const, label: 'New' };
+  if (!card) {
+    return seenWords[wordId]
+      ? { key: 'seen' as const, label: 'Seen' }
+      : { key: 'new' as const, label: 'New' };
+  }
   if (card.status === 'mastered') return { key: 'mastered' as const, label: 'Mastered' };
   if (card.status === 'learning') return { key: 'learning' as const, label: 'Learning' };
   return { key: 'review' as const, label: 'Reviewing' };
@@ -82,7 +90,7 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
         return false;
       }
       const card = progress.cards[word.id];
-      if (filter === 'new') return !card;
+      if (filter === 'new') return !card && !progress.seenWords[word.id];
       if (filter === 'due') return Boolean(card && card.due <= Date.now());
       if (filter === 'learning') return card?.status === 'learning';
       if (filter === 'review') return card?.status === 'review';
@@ -101,9 +109,12 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
       });
     }
     return result;
-  }, [words, query, filter, sort, progress.cards, settings.targetLanguage, stats.dueNow]);
+  }, [words, query, filter, sort, progress.cards, progress.seenWords, settings.targetLanguage, stats.dueNow]);
 
-  const nextWord = words.find((word) => !progress.cards[word.id]) ?? words[0];
+  // A word counts as new only if it has never been opened and is not in the
+  // review queue. Words seen earlier but skipped are not offered again.
+  const nextWord =
+    words.find((word) => !progress.cards[word.id] && !progress.seenWords[word.id]) ?? words[0];
   const savedIndex = progress.levelPositions[level];
   // Positions are recorded in vocabulary-file order, so the saved word stays
   // valid when the visible deck is randomly ordered.
@@ -155,7 +166,9 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                   ? `Resume at #${resumeIndex + 1}`
                   : progress.cards[nextWord.id]
                     ? 'Practice a word'
-                    : 'Study next word'}
+                    : progress.seenWords[nextWord.id]
+                      ? 'Revisit a word'
+                      : 'Study next word'}
                 <ArrowRight size={16} aria-hidden="true" />
               </AppLink>
             ) : null}
@@ -335,7 +348,7 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
             <div className="word-list">
               {filtered.map((word) => {
                 const card = progress.cards[word.id];
-                const status = statusFor(word.id, progress.cards);
+                const status = statusFor(word.id, progress.cards, progress.seenWords);
                 const due = card && card.due <= Date.now();
                 const exampleCount = progress.generatedExamples[word.id]?.length ?? 0;
                 return (
@@ -350,7 +363,16 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                           {settings.showPronunciation && word.pronunciation && (
                             <span className="word-row-pron">/{word.pronunciation}/</span>
                           )}
-                          <span className={`status-pill status-${status.key}`}>{status.label}</span>
+                          <span
+                            className={`status-pill status-${status.key}`}
+                            title={
+                              status.key === 'seen'
+                                ? 'You opened this word before, but did not add it to the review queue'
+                                : undefined
+                            }
+                          >
+                            {status.label}
+                          </span>
                           {resumeWord?.id === word.id && (
                             <span className="status-pill status-resume">
                               Resume · #{resumeIndex + 1}

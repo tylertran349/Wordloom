@@ -46,7 +46,9 @@ export function Dashboard() {
   const lastStudiedWord = progress.lastStudied
     ? WORD_BY_ID[progress.lastStudied.wordId]
     : undefined;
-  const nextNewWord = studyOrder.find((word) => !progress.cards[word.id]);
+  const nextNewWord = studyOrder.find(
+    (word) => !progress.cards[word.id] && !progress.seenWords[word.id],
+  );
   const focusWord = nextNewWord ?? lastStudiedWord ?? studyOrder[0] ?? ALL_WORDS[0];
   const focusLabel = nextNewWord
     ? stats.studied === 0

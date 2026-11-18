@@ -23,19 +23,29 @@
  * Requests without a sheetId use the bound spreadsheet and the typed email:
  * that is the legacy shared-sheet mode, kept for importing old progress.
  *
- * Schema 5 keeps the per-email row layout from schema 4.
+ * Schema 5 keeps the per-email row layout from schema 4. Schema 6 adds the
+ * "Wordloom Seen" tab: every word the learner has opened, so the app can
+ * avoid offering skipped words as new ones again. Older deployments should
+ * paste this file and redeploy; missing tabs are recreated automatically.
+ *
+ * Learners' typed translation attempts are never stored. The legacy
+ * "Wordloom Responses" tab is deleted (or wiped) on the next read or write,
+ * and the app no longer writes that tab.
  *
  * This file is pasted into the Apps Script editor as-is. Change the owner
  * email and allowed origins below if the deployment moves.
  */
 
-var SCHEMA = 5;
+var SCHEMA = 6;
 
 // Optional shared password for the legacy (email) mode. Blank by default.
 var TOKEN = '';
 
 // Rows from before the per-email migration belong to this address.
 var LEGACY_OWNER_EMAIL = 'tylertran349@gmail.com';
+
+// The tab that used to store typed translation attempts. Removed on sight.
+var LEGACY_RESPONSES_TAB = 'Wordloom Responses';
 
 // User sheets are shared with this account so the anonymous data bridge can
 // open them. It must be the Google account that deployed the data bridge.
@@ -56,8 +66,8 @@ var TABS = {
   meta: 'Wordloom Meta',
   settings: 'Wordloom Settings',
   cards: 'Wordloom Cards',
-  responses: 'Wordloom Responses',
   solutions: 'Wordloom Solutions',
+  seen: 'Wordloom Seen',
   examples: 'Wordloom Examples',
   practice: 'Wordloom Practice',
   activity: 'Wordloom Activity',
@@ -69,8 +79,8 @@ var HEADERS = {
   meta: ['email', 'key', 'value'],
   settings: ['email', 'key', 'value'],
   cards: ['email', 'wordId', 'ease', 'interval', 'repetitions', 'lapses', 'due', 'createdAt', 'lastReviewed', 'totalReviews', 'status'],
-  responses: ['email', 'key', 'value'],
   solutions: ['email', 'key', 'value'],
+  seen: ['email', 'wordId', 'at'],
   examples: ['email', 'wordId', 'target', 'native'],
   practice: ['email', 'wordId', 'sentence'],
   activity: ['email', 'date', 'studied', 'reviews'],
@@ -632,7 +642,7 @@ function moveAccount_(sheet, fromEmail, toEmail) {
   var to = normalizeEmail_(toEmail);
   if (!from || !to || from === to) return 0;
 
-  var order = ['meta', 'settings', 'cards', 'responses', 'solutions', 'examples', 'practice', 'activity', 'history'];
+  var order = ['meta', 'settings', 'cards', 'solutions', 'examples', 'practice', 'activity', 'history', 'seen'];
   var moved = 0;
 
   for (var i = 0; i < order.length; i += 1) {
@@ -1247,6 +1257,15 @@ function readState_(sheet, email) {
     });
   });
 
+  var seenWords = {};
+  eachRow_(sheet, TABS.seen, function (row) {
+    if (rowEmail_(row) !== email) return;
+    var id = String(row[1] || '');
+    if (!id) return;
+    var at = number_(row[2]);
+    seenWords[id] = at > 0 ? at : 0;
+  });
+
   var lastStudied;
   if (meta.lastStudiedWordId) {
     lastStudied = {
@@ -1264,7 +1283,6 @@ function readState_(sheet, email) {
     progress: {
       version: 1,
       cards: cards,
-      responses: readPairs_(sheet, TABS.responses, email),
       solutions: readPairs_(sheet, TABS.solutions, email),
       generatedExamples: generatedExamples,
       generatedPractice: generatedPractice,
@@ -1273,6 +1291,7 @@ function readState_(sheet, email) {
       reviewCount: number_(meta.reviewCount),
       strongReviewCount: number_(meta.strongReviewCount),
       levelPositions: readPositions_(meta),
+      seenWords: seenWords,
       lastStudied: lastStudied
     }
   };
@@ -1317,8 +1336,18 @@ function writeState_(sheet, email, body) {
     })
   );
 
-  writeUserTable_(sheet, TABS.responses, HEADERS.responses, email, pairRows_(email, progress.responses));
   writeUserTable_(sheet, TABS.solutions, HEADERS.solutions, email, pairRows_(email, progress.solutions));
+
+  var seenWords = progress.seenWords || {};
+  writeUserTable_(
+    sheet,
+    TABS.seen,
+    HEADERS.seen,
+    email,
+    Object.keys(seenWords).map(function (id) {
+      return [email, String(id), number_(seenWords[id])];
+    })
+  );
 
   var examples = progress.generatedExamples || {};
   var exampleRows = [];
@@ -1458,10 +1487,11 @@ function pairRows_(email, source) {
  * LEGACY_OWNER_EMAIL so the original owner keeps their progress.
  */
 function ensureMigrated_(sheet, requestEmail, adoptRequestedEmail) {
+  dropLegacyResponsesTab_(sheet);
   var legacy = adoptRequestedEmail
     ? normalizeEmail_(requestEmail)
     : legacyEmail_(requestEmail);
-  var order = ['meta', 'settings', 'cards', 'responses', 'solutions', 'examples', 'practice', 'activity', 'history'];
+  var order = ['meta', 'settings', 'cards', 'solutions', 'examples', 'practice', 'activity', 'history', 'seen'];
   var migrated = false;
 
   for (var i = 0; i < order.length; i += 1) {
@@ -1498,6 +1528,26 @@ function ensureMigrated_(sheet, requestEmail, adoptRequestedEmail) {
   }
 
   return migrated;
+}
+
+/**
+ * Typed translation attempts are not stored anywhere, so the legacy tab that
+ * held them is removed. Deleting beats clearing: the database should not keep
+ * them at all. A sheet must always keep one tab, so fall back to wiping the
+ * contents if this is the last one.
+ */
+function dropLegacyResponsesTab_(sheet) {
+  try {
+    var tab = sheet.getSheetByName(LEGACY_RESPONSES_TAB);
+    if (!tab) return;
+    try {
+      sheet.deleteSheet(tab);
+    } catch (deleteError) {
+      tab.clearContents();
+    }
+  } catch (error) {
+    // Cleanup must never block a sync.
+  }
 }
 
 function repairMissingEmails_(tab, legacy) {

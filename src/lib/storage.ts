@@ -79,7 +79,6 @@ export function emptyProgress(): ProgressState {
   return {
     version: 1,
     cards: {},
-    responses: {},
     solutions: {},
     generatedExamples: {},
     generatedPractice: {},
@@ -88,6 +87,7 @@ export function emptyProgress(): ProgressState {
     reviewCount: 0,
     strongReviewCount: 0,
     levelPositions: {},
+    seenWords: {},
   };
 }
 
@@ -346,6 +346,15 @@ function normalizeProgress(raw: unknown): ProgressState {
     });
   }
 
+  const seenWords: Record<string, number> = {};
+  if (isRecord(raw.seenWords)) {
+    Object.entries(raw.seenWords).forEach(([wordId, value]) => {
+      if (!wordId || wordId.length > 100 || Object.keys(seenWords).length >= 10_000) return;
+      const at = asNumber(value, -1, -1, Number.MAX_SAFE_INTEGER);
+      if (at >= 0) seenWords[wordId] = at;
+    });
+  }
+
   const strongFromLog = reviewLog.filter(
     (entry) => entry.grade === 'good' || entry.grade === 'easy',
   ).length;
@@ -364,7 +373,6 @@ function normalizeProgress(raw: unknown): ProgressState {
   return {
     version: 1,
     cards,
-    responses: stringRecord(raw.responses),
     solutions: stringRecord(raw.solutions),
     generatedExamples,
     generatedPractice,
@@ -373,6 +381,7 @@ function normalizeProgress(raw: unknown): ProgressState {
     reviewCount,
     strongReviewCount,
     levelPositions,
+    seenWords,
     lastStudied,
   };
 }
@@ -385,10 +394,86 @@ export function parseStoredProgress(raw: string): ProgressState {
   return normalizeProgress(JSON.parse(raw));
 }
 
-function preserveCorruptValue(key: string): void {
+/**
+ * Remove every top-level `"responses"` subtree (a flat string map holding the
+ * learner's typed translation attempts) from stored progress JSON.
+ *
+ * This works byte-wise so it can also repair values that no longer parse as
+ * JSON. The needle `"responses"` with its quotes can only match a real object
+ * key: quotes inside a JSON string value must be escaped. Returns the cleaned
+ * text, or `null` when the subtree cannot be located and removed safely.
+ */
+function stripLegacyResponses(raw: string): string | null {
+  let result = raw;
+  for (let guard = 0; guard < 5; guard += 1) {
+    const keyIndex = result.indexOf('"responses"');
+    if (keyIndex === -1) return result;
+    const valueStart = result.indexOf('{', keyIndex);
+    // The key must be followed only by `:` and whitespace. This rejects a
+    // `"responses"` that is not the object-valued key we know how to strip.
+    if (valueStart === -1 || !/^\s*:\s*$/.test(result.slice(keyIndex + '"responses"'.length, valueStart))) {
+      return null;
+    }
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    let valueEnd = -1;
+    for (let i = valueStart; i < result.length; i += 1) {
+      const ch = result.charAt(i);
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (ch === '\\') {
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') {
+        inString = true;
+        continue;
+      }
+      if (ch === '{') depth += 1;
+      else if (ch === '}') {
+        depth -= 1;
+        if (depth === 0) {
+          valueEnd = i + 1;
+          break;
+        }
+      }
+    }
+    if (valueEnd === -1) return null;
+    let start = keyIndex;
+    let end = valueEnd;
+    // Drop one adjacent comma too, whichever side has one.
+    let probe = end;
+    while (probe < result.length && /\s/.test(result.charAt(probe))) probe += 1;
+    if (result.charAt(probe) === ',') {
+      end = probe + 1;
+    } else {
+      let back = start;
+      while (back > 0 && /\s/.test(result.charAt(back - 1))) back -= 1;
+      if (result.charAt(back - 1) === ',') start = back - 1;
+    }
+    result = result.slice(0, start) + result.slice(end);
+  }
+  return result;
+}
+
+function preserveCorruptValue(key: string, rawValue?: string): void {
   try {
-    const raw = window.localStorage.getItem(key);
-    if (raw) window.localStorage.setItem(`${key}.corrupt.${Date.now()}`, raw);
+    const raw = rawValue ?? window.localStorage.getItem(key);
+    if (!raw) return;
+    if (!raw.includes('"responses"')) {
+      window.localStorage.setItem(`${key}.corrupt.${Date.now()}`, raw);
+      return;
+    }
+    // Never carry typed translation answers into the debug snapshot.
+    const cleaned = stripLegacyResponses(raw);
+    if (cleaned) window.localStorage.setItem(`${key}.corrupt.${Date.now()}`, cleaned);
   } catch {
     // If storage itself is unavailable, there is nothing else to preserve.
   }
@@ -421,12 +506,48 @@ export function saveSettings(settings: Settings, profile = ''): boolean {
 
 export function loadProgress(profile = ''): ProgressState {
   const key = storageKeyForProfile(PROGRESS_KEY, profile);
+  let raw: string | null = null;
   try {
-    const raw = window.localStorage.getItem(key);
+    raw = window.localStorage.getItem(key);
     if (!raw) return emptyProgress();
-    return parseStoredProgress(raw);
+    const parsed = parseStoredProgress(raw);
+    // Older versions persisted the learner's typed translation attempts.
+    // They are no longer kept anywhere, so scrub the stale copy on load.
+    if (raw.includes('"responses"')) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(parsed));
+      } catch {
+        // The cleaned copy is best effort; parsing already dropped it in memory.
+      }
+    }
+    return parsed;
   } catch {
-    preserveCorruptValue(key);
+    // The stored value cannot be parsed. Repair it without the legacy typed
+    // answers when possible; whatever remains is as good as it gets.
+    if (raw) {
+      const cleaned = stripLegacyResponses(raw);
+      if (cleaned) {
+        try {
+          const parsed = parseStoredProgress(cleaned);
+          try {
+            window.localStorage.setItem(key, cleaned);
+          } catch {
+            // Best effort; the parsed value is used either way.
+          }
+          return parsed;
+        } catch {
+          preserveCorruptValue(key, cleaned);
+        }
+      } else {
+        // Typed answers cannot be ruled out, so the unusable key is removed
+        // rather than left behind.
+        try {
+          window.localStorage.removeItem(key);
+        } catch {
+          // Storage unavailable; nothing more can be done.
+        }
+      }
+    }
     return emptyProgress();
   }
 }
@@ -442,6 +563,38 @@ export function saveProgress(progress: ProgressState, profile = ''): boolean {
     // The session still works in memory; the provider reports the failure.
     return false;
   }
+}
+
+/**
+ * Remove the learner's previously typed translation attempts from every stored
+ * copy on this browser — the local-only profile, per-email profiles, and any
+ * legacy corrupt debug snapshots. Runs once at startup so stale answers never
+ * survive an update, even in profiles that are not opened right now.
+ */
+export function scrubAllStoredProgress(): void {
+  let keys: string[] = [];
+  try {
+    keys = Object.keys(window.localStorage);
+  } catch {
+    return;
+  }
+  keys.forEach((key) => {
+    if (!key.startsWith(PROGRESS_KEY)) return;
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw || !raw.includes('"responses"')) return;
+      const cleaned = stripLegacyResponses(raw);
+      if (cleaned === null) {
+        // Cannot guarantee the typed answers are gone. The key is unusable
+        // either way, so remove it rather than keep it around.
+        window.localStorage.removeItem(key);
+        return;
+      }
+      window.localStorage.setItem(key, cleaned);
+    } catch {
+      // One unreadable key must not block the rest.
+    }
+  });
 }
 
 /** True when this browser already has an offline cache for the profile. */
