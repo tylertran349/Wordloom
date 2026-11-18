@@ -25,6 +25,7 @@ import {
 import {
   createCard,
   previewGradeIntervals,
+  srsConfigFromSettings,
 } from '../lib/srs';
 import {
   AppLink,
@@ -109,22 +110,11 @@ export function Review({ practice = false }: { practice?: boolean }) {
     dismissError,
   } = useWordContentGeneration(current);
   const currentCard = current ? progress.cards[current.id] : undefined;
+  const srsConfig = srsConfigFromSettings(settings);
   const now = Date.now();
-  const previewCard = currentCard ?? (current ? createCard(current.id, {
-    startingEase: settings.startingEase,
-    easyBonus: settings.easyBonus,
-    hardMultiplier: settings.hardMultiplier,
-    maxIntervalDays: settings.maxIntervalDays,
-    learningStepMinutes: settings.learningStepMinutes,
-  }, now) : undefined);
+  const previewCard = currentCard ?? (current ? createCard(current.id, srsConfig, now) : undefined);
   const previews = previewCard
-    ? previewGradeIntervals(previewCard, {
-        startingEase: settings.startingEase,
-        easyBonus: settings.easyBonus,
-        hardMultiplier: settings.hardMultiplier,
-        maxIntervalDays: settings.maxIntervalDays,
-        learningStepMinutes: settings.learningStepMinutes,
-      }, now)
+    ? previewGradeIntervals(previewCard, srsConfig, now)
     : null;
 
   useEffect(() => {

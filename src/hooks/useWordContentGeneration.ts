@@ -2,14 +2,33 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { VocabWord } from '../types';
 import {
-  generateExamples,
-  generatePracticeSentences,
+  generateExamples as requestExamples,
+  generatePracticeSentences as requestPracticeSentences,
   hasAiCredentials,
   isCancelledRequest,
 } from '../lib/ai';
 import { pluralize } from '../lib/utils';
 
 const EXAMPLE_COUNT = 2;
+
+type GenerationKind = 'examples' | 'sentences';
+
+/**
+ * Everything that differs between the two content types, fully typed so the
+ * shared runner below needs no casts. Each call site builds a plan whose item
+ * type is concrete, so `T` is always inferred cleanly.
+ */
+interface GenerationPlan<T> {
+  kind: GenerationKind;
+  /** Ask the model for a fresh batch. */
+  run: (signal: AbortSignal) => Promise<T[]>;
+  /** Drop anything the learner already has. */
+  fresh: (generated: T[]) => T[];
+  /** Store the batch in progress. */
+  save: (fresh: T[]) => void;
+  noneMessage: string;
+  addedMessage: (count: number) => string;
+}
 
 export interface WordContentGeneration {
   canGenerate: boolean;
@@ -50,79 +69,89 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
   const existingExamples = wordId ? progress.generatedExamples[wordId] ?? [] : [];
   const existingSentences = wordId ? progress.generatedPractice[wordId] ?? [] : [];
 
-  const generateExamplesFn = useCallback(async () => {
-    if (!word || !canGenerate || pending.current.examples) return;
-    const abort = new AbortController();
-    examplesAbort.current = abort;
-    pending.current.examples = true;
-    setGeneratingExamples(true);
-    setError(null);
-    try {
-      const generated = await generateExamples({
-        word,
-        count: EXAMPLE_COUNT,
-        settings,
-        signal: abort.signal,
-      });
-      const known = new Set(existingExamples.map((example) => example.target.trim().toLowerCase()));
-      const fresh = generated.filter((example) => {
-        const key = example.target.trim().toLowerCase();
-        if (!key || known.has(key)) return false;
-        known.add(key);
-        return true;
-      });
-      if (fresh.length === 0) {
-        notify('The AI returned examples you already have. Try again for a fresh set.', 'info');
+  const generateBatch = useCallback(
+    async <T,>(plan: GenerationPlan<T>): Promise<void> => {
+      if (!word || !canGenerate || pending.current[plan.kind]) return;
+      const abort = new AbortController();
+      if (plan.kind === 'examples') {
+        examplesAbort.current = abort;
+        setGeneratingExamples(true);
       } else {
-        addGeneratedExercises(word.id, fresh, []);
-        notify(`Added ${fresh.length} example ${pluralize(fresh.length, 'sentence')}.`);
+        sentencesAbort.current = abort;
+        setGeneratingSentences(true);
       }
-    } catch (requestError) {
-      if (isCancelledRequest(requestError)) return;
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : 'The AI request failed. Check your provider settings.',
-      );
-    } finally {
-      pending.current.examples = false;
-      setGeneratingExamples(false);
-    }
-  }, [word, canGenerate, settings, existingExamples, addGeneratedExercises, notify]);
+      pending.current[plan.kind] = true;
+      setError(null);
+      try {
+        const fresh = plan.fresh(await plan.run(abort.signal));
+        if (fresh.length === 0) {
+          notify(plan.noneMessage, 'info');
+        } else {
+          plan.save(fresh);
+          notify(plan.addedMessage(fresh.length));
+        }
+      } catch (requestError) {
+        if (isCancelledRequest(requestError)) return;
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : 'The AI request failed. Check your provider settings.',
+        );
+      } finally {
+        pending.current[plan.kind] = false;
+        if (plan.kind === 'examples') setGeneratingExamples(false);
+        else setGeneratingSentences(false);
+      }
+    },
+    [word, canGenerate, notify],
+  );
 
-  const generateSentencesFn = useCallback(async () => {
-    if (!word || !canGenerate || pending.current.sentences) return;
-    const abort = new AbortController();
-    sentencesAbort.current = abort;
-    pending.current.sentences = true;
-    setGeneratingSentences(true);
-    setError(null);
-    try {
-      const generated = await generatePracticeSentences({
-        word,
-        count: Math.max(3, settings.exercisesPerWord),
-        settings,
-        signal: abort.signal,
+  const generateExamplesFn = useCallback(
+    async () => {
+      if (!word) return;
+      await generateBatch({
+        kind: 'examples',
+        run: (signal) => requestExamples({ word, count: EXAMPLE_COUNT, settings, signal }),
+        fresh: (generated) => {
+          const known = new Set(
+            existingExamples.map((example) => example.target.trim().toLowerCase()),
+          );
+          return generated.filter((example) => {
+            const key = example.target.trim().toLowerCase();
+            if (!key || known.has(key)) return false;
+            known.add(key);
+            return true;
+          });
+        },
+        save: (fresh) => addGeneratedExercises(word.id, fresh, []),
+        noneMessage: 'The AI returned examples you already have. Try again for a fresh set.',
+        addedMessage: (count) => `Added ${count} example ${pluralize(count, 'sentence')}.`,
       });
-      const fresh = generated.filter((sentence) => !existingSentences.includes(sentence));
-      if (fresh.length === 0) {
-        notify('The AI returned sentences you already have. Try again for a fresh set.', 'info');
-      } else {
-        addGeneratedExercises(word.id, [], fresh);
-        notify(`Added ${fresh.length} practice ${pluralize(fresh.length, 'sentence')}.`);
-      }
-    } catch (requestError) {
-      if (isCancelledRequest(requestError)) return;
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : 'The AI request failed. Check your provider settings.',
-      );
-    } finally {
-      pending.current.sentences = false;
-      setGeneratingSentences(false);
-    }
-  }, [word, canGenerate, settings, existingSentences, addGeneratedExercises, notify]);
+    },
+    [generateBatch, word, settings, existingExamples, addGeneratedExercises],
+  );
+
+  const generateSentencesFn = useCallback(
+    async () => {
+      if (!word) return;
+      await generateBatch({
+        kind: 'sentences',
+        run: (signal) =>
+          requestPracticeSentences({
+            word,
+            count: Math.max(3, settings.exercisesPerWord),
+            settings,
+            signal,
+          }),
+        fresh: (generated) =>
+          generated.filter((sentence) => !existingSentences.includes(sentence)),
+        save: (fresh) => addGeneratedExercises(word.id, [], fresh),
+        noneMessage: 'The AI returned sentences you already have. Try again for a fresh set.',
+        addedMessage: (count) => `Added ${count} practice ${pluralize(count, 'sentence')}.`,
+      });
+    },
+    [generateBatch, word, settings, existingSentences, addGeneratedExercises],
+  );
 
   const dismissError = useCallback(() => setError(null), []);
 

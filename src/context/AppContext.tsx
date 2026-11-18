@@ -42,7 +42,7 @@ import {
   scrubAllStoredProgress,
   storageKeyForProfile,
 } from '../lib/storage';
-import { createCard, isDue, scheduleCard } from '../lib/srs';
+import { createCard, isDue, srsConfigFromSettings, scheduleCard } from '../lib/srs';
 import {
   dayKey,
   endOfDay,
@@ -1386,22 +1386,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return keys;
   }, [allWords, settings.hiddenWords, settings.wordEdits]);
 
-  const srsConfig = useMemo(
-    () => ({
-      startingEase: settings.startingEase,
-      easyBonus: settings.easyBonus,
-      hardMultiplier: settings.hardMultiplier,
-      maxIntervalDays: settings.maxIntervalDays,
-      learningStepMinutes: settings.learningStepMinutes,
-    }),
-    [
-      settings.startingEase,
-      settings.easyBonus,
-      settings.hardMultiplier,
-      settings.maxIntervalDays,
-      settings.learningStepMinutes,
-    ],
-  );
+  const srsConfig = useMemo(() => srsConfigFromSettings(settings), [settings]);
 
   const levelDecks = useMemo(() => {
     const decks = {} as Record<CEFRLevel, VocabWord[]>;

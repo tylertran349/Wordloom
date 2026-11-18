@@ -12,6 +12,7 @@ import type {
 } from '../types';
 import { LANGUAGES } from '../data/languages';
 import { CEFR_LEVELS } from '../types';
+import { DEFAULT_SRS } from './srs';
 import { clamp } from './utils';
 import {
   createCustomWordId,
@@ -56,11 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ttsProvider: 'google',
   ttsRate: 0.9,
 
-  startingEase: 2.5,
-  easyBonus: 1.3,
-  hardMultiplier: 1.2,
-  maxIntervalDays: 365,
-  learningStepMinutes: 10,
+  ...DEFAULT_SRS,
   reviewShowExample: true,
   reviewExercise: true,
 

@@ -385,6 +385,22 @@ export function attachSheetUrl(
   return { ...connection, sheetUrl };
 }
 
+/** The bridge write request shared by fetch uploads and sendBeacon saves. */
+function buildWriteBody(connection: SheetConnection, payload: SheetWritePayload): string {
+  return JSON.stringify({
+    action: 'write',
+    token: connection.token,
+    email: normalizeEmail(payload.email),
+    deviceId: payload.deviceId,
+    baseUpdatedAt: payload.baseUpdatedAt,
+    settings: settingsForSheet(connection, payload.settings),
+    progress: payload.progress,
+    ...(connection.kind === 'sheet'
+      ? { sheetId: connection.sheetId, secret: connection.secret }
+      : {}),
+  });
+}
+
 async function callBridge(
   url: string,
   kind: SheetConnectionKind,
@@ -522,18 +538,7 @@ export async function writeSheet(
   connection: SheetConnection,
   payload: SheetWritePayload,
 ): Promise<SheetWriteResult> {
-  const body = JSON.stringify({
-    action: 'write',
-    token: connection.token,
-    email: normalizeEmail(payload.email),
-    deviceId: payload.deviceId,
-    baseUpdatedAt: payload.baseUpdatedAt,
-    settings: settingsForSheet(connection, payload.settings),
-    progress: payload.progress,
-    ...(connection.kind === 'sheet'
-      ? { sheetId: connection.sheetId, secret: connection.secret }
-      : {}),
-  });
+  const body = buildWriteBody(connection, payload);
 
   const response = await callBridge(connection.endpoint, connection.kind, {
     method: 'POST',
@@ -573,18 +578,7 @@ export async function writeSheet(
 export function beaconSheet(connection: SheetConnection, payload: SheetWritePayload): boolean {
   try {
     if (typeof navigator === 'undefined' || typeof navigator.sendBeacon !== 'function') return false;
-    const body = JSON.stringify({
-      action: 'write',
-      token: connection.token,
-      email: normalizeEmail(payload.email),
-      deviceId: payload.deviceId,
-      baseUpdatedAt: payload.baseUpdatedAt,
-      settings: settingsForSheet(connection, payload.settings),
-      progress: payload.progress,
-      ...(connection.kind === 'sheet'
-        ? { sheetId: connection.sheetId, secret: connection.secret }
-        : {}),
-    });
+    const body = buildWriteBody(connection, payload);
     return navigator.sendBeacon(
       connection.endpoint,
       new Blob([body], { type: 'text/plain;charset=UTF-8' }),

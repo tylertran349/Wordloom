@@ -110,7 +110,7 @@ export function dayKey(date: Date | number = new Date()): string {
 }
 
 export function startOfDay(date: Date | number = new Date()): Date {
-  const value = typeof date === 'number' ? new Date(date) : new Date(date);
+  const value = new Date(date);
   value.setHours(0, 0, 0, 0);
   return value;
 }
@@ -194,11 +194,6 @@ export function percent(value: number, total: number): number {
   return clamp(Math.round((value / total) * 100), 0, 100);
 }
 
-export function truncate(value: string, length: number): string {
-  if (value.length <= length) return value;
-  return `${value.slice(0, length).trimEnd()}…`;
-}
-
 const TYPOGRAPHIC_APOSTROPHES = /[\u2018\u2019\u02bc\u00b4]/g;
 
 function foldForComparison(value: string): string {
@@ -237,59 +232,4 @@ export function downloadText(filename: string, text: string, type = 'text/plain'
 
 export function downloadJSON(filename: string, data: unknown): void {
   downloadText(filename, JSON.stringify(data, null, 2), 'application/json');
-}
-
-/**
- * Copy text to the clipboard, falling back to a temporary textarea on browsers
- * where the async Clipboard API is missing or blocked (non-HTTPS origins,
- * older Safari, denied permissions).
- */
-export async function copyText(text: string): Promise<boolean> {
-  if (
-    typeof navigator !== 'undefined' &&
-    navigator.clipboard &&
-    typeof navigator.clipboard.writeText === 'function' &&
-    window.isSecureContext
-  ) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // Fall through to the legacy selection-based copy below.
-    }
-  }
-  if (typeof document === 'undefined') return false;
-  const previouslyFocused =
-    document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', '');
-  textarea.setAttribute('aria-hidden', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.top = '0';
-  textarea.style.left = '0';
-  textarea.style.width = '1px';
-  textarea.style.height = '1px';
-  textarea.style.padding = '0';
-  textarea.style.border = 'none';
-  textarea.style.opacity = '0';
-  textarea.style.pointerEvents = 'none';
-  document.body.appendChild(textarea);
-  const selection = window.getSelection();
-  const previousRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-  try {
-    textarea.focus();
-    textarea.select();
-    textarea.setSelectionRange(0, text.length);
-    return document.execCommand('copy');
-  } catch {
-    return false;
-  } finally {
-    textarea.remove();
-    if (selection && previousRange) {
-      selection.removeAllRanges();
-      selection.addRange(previousRange);
-    }
-    previouslyFocused?.focus({ preventScroll: true });
-  }
 }

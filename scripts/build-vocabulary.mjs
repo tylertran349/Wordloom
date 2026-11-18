@@ -169,8 +169,6 @@ export const VOCABULARY: Record<CEFRLevel, VocabEntry[]> = {
 ${sections}
 };
 
-const levelOrder = new Map<CEFRLevel, number>(CEFR_LEVELS.map((level, index) => [level, index]));
-
 export const ALL_WORDS: VocabWord[] = CEFR_LEVELS.flatMap((level) =>
   (VOCABULARY[level] ?? []).map((word) => ({ ...word, level })),
 );
@@ -178,18 +176,6 @@ export const ALL_WORDS: VocabWord[] = CEFR_LEVELS.flatMap((level) =>
 export const WORD_BY_ID: Record<string, VocabWord> = Object.fromEntries(
   ALL_WORDS.map((word) => [word.id, word]),
 );
-
-export const LEVEL_WORDS: Record<CEFRLevel, VocabWord[]> = Object.fromEntries(
-  CEFR_LEVELS.map((level) => [level, ALL_WORDS.filter((word) => word.level === level)]),
-) as Record<CEFRLevel, VocabWord[]>;
-
-export const LEVEL_COUNTS: Record<CEFRLevel, number> = Object.fromEntries(
-  CEFR_LEVELS.map((level) => [level, LEVEL_WORDS[level].length]),
-) as Record<CEFRLevel, number>;
-
-export function sortByLevel(a: VocabWord, b: VocabWord): number {
-  return (levelOrder.get(a.level) ?? 0) - (levelOrder.get(b.level) ?? 0);
-}
 `;
 
 await writeFile(outFile, output, 'utf8');

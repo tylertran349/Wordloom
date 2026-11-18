@@ -1,4 +1,4 @@
-import type { ReviewGrade, SRSCard, SRSConfig } from '../types';
+import type { ReviewGrade, Settings, SRSCard, SRSConfig } from '../types';
 import { clamp, formatInterval } from './utils';
 
 export const DAY_MS = 86_400_000;
@@ -10,6 +10,17 @@ export const DEFAULT_SRS: SRSConfig = {
   maxIntervalDays: 365,
   learningStepMinutes: 10,
 };
+
+/** The scheduling subset of the learner's settings, as the scheduler sees it. */
+export function srsConfigFromSettings(settings: Settings): SRSConfig {
+  return {
+    startingEase: settings.startingEase,
+    easyBonus: settings.easyBonus,
+    hardMultiplier: settings.hardMultiplier,
+    maxIntervalDays: settings.maxIntervalDays,
+    learningStepMinutes: settings.learningStepMinutes,
+  };
+}
 
 export function createCard(wordId: string, config: SRSConfig, now = Date.now()): SRSCard {
   const learningInterval = config.learningStepMinutes / (24 * 60);

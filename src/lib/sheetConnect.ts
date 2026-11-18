@@ -12,10 +12,6 @@ let pending: SheetConnectionInput | null = null;
 /** Why a returned connection was rejected, when it was. */
 let returnError: string | null = null;
 
-export function isSheetConnectConfigured(): boolean {
-  return Boolean(SHARED_CONNECT_ENDPOINT);
-}
-
 function createNonce(): string {
   try {
     const bytes = new Uint8Array(16);

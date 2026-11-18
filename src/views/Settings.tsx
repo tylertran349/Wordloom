@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import type { AccentColor, Settings as SettingsType, ThemeMode } from '../types';
 import { getLanguage, getVoiceSample, LANGUAGES } from '../data/languages';
-import { useApp, type SheetActionResult } from '../context/AppContext';
+import { useApp, type SheetActionResult, type SheetPhase } from '../context/AppContext';
 import {
   GEMINI_MODEL_SUGGESTIONS,
   GEMINI_THINKING_LEVELS,
@@ -197,6 +197,121 @@ function RangeSetting({
   );
 }
 
+/** One-line description of the sync state, shown on the status badges. */
+function sheetPhaseLabel(phase: SheetPhase): string {
+  switch (phase) {
+    case 'syncing':
+      return 'Syncing…';
+    case 'unsaved':
+      return 'Saving…';
+    case 'error':
+      return 'Needs attention';
+    case 'idle':
+      return 'Up to date';
+    case 'disconnected':
+      return 'Sync not set up';
+    default:
+      return 'Local only';
+  }
+}
+
+/**
+ * Status card, autosave note, and sync actions shown for both the
+ * learner-owned sheet and the legacy shared sheet. The two connection kinds
+ * only differ in the sheet title and the "open spreadsheet" link.
+ */
+function SheetStatusCard({
+  sheetTitle,
+  openLinkHref,
+  openLinkLabel,
+  onSync,
+  showLastError,
+}: {
+  sheetTitle: string;
+  openLinkHref: string;
+  openLinkLabel: string;
+  onSync: () => void;
+  showLastError: boolean;
+}) {
+  const { progress, sheetSync, sheetPhase, sheetBusy } = useApp();
+  const cardCount = Object.keys(progress.cards).length;
+  return (
+    <>
+      <div className="storage-card sheet-card">
+        <div className="storage-icon">
+          <Cloud size={22} aria-hidden="true" />
+        </div>
+        <div>
+          <strong>Syncing as {sheetSync.email}</strong>
+          <span>
+            {sheetTitle}
+            {' · '}
+            {sheetSync.lastSyncedAt
+              ? `Last checked ${formatShortDate(sheetSync.lastSyncedAt)} at ${formatTime(sheetSync.lastSyncedAt)}`
+              : 'Not checked yet'}
+            {' · '}
+            {cardCount} {pluralize(cardCount, 'card')} in this browser
+          </span>
+        </div>
+        <span
+          className={cn(
+            'storage-badge',
+            (sheetPhase === 'error' || sheetPhase === 'disconnected') && 'is-error',
+            sheetPhase === 'unsaved' && 'is-warn',
+          )}
+        >
+          {sheetPhaseLabel(sheetPhase)}
+        </span>
+      </div>
+
+      <p className="sheet-autosave">
+        <RefreshCw size={12} aria-hidden="true" />
+        {sheetBusy
+          ? 'Syncing with Google Sheets...'
+          : sheetSync.lastError
+            ? 'The last sync failed. Your local data is safe - try again below.'
+            : sheetSync.dirty
+              ? 'Saving to Google Sheets in a few seconds...'
+              : 'Up to date. Changes save automatically a few seconds after you stop.'}
+      </p>
+
+      {sheetSync.lastError && showLastError && (
+        <div className="inline-alert is-error" role="alert">
+          <AlertCircle size={15} aria-hidden="true" />
+          <span>{sheetSync.lastError}</span>
+        </div>
+      )}
+
+      <div className="sheet-connect-actions">
+        <button
+          type="button"
+          className="button button-primary button-small"
+          onClick={onSync}
+          disabled={sheetBusy}
+        >
+          {sheetBusy ? (
+            <Loader2 className="spin" size={14} aria-hidden="true" />
+          ) : (
+            <RefreshCw size={14} aria-hidden="true" />
+          )}
+          {sheetBusy ? 'Syncing...' : 'Sync now'}
+        </button>
+        {openLinkHref && (
+          <a
+            className="text-link sheet-open"
+            href={openLinkHref}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {openLinkLabel}
+            <ExternalLink size={13} aria-hidden="true" />
+          </a>
+        )}
+      </div>
+    </>
+  );
+}
+
 export function Settings() {
   const {
     settings,
@@ -291,18 +406,6 @@ export function Settings() {
     sheetSync.connection?.kind === 'legacy'
       ? 'the old shared Google Sheet'
       : sheetSync.connection?.name || 'your Google Sheet';
-  const sheetPhaseLabel =
-    sheetPhase === 'syncing'
-      ? 'Syncing…'
-      : sheetPhase === 'unsaved'
-        ? 'Saving…'
-        : sheetPhase === 'error'
-          ? 'Needs attention'
-          : sheetPhase === 'idle'
-            ? 'Up to date'
-            : sheetPhase === 'disconnected'
-              ? 'Sync not set up'
-              : 'Local only';
 
   useEffect(() => {
     clearSheetTabRequest();
@@ -322,11 +425,9 @@ export function Settings() {
     setTestResult(null);
     try {
       const reply = await testAiConnection(settings);
-      const model =
-        settings.aiProvider === 'gemini' ? settings.geminiModel : settings.openaiModel;
       setTestResult({
         ok: true,
-        message: `${activeProviderLabel(settings)} replied using ${model}: “${reply}”`,
+        message: `${activeProviderLabel(settings)} replied using ${activeModel}: “${reply}”`,
       });
     } catch (error) {
       setTestResult({
@@ -1495,79 +1596,13 @@ export function Settings() {
               >
                 {sheetSync.connection?.kind === 'sheet' ? (
                   <>
-                    <div className="storage-card sheet-card">
-                      <div className="storage-icon">
-                        <Cloud size={22} aria-hidden="true" />
-                      </div>
-                      <div>
-                        <strong>Syncing as {sheetSync.email}</strong>
-                        <span>
-                          {sheetSync.connection?.name || 'Your Google Sheet'}
-                          {' · '}
-                          {sheetSync.lastSyncedAt
-                            ? `Last checked ${formatShortDate(sheetSync.lastSyncedAt)} at ${formatTime(sheetSync.lastSyncedAt)}`
-                            : 'Not checked yet'}
-                          {' · '}
-                          {Object.keys(progress.cards).length}{' '}
-                          {pluralize(Object.keys(progress.cards).length, 'card')} in this browser
-                        </span>
-                      </div>
-                      <span
-                        className={cn(
-                          'storage-badge',
-                          (sheetPhase === 'error' || sheetPhase === 'disconnected') &&
-                            'is-error',
-                          sheetPhase === 'unsaved' && 'is-warn',
-                        )}
-                      >
-                        {sheetPhaseLabel}
-                      </span>
-                    </div>
-
-                    <p className="sheet-autosave">
-                      <RefreshCw size={12} aria-hidden="true" />
-                      {sheetBusy
-                        ? 'Syncing with Google Sheets...'
-                        : sheetSync.lastError
-                          ? 'The last sync failed. Your local data is safe - try again below.'
-                          : sheetSync.dirty
-                            ? 'Saving to Google Sheets in a few seconds...'
-                            : 'Up to date. Changes save automatically a few seconds after you stop.'}
-                    </p>
-
-                    {sheetSync.lastError && !sheetMessage && (
-                      <div className="inline-alert is-error" role="alert">
-                        <AlertCircle size={15} aria-hidden="true" />
-                        <span>{sheetSync.lastError}</span>
-                      </div>
-                    )}
-
-                    <div className="sheet-connect-actions">
-                      <button
-                        type="button"
-                        className="button button-primary button-small"
-                        onClick={() => void handleSheetSyncNow()}
-                        disabled={sheetBusy}
-                      >
-                        {sheetBusy ? (
-                          <Loader2 className="spin" size={14} aria-hidden="true" />
-                        ) : (
-                          <RefreshCw size={14} aria-hidden="true" />
-                        )}
-                        {sheetBusy ? 'Syncing...' : 'Sync now'}
-                      </button>
-                      {sheetSync.connection?.sheetUrl && (
-                        <a
-                          className="text-link sheet-open"
-                          href={sheetSync.connection.sheetUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open your spreadsheet
-                          <ExternalLink size={13} aria-hidden="true" />
-                        </a>
-                      )}
-                    </div>
+                    <SheetStatusCard
+                      sheetTitle={sheetSync.connection?.name || 'Your Google Sheet'}
+                      openLinkHref={sheetSync.connection?.sheetUrl ?? ''}
+                      openLinkLabel="Open your spreadsheet"
+                      onSync={() => void handleSheetSyncNow()}
+                      showLastError={!sheetMessage}
+                    />
 
                     <details className="sheet-details">
                       <summary>More sync options</summary>
@@ -1634,79 +1669,13 @@ export function Settings() {
                   </>
                 ) : sheetSync.email ? (
                   <>
-                    <div className="storage-card sheet-card">
-                      <div className="storage-icon">
-                        <Cloud size={22} aria-hidden="true" />
-                      </div>
-                      <div>
-                        <strong>Syncing as {sheetSync.email}</strong>
-                        <span>
-                          Old shared sheet
-                          {' · '}
-                          {sheetSync.lastSyncedAt
-                            ? `Last checked ${formatShortDate(sheetSync.lastSyncedAt)} at ${formatTime(sheetSync.lastSyncedAt)}`
-                            : 'Not checked yet'}
-                          {' · '}
-                          {Object.keys(progress.cards).length}{' '}
-                          {pluralize(Object.keys(progress.cards).length, 'card')} in this browser
-                        </span>
-                      </div>
-                      <span
-                        className={cn(
-                          'storage-badge',
-                          (sheetPhase === 'error' || sheetPhase === 'disconnected') &&
-                            'is-error',
-                          sheetPhase === 'unsaved' && 'is-warn',
-                        )}
-                      >
-                        {sheetPhaseLabel}
-                      </span>
-                    </div>
-
-                    <p className="sheet-autosave">
-                      <RefreshCw size={12} aria-hidden="true" />
-                      {sheetBusy
-                        ? 'Syncing with Google Sheets...'
-                        : sheetSync.lastError
-                          ? 'The last sync failed. Your local data is safe - try again below.'
-                          : sheetSync.dirty
-                            ? 'Saving to Google Sheets in a few seconds...'
-                            : 'Up to date. Changes save automatically a few seconds after you stop.'}
-                    </p>
-
-                    {sheetSync.lastError && !sheetMessage && (
-                      <div className="inline-alert is-error" role="alert">
-                        <AlertCircle size={15} aria-hidden="true" />
-                        <span>{sheetSync.lastError}</span>
-                      </div>
-                    )}
-
-                    <div className="sheet-connect-actions">
-                      <button
-                        type="button"
-                        className="button button-primary button-small"
-                        onClick={() => void handleSheetSyncNow()}
-                        disabled={sheetBusy}
-                      >
-                        {sheetBusy ? (
-                          <Loader2 className="spin" size={14} aria-hidden="true" />
-                        ) : (
-                          <RefreshCw size={14} aria-hidden="true" />
-                        )}
-                        {sheetBusy ? 'Syncing...' : 'Sync now'}
-                      </button>
-                      {(sheetSync.connection?.sheetUrl || SHARED_SHEET_URL) && (
-                        <a
-                          className="text-link sheet-open"
-                          href={sheetSync.connection?.sheetUrl || SHARED_SHEET_URL}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open the shared sheet (owner access)
-                          <ExternalLink size={13} aria-hidden="true" />
-                        </a>
-                      )}
-                    </div>
+                    <SheetStatusCard
+                      sheetTitle="Old shared sheet"
+                      openLinkHref={sheetSync.connection?.sheetUrl || SHARED_SHEET_URL}
+                      openLinkLabel="Open the shared sheet (owner access)"
+                      onSync={() => void handleSheetSyncNow()}
+                      showLastError={!sheetMessage}
+                    />
 
                     <div className="inline-alert is-info">
                       <Cloud size={15} aria-hidden="true" />
@@ -1957,7 +1926,7 @@ export function Settings() {
                     ) : (
                       <ShieldCheck size={14} aria-hidden="true" />
                     )}
-                    {sheetSync.email ? sheetPhaseLabel : 'Local only'}
+                    {sheetSync.email ? sheetPhaseLabel(sheetPhase) : 'Local only'}
                   </span>
                 </div>
                 <div className="data-actions">
