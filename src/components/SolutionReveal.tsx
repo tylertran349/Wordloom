@@ -19,6 +19,17 @@ import {
 import { cn, containsTerm } from '../lib/utils';
 import { SpeakerButton } from './ui';
 
+// Auto-reveal can fire one Google Translate request per exercise on a word
+// page at once. Sending them through a shared queue keeps the free endpoint
+// (and the fallback service) from being hammered in parallel.
+let translateQueue: Promise<unknown> = Promise.resolve();
+
+function enqueueTranslate<T>(task: () => Promise<T>): Promise<T> {
+  const run = translateQueue.then(task, task);
+  translateQueue = run.catch(() => undefined);
+  return run;
+}
+
 export function SolutionReveal({
   word,
   source,
@@ -49,7 +60,9 @@ export function SolutionReveal({
     setOpen(false);
     setError(null);
     requested.current = false;
-  }, [exerciseKey, word.id]);
+    // Language changes re-key the solution cache, so the auto-reveal request
+    // must be allowed to run again for the new language pair.
+  }, [exerciseKey, word.id, languageKey]);
 
   useEffect(() => {
     if (copied) {
@@ -59,7 +72,8 @@ export function SolutionReveal({
     return undefined;
   }, [copied]);
 
-  async function reveal() {
+  /** `enqueued` limits the burst from auto-reveal; direct clicks go straight out. */
+  async function reveal(enqueued = false) {
     if (!source.trim()) return;
     if (!settings.googleTranslateEnabled) {
       window.open(translateUrl, '_blank', 'noopener,noreferrer');
@@ -75,7 +89,8 @@ export function SolutionReveal({
     setLoading(true);
     setError(null);
     try {
-      const result = await translateFree(source, native.code, target.code);
+      const fetchTranslation = () => translateFree(source, native.code, target.code);
+      const result = enqueued ? await enqueueTranslate(fetchTranslation) : await fetchTranslation();
       setSolution(word.id, `${exerciseKey}::${languageKey}`, result.text);
       setOpen(true);
       if (result.provider === 'mymemory') {
@@ -98,7 +113,7 @@ export function SolutionReveal({
     }
     if (!requested.current && source.trim()) {
       requested.current = true;
-      void reveal();
+      void reveal(true);
     }
     // The effect intentionally runs when the exercise or language changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps

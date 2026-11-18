@@ -482,7 +482,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const notify = useCallback((message: string, tone: ToastMessage['tone'] = 'success') => {
     if (toastTimer.current) window.clearTimeout(toastTimer.current);
     setToast({ id: Date.now(), message, tone });
-    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
+    // Errors carry actionable guidance (what failed, what to do), so keep them
+    // up roughly twice as long as ordinary confirmations.
+    toastTimer.current = window.setTimeout(() => setToast(null), tone === 'error' ? 7200 : 3200);
   }, []);
 
   const dismissToast = useCallback(() => {
@@ -528,7 +530,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applySheetSnapshot = useCallback(
-    (snapshot: SheetSnapshot, connection: SheetConnection | null) => {
+    (
+      snapshot: SheetSnapshot,
+      connection: SheetConnection | null,
+      /** Snapshots read from a different connection must not adopt its URL. */
+      adoptUrl = true,
+    ) => {
       if (pushTimer.current) {
         window.clearTimeout(pushTimer.current);
         pushTimer.current = undefined;
@@ -564,7 +571,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setProgress(snapshot.progress);
       const base = connection ?? sheetRef.current.connection;
       patchSheet({
-        connection: base ? attachSheetUrl(base, snapshot.sheetUrl) : null,
+        connection: base ? (adoptUrl ? attachSheetUrl(base, snapshot.sheetUrl) : base) : null,
         lastRemoteUpdatedAt: snapshot.updatedAt,
         lastSyncedAt: Date.now(),
         localChangedAt: snapshot.updatedAt,
@@ -1124,7 +1131,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             message: `The old shared sheet has no saved progress for ${email}.`,
           };
         }
-        applySheetSnapshot(remote.snapshot, connection);
+        // The snapshot comes from the legacy shared sheet; keep the learner's
+        // own spreadsheet URL instead of adopting the legacy one.
+        applySheetSnapshot(remote.snapshot, connection, false);
         patchSheet({ dirty: true, localChangedAt: Date.now() });
         const result = await performPush(true);
         return result.ok

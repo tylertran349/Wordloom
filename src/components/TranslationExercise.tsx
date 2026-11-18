@@ -10,7 +10,7 @@ import {
 import type { AiFeedback, VocabWord } from '../types';
 import { useApp } from '../context/AppContext';
 import { getLanguage } from '../data/languages';
-import { evaluateTranslation, hasAiCredentials } from '../lib/ai';
+import { evaluateTranslation, hasAiCredentials, isCancelledRequest } from '../lib/ai';
 import { cn } from '../lib/utils';
 import { SpeakerButton } from './ui';
 import { SolutionReveal } from './SolutionReveal';
@@ -61,6 +61,9 @@ export function TranslationExercise({
   const visibleFeedback = feedback && feedback.answer === answer ? feedback.data : null;
   const onDraftChangeRef = useRef(onDraftChange);
   onDraftChangeRef.current = onDraftChange;
+  // Leaving the exercise (or the whole card) cancels a pending AI check so a
+  // slow response cannot arrive after the learner moved on.
+  const aiAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     onDraftChangeRef.current?.(answer.trim().length > 0);
@@ -68,6 +71,7 @@ export function TranslationExercise({
 
   useEffect(
     () => () => {
+      aiAbortRef.current?.abort();
       onDraftChangeRef.current?.(false);
     },
     [],
@@ -82,6 +86,8 @@ export function TranslationExercise({
       notify('Add your AI provider details in Settings to use feedback.', 'info');
       return;
     }
+    const abort = new AbortController();
+    aiAbortRef.current = abort;
     setChecking(true);
     setError(null);
     try {
@@ -90,9 +96,11 @@ export function TranslationExercise({
         source: sentence,
         answer,
         settings,
+        signal: abort.signal,
       });
       setFeedback({ answer, data: result });
     } catch (caught) {
+      if (isCancelledRequest(caught)) return;
       setError(
         caught instanceof Error
           ? caught.message

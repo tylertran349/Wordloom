@@ -315,8 +315,8 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                 {settings.showPartOfSpeech && word.partOfSpeech && (
                   <span className="chip">{word.partOfSpeech}</span>
                 )}
-                {(word.tags ?? []).map((tag) => (
-                  <span className="chip chip-quiet" key={tag}>
+                {(word.tags ?? []).map((tag, index) => (
+                  <span className="chip chip-quiet" key={`${tag}-${index}`}>
                     {tag}
                   </span>
                 ))}
@@ -668,7 +668,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                 <span className="tip-icon"><CircleDashed size={14} /></span>
                 <div>
                   <strong>Write before revealing</strong>
-                  <span>Attempt all five translations before checking Google.</span>
+                  <span>Attempt every translation before checking Google.</span>
                 </div>
               </li>
               <li>

@@ -102,7 +102,7 @@ export function Dashboard() {
         <PageHeader
           eyebrow={formatLongDate()}
           title={`Welcome to Wordloom, ${displayName}.`}
-          description="Your vocabulary studio is ready. Add words to src/data/vocabulary.ts to begin."
+          description="Your vocabulary studio is ready. Open a deck to add a word by hand, or import a list from Quizlet, a spreadsheet, or plain text."
         />
         <EmptyState
           icon={<BookOpen size={24} />}
@@ -293,8 +293,8 @@ export function Dashboard() {
               {settings.showPartOfSpeech && focusWord.partOfSpeech && (
                 <span className="chip">{focusWord.partOfSpeech}</span>
               )}
-              {(focusWord.tags ?? []).slice(0, 2).map((tag) => (
-                <span className="chip chip-quiet" key={tag}>
+              {(focusWord.tags ?? []).slice(0, 2).map((tag, index) => (
+                <span className="chip chip-quiet" key={`${tag}-${index}`}>
                   {tag}
                 </span>
               ))}

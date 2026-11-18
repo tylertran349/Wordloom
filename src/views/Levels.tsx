@@ -537,8 +537,8 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
                           {settings.showPartOfSpeech && word.partOfSpeech && (
                             <span>{word.partOfSpeech}</span>
                           )}
-                          {(word.tags ?? []).map((tag) => (
-                            <span key={tag}>{tag}</span>
+                          {(word.tags ?? []).map((tag, index) => (
+                            <span key={`${tag}-${index}`}>{tag}</span>
                           ))}
                           <span>
                             {exampleCount > 0

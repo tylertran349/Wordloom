@@ -619,13 +619,16 @@ function preserveCorruptValue(key: string, rawValue?: string): void {
   try {
     const raw = rawValue ?? window.localStorage.getItem(key);
     if (!raw) return;
+    // A fixed suffix keeps at most one debug snapshot per key, so a value that
+    // stays corrupt cannot grow storage on every load.
+    const snapshotKey = `${key}.corrupt`;
     if (!raw.includes('"responses"')) {
-      window.localStorage.setItem(`${key}.corrupt.${Date.now()}`, raw);
+      window.localStorage.setItem(snapshotKey, raw);
       return;
     }
     // Never carry typed translation answers into the debug snapshot.
     const cleaned = stripLegacyResponses(raw);
-    if (cleaned) window.localStorage.setItem(`${key}.corrupt.${Date.now()}`, cleaned);
+    if (cleaned) window.localStorage.setItem(snapshotKey, cleaned);
   } catch {
     // If storage itself is unavailable, there is nothing else to preserve.
   }
@@ -804,7 +807,8 @@ export function getStorageFootprint(settings: Settings, progress: ProgressState)
 
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
-  return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export const STORAGE_KEYS = { SETTINGS_KEY, PROGRESS_KEY };

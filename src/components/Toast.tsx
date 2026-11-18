@@ -7,7 +7,11 @@ export function ToastHost() {
   if (!toast) return null;
 
   return (
-    <div className={cn('toast', `toast-${toast.tone}`)} role="status" aria-live="polite">
+    <div
+      className={cn('toast', `toast-${toast.tone}`)}
+      role={toast.tone === 'error' ? 'alert' : 'status'}
+      aria-live={toast.tone === 'error' ? 'assertive' : 'polite'}
+    >
       <span className="toast-icon">
         {toast.tone === 'success' && <CheckCircle2 size={17} aria-hidden="true" />}
         {toast.tone === 'error' && <AlertCircle size={17} aria-hidden="true" />}

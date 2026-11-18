@@ -102,8 +102,14 @@ async function postJson(
   headers: Record<string, string>,
   body: unknown,
   timeoutMs = 60_000,
+  signal?: AbortSignal,
 ): Promise<unknown> {
+  if (signal?.aborted) throw createCancelledError();
   const controller = new AbortController();
+  // The caller's signal (component unmounted or exercise changed) and the
+  // fixed timeout both cancel the same underlying fetch.
+  const onExternalAbort = () => controller.abort();
+  signal?.addEventListener('abort', onExternalAbort, { once: true });
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(url, {
@@ -130,13 +136,26 @@ async function postJson(
     }
     return data;
   } catch (error) {
+    if (signal?.aborted) throw createCancelledError();
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error('The AI request timed out. Try a smaller/faster model or a higher thinking budget.');
     }
     throw error;
   } finally {
     window.clearTimeout(timer);
+    signal?.removeEventListener('abort', onExternalAbort);
   }
+}
+
+/** Marker error for requests the caller cancelled; hooks swallow these. */
+function createCancelledError(): Error {
+  const error = new Error('The AI request was cancelled.');
+  error.name = 'CancelledError';
+  return error;
+}
+
+export function isCancelledRequest(error: unknown): boolean {
+  return error instanceof Error && error.name === 'CancelledError';
 }
 
 function extractGeminiText(data: unknown): string {
@@ -174,6 +193,7 @@ async function callGemini(
   user: string,
   settings: Settings,
   maxOutputTokens: number,
+  signal?: AbortSignal,
 ): Promise<string> {
   const key = settings.geminiApiKey.trim();
   const model = settings.geminiModel.trim();
@@ -212,10 +232,11 @@ async function callGemini(
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      data = await postJson(url, headers, buildBody(includeThinking));
+      data = await postJson(url, headers, buildBody(includeThinking), 60_000, signal);
       lastError = undefined;
       break;
     } catch (error) {
+      if (isCancelledRequest(error)) throw error;
       lastError =
         error instanceof Error ? error : new Error('The Gemini request failed.');
       const message = lastError.message;
@@ -268,6 +289,7 @@ async function callOpenAiCompatible(
   user: string,
   settings: Settings,
   maxOutputTokens: number,
+  signal?: AbortSignal,
 ): Promise<string> {
   const base = settings.openaiBaseUrl.trim().replace(/\/+$/, '') || 'https://api.openai.com/v1';
   const model = settings.openaiModel.trim();
@@ -303,10 +325,11 @@ async function callOpenAiCompatible(
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      data = await postJson(url, headers, body);
+      data = await postJson(url, headers, body, 60_000, signal);
       lastError = undefined;
       break;
     } catch (error) {
+      if (isCancelledRequest(error)) throw error;
       lastError = error instanceof Error ? error : new Error('The API request failed.');
       const message = lastError.message;
       let adjusted = false;
@@ -347,11 +370,12 @@ async function requestText(
   user: string,
   settings: Settings,
   maxOutputTokens = 1600,
+  signal?: AbortSignal,
 ): Promise<string> {
   if (settings.aiProvider === 'gemini') {
-    return callGemini(system, user, settings, maxOutputTokens);
+    return callGemini(system, user, settings, maxOutputTokens, signal);
   }
-  return callOpenAiCompatible(system, user, settings, maxOutputTokens);
+  return callOpenAiCompatible(system, user, settings, maxOutputTokens, signal);
 }
 
 function extractJson(raw: string): unknown {
@@ -383,6 +407,8 @@ export interface ExerciseGenerationInput {
   settings: Settings;
   /** Restrict the request to a single content type. Defaults to both. */
   only?: 'examples' | 'sentences';
+  /** Cancels the request when the caller goes away. */
+  signal?: AbortSignal;
 }
 
 export interface GeneratedExercises {
@@ -394,6 +420,8 @@ export interface ExampleGenerationInput {
   word: VocabWord;
   count?: number;
   settings: Settings;
+  /** Cancels the request when the caller goes away. */
+  signal?: AbortSignal;
 }
 
 /** Generate example sentences only — no practice exercises are requested. */
@@ -401,6 +429,7 @@ export async function generateExamples({
   word,
   count = 2,
   settings,
+  signal,
 }: ExampleGenerationInput): Promise<ExampleSentence[]> {
   const result = await generateExercises({
     word,
@@ -408,6 +437,7 @@ export async function generateExamples({
     exampleCount: count,
     settings,
     only: 'examples',
+    signal,
   });
   return result.examples;
 }
@@ -417,12 +447,14 @@ export async function generatePracticeSentences({
   word,
   count,
   settings,
+  signal,
 }: {
   word: VocabWord;
   count: number;
   settings: Settings;
+  signal?: AbortSignal;
 }): Promise<string[]> {
-  const result = await generateExercises({ word, count, settings, only: 'sentences' });
+  const result = await generateExercises({ word, count, settings, only: 'sentences', signal });
   return result.sentences;
 }
 
@@ -437,6 +469,7 @@ export async function generateExercises({
   exampleCount = 2,
   settings,
   only,
+  signal,
 }: ExerciseGenerationInput): Promise<GeneratedExercises> {
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
@@ -454,7 +487,7 @@ export async function generateExercises({
     wantSentences,
   });
 
-  const raw = await requestText(system, user, settings, 3500);
+  const raw = await requestText(system, user, settings, 3500, signal);
   const parsed = extractJson(raw);
   const record = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null;
 
@@ -558,6 +591,8 @@ export interface TranslationFeedbackInput {
   source: string;
   answer: string;
   settings: Settings;
+  /** Cancels the request when the caller goes away. */
+  signal?: AbortSignal;
 }
 
 export async function evaluateTranslation({
@@ -565,6 +600,7 @@ export async function evaluateTranslation({
   source,
   answer,
   settings,
+  signal,
 }: TranslationFeedbackInput): Promise<AiFeedback> {
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
@@ -580,7 +616,7 @@ Respond in ${native.label} with this exact JSON shape:
 {"verdict":"great"|"close"|"needs-work","feedback":"1–2 short sentences of specific feedback","suggestion":"a natural ${target.label} translation, or an empty string if the learner's version is already natural"}
 Use "great" for accurate and natural, "close" for understandable with small errors, "needs-work" for meaning or major grammar problems.`;
 
-  const raw = await requestText(system, user, settings, 1200);
+  const raw = await requestText(system, user, settings, 1200, signal);
   const parsed = extractJson(raw);
   if (parsed && typeof parsed === 'object') {
     const record = parsed as Record<string, unknown>;

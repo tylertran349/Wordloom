@@ -1,7 +1,12 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { VocabWord } from '../types';
-import { generateExamples, generatePracticeSentences, hasAiCredentials } from '../lib/ai';
+import {
+  generateExamples,
+  generatePracticeSentences,
+  hasAiCredentials,
+  isCancelledRequest,
+} from '../lib/ai';
 import { pluralize } from '../lib/utils';
 
 const EXAMPLE_COUNT = 2;
@@ -27,6 +32,18 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
   const [generatingSentences, setGeneratingSentences] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pending = useRef({ examples: false, sentences: false });
+  // Navigating away cancels in-flight requests so a slow response can neither
+  // write into progress for a word the learner left nor raise a stale toast.
+  const examplesAbort = useRef<AbortController | null>(null);
+  const sentencesAbort = useRef<AbortController | null>(null);
+
+  useEffect(
+    () => () => {
+      examplesAbort.current?.abort();
+      sentencesAbort.current?.abort();
+    },
+    [],
+  );
 
   const wordId = word?.id;
   const canGenerate = settings.aiExercises && hasAiCredentials(settings);
@@ -35,6 +52,8 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
 
   const generateExamplesFn = useCallback(async () => {
     if (!word || !canGenerate || pending.current.examples) return;
+    const abort = new AbortController();
+    examplesAbort.current = abort;
     pending.current.examples = true;
     setGeneratingExamples(true);
     setError(null);
@@ -43,6 +62,7 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
         word,
         count: EXAMPLE_COUNT,
         settings,
+        signal: abort.signal,
       });
       const known = new Set(existingExamples.map((example) => example.target.trim().toLowerCase()));
       const fresh = generated.filter((example) => {
@@ -58,6 +78,7 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
         notify(`Added ${fresh.length} example ${pluralize(fresh.length, 'sentence')}.`);
       }
     } catch (requestError) {
+      if (isCancelledRequest(requestError)) return;
       setError(
         requestError instanceof Error
           ? requestError.message
@@ -71,6 +92,8 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
 
   const generateSentencesFn = useCallback(async () => {
     if (!word || !canGenerate || pending.current.sentences) return;
+    const abort = new AbortController();
+    sentencesAbort.current = abort;
     pending.current.sentences = true;
     setGeneratingSentences(true);
     setError(null);
@@ -79,6 +102,7 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
         word,
         count: Math.max(3, settings.exercisesPerWord),
         settings,
+        signal: abort.signal,
       });
       const fresh = generated.filter((sentence) => !existingSentences.includes(sentence));
       if (fresh.length === 0) {
@@ -88,6 +112,7 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
         notify(`Added ${fresh.length} practice ${pluralize(fresh.length, 'sentence')}.`);
       }
     } catch (requestError) {
+      if (isCancelledRequest(requestError)) return;
       setError(
         requestError instanceof Error
           ? requestError.message

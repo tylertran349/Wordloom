@@ -60,6 +60,11 @@ export function WordEditor({
     const previousRootOverflow = root.style.overflow;
     document.body.style.overflow = 'hidden';
     root.style.overflow = 'hidden';
+    // Hide the app shell from assistive tech while the modal is open, matching
+    // the aria-modal state for screen readers.
+    const appRoot = document.getElementById('root');
+    const previousAppInert = appRoot?.inert ?? false;
+    if (appRoot) appRoot.inert = true;
     firstFieldRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -97,6 +102,7 @@ export function WordEditor({
       window.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = previousBodyOverflow;
       root.style.overflow = previousRootOverflow;
+      if (appRoot) appRoot.inert = previousAppInert;
       previouslyFocused?.focus({ preventScroll: true });
     };
   }, []);

@@ -187,7 +187,12 @@ export function Import({ initialLevel }: { initialLevel?: CEFRLevel }) {
                   event.preventDefault();
                   setDragging(true);
                 }}
-                onDragLeave={() => setDragging(false)}
+                onDragLeave={(event) => {
+                  // Child elements fire dragleave as the pointer crosses them;
+                  // only clear the highlight when the drag leaves the zone.
+                  if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+                  setDragging(false);
+                }}
                 onDrop={onDrop}
                 onClick={() => fileInputRef.current?.click()}
                 role="button"
@@ -210,18 +215,18 @@ export function Import({ initialLevel }: { initialLevel?: CEFRLevel }) {
                 <span className="button button-ghost button-small">
                   Choose file
                 </span>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv,.tsv,.txt,.json,text/csv,text/tab-separated-values,text/plain,application/json"
-                  className="sr-only"
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={(event) => {
-                    void readFile(event.target.files?.[0]);
-                    event.target.value = '';
-                  }}
-                />
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.tsv,.txt,.json,text/csv,text/tab-separated-values,text/plain,application/json"
+                className="sr-only"
+                aria-label="Choose a word list file"
+                onChange={(event) => {
+                  void readFile(event.target.files?.[0]);
+                  event.target.value = '';
+                }}
+              />
 
               <label className="import-source-label" htmlFor="import-text">
                 Or paste your list
@@ -350,8 +355,8 @@ export function Import({ initialLevel }: { initialLevel?: CEFRLevel }) {
                               </strong>
                               {(entry.tags ?? []).length > 0 && (
                                 <span className="import-row-tags">
-                                  {entry.tags.slice(0, 3).map((tag) => (
-                                    <span key={tag}>{tag}</span>
+                                  {entry.tags.slice(0, 3).map((tag, index) => (
+                                    <span key={`${tag}-${index}`}>{tag}</span>
                                   ))}
                                 </span>
                               )}
@@ -549,8 +554,8 @@ export function Import({ initialLevel }: { initialLevel?: CEFRLevel }) {
                       </AppLink>
                       <div className="imported-meta">
                         {word.partOfSpeech && <span>{word.partOfSpeech}</span>}
-                        {(word.tags ?? []).slice(0, 4).map((tag) => (
-                          <span key={tag}>{tag}</span>
+                        {(word.tags ?? []).slice(0, 4).map((tag, index) => (
+                          <span key={`${tag}-${index}`}>{tag}</span>
                         ))}
                         <span>
                           {word.source ? `${word.source} · ` : ''}

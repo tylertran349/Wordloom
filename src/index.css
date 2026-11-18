@@ -856,6 +856,10 @@ kbd {
   background: var(--danger);
   color: #fff;
 }
+/* In dark theme --danger is a light salmon, so keep the label readable. */
+html[data-theme='dark'] .button-danger-solid {
+  color: var(--danger-soft);
+}
 .button-small {
   padding: 0.4rem 0.68rem;
   font-size: 0.68rem;
@@ -5431,6 +5435,10 @@ html[data-theme='dark'] .storage-badge.is-warn {
   background: var(--danger);
   color: #fff;
 }
+/* In dark theme --danger is a light salmon, so keep the label readable. */
+html[data-theme='dark'] .toast-error {
+  color: var(--danger-soft);
+}
 .toast-info {
   border: 1px solid var(--line);
   background: var(--surface);
@@ -6293,6 +6301,12 @@ html.reduce-motion *::after {
 
 /* Touch devices should not keep a hover lift stuck after a tap. */
 @media (hover: none), (pointer: coarse) {
+  /* Keep the card-jump input at 16px so iOS Safari does not zoom the
+     viewport when it is focused, and give it a comfortable touch size. */
+  .word-pager-input {
+    width: 3rem;
+    font-size: 1rem;
+  }
   .button:not(:disabled):hover,
   .level-card:hover,
   .grade-button:hover {

@@ -20,23 +20,58 @@ export function speechSupported(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
 
-function browserSpeak(text: string, lang: string, rate: number): boolean {
-  if (!speechSupported() || !text.trim()) return false;
+// Chrome and Edge populate the voice list asynchronously; a warm-up call plus
+// one listener makes voices available on the very first playback instead of
+// falling back to the default (often wrong-language) voice.
+if (speechSupported()) {
   try {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = Math.min(MAX_RATE, Math.max(MIN_RATE, rate));
-    const prefix = lang.split('-')[0].toLowerCase();
-    const voice = window.speechSynthesis
-      .getVoices()
-      .find((candidate) => candidate.lang.toLowerCase().replace('_', '-').startsWith(prefix));
-    if (voice) utterance.voice = voice;
-    window.speechSynthesis.speak(utterance);
-    return true;
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', () => {}, { once: true });
   } catch {
-    return false;
+    // Voice warm-up is best-effort.
   }
+}
+
+function browserSpeak(text: string, lang: string, rate: number): Promise<boolean> {
+  if (!speechSupported() || !text.trim()) return Promise.resolve(false);
+  return new Promise<boolean>((resolve) => {
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      utterance.rate = Math.min(MAX_RATE, Math.max(MIN_RATE, rate));
+      const prefix = lang.split('-')[0].toLowerCase();
+      const voice = window.speechSynthesis
+        .getVoices()
+        .find((candidate) => candidate.lang.toLowerCase().replace('_', '-').startsWith(prefix));
+      if (voice) utterance.voice = voice;
+
+      let settled = false;
+      const settle = (ok: boolean) => {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      };
+      // Resolve when speech actually starts, or report the failure instead of
+      // always claiming success.
+      utterance.onstart = () => settle(true);
+      utterance.onerror = (event) => {
+        // Deliberate cancellation (a new playback or cancelSpeech) is not a
+        // failure for the caller that started it.
+        if (event.error === 'canceled' || event.error === 'interrupted') {
+          settle(true);
+          return;
+        }
+        settle(false);
+      };
+      // A few engines never fire onstart (for example with no matching voice
+      // installed); assume the queue accepted it after a short wait.
+      window.setTimeout(() => settle(true), 400);
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      resolve(false);
+    }
+  });
 }
 
 /** Stops any speech that is currently playing, from either provider. */
@@ -127,6 +162,23 @@ function playChunk(
     let settled = false;
     let started = false;
     let timer: number | undefined;
+    let stallTimer: number | undefined;
+
+    // After playback starts, a chunk that stops making progress (network stall
+    // mid-stream) would otherwise hang the queue forever: neither `error` nor
+    // `ended` fires. Reset the watchdog on every progress event.
+    const STALL_TIMEOUT_MS = 12_000;
+    const clearStall = () => {
+      if (stallTimer) window.clearTimeout(stallTimer);
+      stallTimer = undefined;
+    };
+    const resetStall = () => {
+      clearStall();
+      stallTimer = window.setTimeout(
+        () => fail(new Error('Google Translate audio stalled.')),
+        STALL_TIMEOUT_MS,
+      );
+    };
 
     const clearTimer = () => {
       if (timer) window.clearTimeout(timer);
@@ -135,6 +187,7 @@ function playChunk(
 
     const cleanup = () => {
       clearTimer();
+      clearStall();
       if (activeAudio === audio) activeAudio = null;
       if (activeFinish === finish) activeFinish = null;
     };
@@ -163,8 +216,10 @@ function playChunk(
     const markStarted = () => {
       if (started) return;
       started = true;
-      // The timeout only guards loading; playback can take longer than 10s.
+      // The load timeout only guards loading; playback can take longer than
+      // 10s, so switch to the progress watchdog instead.
       clearTimer();
+      resetStall();
       onStarted?.();
     };
 
@@ -180,6 +235,7 @@ function playChunk(
     activeAudio = audio;
     activeFinish = finish;
     audio.addEventListener('playing', markStarted, { once: true });
+    audio.addEventListener('timeupdate', resetStall);
     audio.addEventListener('ended', finish, { once: true });
     audio.addEventListener(
       'error',
@@ -276,7 +332,9 @@ export async function speakText(
       }
       // If sound already started, don't restart the whole sentence in another
       // voice just because a later chunk failed.
-      if (!reported) reportStarted(browserSpeak(clean, lang, rate));
+      if (!reported) {
+        void browserSpeak(clean, lang, rate).then((ok) => reportStarted(ok));
+      }
     }
   })();
 
