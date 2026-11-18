@@ -201,17 +201,20 @@ step, session limit) are editable in Settings.
 
 ## Google Sheets sync
 
-Wordloom saves everything in your browser first. Google Sheets is an optional backup that lives in a
-spreadsheet you own. Signing in with Google confirms your account, then you pick an existing
-spreadsheet or create a new one. Existing Wordloom tabs and progress are kept, and other tabs in the
-sheet are never touched.
+Wordloom saves everything in your browser first, which also acts as a fallback when Google is
+unavailable. Google Sheets is an optional sync target that lives in a spreadsheet you own. Once a
+sheet is linked, it is the source of truth for the website: Wordloom loads the sheet's copy into
+this browser and saves your changes back to it. Signing in with Google confirms your account, then
+you pick an existing spreadsheet or create a new one. Existing Wordloom tabs and progress are kept,
+and other tabs in the sheet are never touched.
 
 ### Turn sync on
 
 1. Open **Settings → Google Sheets**.
 2. Press **Sign in with Google**.
 3. On Google's page, approve access, then pick a spreadsheet or create a new one.
-4. Wordloom returns to Settings and, if the sheet already has progress, asks which copy to keep.
+4. Wordloom returns to Settings and, if the sheet already has progress, loads that copy into this
+   browser.
 
 There is no password, no Google Cloud project, and no spreadsheet URL to copy. Signing in on another
 device with the same Google account reconnects to the same spreadsheet.
@@ -221,8 +224,9 @@ device with the same Google account reconnects to the same spreadsheet.
 - Picking a sheet that already has Wordloom tabs keeps every tab and row. If the data belongs to an
   older email, Wordloom offers to move that progress to your Google account before connecting.
 - Other tabs in the spreadsheet are left alone.
-- Nothing is overwritten silently. When both sides have data, Wordloom shows **Use the sheet
-  version** and **Use this browser's version**.
+- The linked sheet wins when both sides have data: Wordloom loads the sheet's copy and replaces the
+  browser's local data. Your changes are still saved in this browser and uploaded to the sheet as
+  you study, so local storage remains a fallback if Google is unreachable.
 - **Import from the old shared sheet** in Settings copies progress saved under an email in the old
   shared spreadsheet into your own sheet. Enter the email you used there.
 
@@ -230,9 +234,7 @@ device with the same Google account reconnects to the same spreadsheet.
 
 | Button | What it does |
 | --- | --- |
-| **Sync now** | Compares this browser and the sheet and saves the newer copy. |
-| **Use the sheet version** | Replaces this browser's progress with the copy in the sheet. |
-| **Use this browser's version** | Replaces your sheet's rows with this browser's progress. |
+| **Sync now** | Loads the sheet's copy into this browser, or uploads local changes when the sheet is up to date. |
 | **Change** | Opens Google to pick or create another spreadsheet. |
 | **Log out** | Removes the connection from this browser. Your local data stays. The sheet remains shared with the site owner; remove that share in Google Drive if you want to revoke it. |
 
@@ -256,7 +258,7 @@ device with the same Google account reconnects to the same spreadsheet.
 | Problem | What to do |
 | --- | --- |
 | **"Google Sheets sync needs a one-time update"** | The site owner needs to update the Apps Script bridge. See **For the site owner** below. |
-| **"Which copy should Wordloom keep?"** | Choose **Use the sheet version** for a new device or to keep the sheet. Choose **Use this browser's version** if you studied here and the sheet is out of date. |
+| **Local progress was replaced after connecting** | A linked sheet is the source of truth, so its copy is loaded here. Restore an older local copy from a backup if you need it. |
 | **"This spreadsheet already has Wordloom data for another account"** | Confirm the move when Google returns you to Wordloom, or pick a different sheet. |
 | **I signed in with the wrong Google account** | Press **Log out**, then sign in again. |
 | **Sync keeps failing** | Check your internet connection and any ad blocker, then press **Sync now**. Your local data is safe. |

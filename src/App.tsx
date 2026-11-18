@@ -85,9 +85,7 @@ function App() {
               {sheetSync.email
                 ? sheetPhase === 'error'
                   ? 'sync issue — check Settings'
-                  : sheetPhase === 'needs-decision'
-                    ? 'choose a sync copy'
-                    : sheetPhase === 'disconnected'
+                  : sheetPhase === 'disconnected'
                       ? 'sync not set up'
                       : sheetPhase === 'unsaved' || sheetPhase === 'syncing'
                         ? 'syncing…'

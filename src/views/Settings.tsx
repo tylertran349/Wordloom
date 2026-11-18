@@ -217,9 +217,6 @@ export function Settings() {
     signInSheet,
     signOutSheet,
     syncSheet,
-    pullSheet,
-    pushSheet,
-    resolveSheetConflict,
   } = useApp();
   const [tab, setTab] = useState<Tab>(() => (consumeSheetTabRequest() ? 'sheets' : 'general'));
   const [showGeminiKey, setShowGeminiKey] = useState(false);
@@ -237,9 +234,7 @@ export function Settings() {
   const [confirmReset, setConfirmReset] = useState<'progress' | 'settings' | 'all' | null>(null);
   const [sheetEmailInput, setSheetEmailInput] = useState('');
   const [legacyEmailInput, setLegacyEmailInput] = useState('');
-  const [sheetConfirm, setSheetConfirm] = useState<
-    'pull' | 'push' | 'legacy-import' | 'conflict-push' | null
-  >(null);
+  const [sheetConfirm, setSheetConfirm] = useState<'legacy-import' | null>(null);
   const [importBusy, setImportBusy] = useState(false);
   const [sheetMessage, setSheetMessage] = useState<{
     tone: 'success' | 'error' | 'info';
@@ -295,15 +290,13 @@ export function Settings() {
       ? 'Syncing…'
       : sheetPhase === 'unsaved'
         ? 'Saving…'
-        : sheetPhase === 'needs-decision'
-          ? 'Choose a copy'
-          : sheetPhase === 'error'
-            ? 'Needs attention'
-            : sheetPhase === 'idle'
-              ? 'Up to date'
-              : sheetPhase === 'disconnected'
-                ? 'Sync not set up'
-                : 'Local only';
+        : sheetPhase === 'error'
+          ? 'Needs attention'
+          : sheetPhase === 'idle'
+            ? 'Up to date'
+            : sheetPhase === 'disconnected'
+              ? 'Sync not set up'
+              : 'Local only';
 
   useEffect(() => {
     clearSheetTabRequest();
@@ -413,41 +406,13 @@ export function Settings() {
     showSheetResult(result);
   }
 
-  function handleSheetPull() {
-    setSheetConfirm('pull');
-  }
-
-  function handleSheetPush() {
-    setSheetConfirm('push');
-  }
-
   async function runSheetConfirm() {
-    const action = sheetConfirm;
-    if (!action) return;
+    if (sheetConfirm !== 'legacy-import') return;
     setSheetConfirm(null);
     setSheetMessage(null);
-
-    if (action === 'legacy-import') {
-      setImportBusy(true);
-      const result = await importLegacySheet(legacyEmailInput);
-      setImportBusy(false);
-      showSheetResult(result);
-      return;
-    }
-    if (action === 'conflict-push') {
-      showSheetResult(await resolveSheetConflict('push'));
-      return;
-    }
-    showSheetResult(action === 'pull' ? await pullSheet(true) : await pushSheet(true));
-  }
-
-  async function handleSheetDecision(choice: 'pull' | 'push') {
-    if (choice === 'push') {
-      setSheetConfirm('conflict-push');
-      return;
-    }
-    setSheetMessage(null);
-    const result = await resolveSheetConflict(choice);
+    setImportBusy(true);
+    const result = await importLegacySheet(legacyEmailInput);
+    setImportBusy(false);
     showSheetResult(result);
   }
 
@@ -544,9 +509,7 @@ export function Settings() {
                       ? 'Syncing…'
                       : sheetPhase === 'unsaved'
                         ? 'Saving…'
-                        : sheetPhase === 'needs-decision'
-                          ? 'Choose a copy'
-                          : 'Backed up'
+                        : 'Backed up'
                 : 'Saved locally'}
             </span>
             {sheetSync.email && (
@@ -1519,7 +1482,7 @@ export function Settings() {
             <>
               <Section
                 title="Sync with Google Sheets"
-                description="Wordloom saves everything in this browser first. Sign in with Google to keep your progress in a spreadsheet you own, and pick it up on another device. Sync is optional."
+                description="Wordloom saves everything in this browser first, as a fallback when Google is unavailable. Once you link a Google Sheet, the sheet is the source of truth: Wordloom loads its copy here and saves your changes back to it. Sync is optional."
               >
                 {sheetSync.connection?.kind === 'sheet' ? (
                   <>
@@ -1545,8 +1508,7 @@ export function Settings() {
                           'storage-badge',
                           (sheetPhase === 'error' || sheetPhase === 'disconnected') &&
                             'is-error',
-                          (sheetPhase === 'needs-decision' || sheetPhase === 'unsaved') &&
-                            'is-warn',
+                          sheetPhase === 'unsaved' && 'is-warn',
                         )}
                       >
                         {sheetPhaseLabel}
@@ -1555,69 +1517,19 @@ export function Settings() {
 
                     <p className="sheet-autosave">
                       <RefreshCw size={12} aria-hidden="true" />
-                      {sheetSync.pendingDecision
-                        ? 'Choose which copy to keep below.'
-                        : sheetBusy
-                          ? 'Syncing with Google Sheets...'
-                          : sheetSync.lastError
-                            ? 'The last sync failed. Your local data is safe - try again below.'
-                            : sheetSync.dirty
-                              ? 'Saving to Google Sheets in a few seconds...'
-                              : 'Up to date. Changes save automatically a few seconds after you stop.'}
+                      {sheetBusy
+                        ? 'Syncing with Google Sheets...'
+                        : sheetSync.lastError
+                          ? 'The last sync failed. Your local data is safe - try again below.'
+                          : sheetSync.dirty
+                            ? 'Saving to Google Sheets in a few seconds...'
+                            : 'Up to date. Changes save automatically a few seconds after you stop.'}
                     </p>
 
-                    {sheetSync.lastError && !sheetMessage && !sheetSync.pendingDecision && (
+                    {sheetSync.lastError && !sheetMessage && (
                       <div className="inline-alert is-error" role="alert">
                         <AlertCircle size={15} aria-hidden="true" />
                         <span>{sheetSync.lastError}</span>
-                      </div>
-                    )}
-
-                    {sheetSync.pendingDecision && (
-                      <div className="sheet-decision">
-                        <div>
-                          <strong>Which copy should Wordloom keep?</strong>
-                          <p>
-                            This browser has {Object.keys(progress.cards).length}{' '}
-                            {pluralize(Object.keys(progress.cards).length, 'card')}. The sheet
-                            has{' '}
-                            {sheetSync.remoteSummary
-                              ? `${sheetSync.remoteSummary.cards} cards · ${sheetSync.remoteSummary.reviews} reviews`
-                              : 'saved data'}
-                            {sheetSync.lastRemoteUpdatedAt > 0
-                              ? ` (last saved ${formatShortDate(
-                                  sheetSync.lastRemoteUpdatedAt,
-                                )} at ${formatTime(sheetSync.lastRemoteUpdatedAt)})`
-                              : ''}
-                            .
-                          </p>
-                          <p>
-                            Choose <strong>Use the sheet version</strong> when you are setting up
-                            a new device or want the copy in the sheet. Choose{' '}
-                            <strong>Use this browser's version</strong> if you have been studying
-                            here and the sheet is out of date.
-                          </p>
-                        </div>
-                        <div className="sheet-decision-actions">
-                          <button
-                            type="button"
-                            className="button button-primary button-small"
-                            onClick={() => void handleSheetDecision('pull')}
-                            disabled={sheetBusy}
-                          >
-                            <Download size={14} aria-hidden="true" />
-                            Use the sheet version
-                          </button>
-                          <button
-                            type="button"
-                            className="button button-ghost button-small"
-                            onClick={() => void handleSheetDecision('push')}
-                            disabled={sheetBusy}
-                          >
-                            <Upload size={14} aria-hidden="true" />
-                            Use this browser's version
-                          </button>
-                        </div>
                       </div>
                     )}
 
@@ -1626,7 +1538,7 @@ export function Settings() {
                         type="button"
                         className="button button-primary button-small"
                         onClick={() => void handleSheetSyncNow()}
-                        disabled={sheetBusy || sheetSync.pendingDecision}
+                        disabled={sheetBusy}
                       >
                         {sheetBusy ? (
                           <Loader2 className="spin" size={14} aria-hidden="true" />
@@ -1651,36 +1563,6 @@ export function Settings() {
                     <details className="sheet-details">
                       <summary>More sync options</summary>
                       <div className="data-actions">
-                        <div className="data-action">
-                          <div>
-                            <strong>Use the sheet version</strong>
-                            <span>Replace this browser's progress with the copy in your sheet.</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="button button-ghost button-small"
-                            onClick={handleSheetPull}
-                            disabled={sheetBusy || sheetSync.pendingDecision}
-                          >
-                            <Download size={14} aria-hidden="true" />
-                            Replace
-                          </button>
-                        </div>
-                        <div className="data-action">
-                          <div>
-                            <strong>Use this browser's version</strong>
-                            <span>Replace your sheet's rows with this browser's progress.</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="button button-ghost button-small"
-                            onClick={handleSheetPush}
-                            disabled={sheetBusy || sheetSync.pendingDecision}
-                          >
-                            <Upload size={14} aria-hidden="true" />
-                            Replace
-                          </button>
-                        </div>
                         <div className="data-action">
                           <div>
                             <strong>Change spreadsheet</strong>
@@ -1711,7 +1593,7 @@ export function Settings() {
                             type="button"
                             className="button button-ghost button-small"
                             onClick={handleLegacyImport}
-                            disabled={sheetBusy || importBusy || sheetSync.pendingDecision}
+                            disabled={sheetBusy || importBusy}
                           >
                             <Download size={14} aria-hidden="true" />
                             {importBusy ? 'Importing...' : 'Import'}
@@ -1765,8 +1647,7 @@ export function Settings() {
                           'storage-badge',
                           (sheetPhase === 'error' || sheetPhase === 'disconnected') &&
                             'is-error',
-                          (sheetPhase === 'needs-decision' || sheetPhase === 'unsaved') &&
-                            'is-warn',
+                          sheetPhase === 'unsaved' && 'is-warn',
                         )}
                       >
                         {sheetPhaseLabel}
@@ -1775,58 +1656,19 @@ export function Settings() {
 
                     <p className="sheet-autosave">
                       <RefreshCw size={12} aria-hidden="true" />
-                      {sheetSync.pendingDecision
-                        ? 'Choose which copy to keep below.'
-                        : sheetBusy
-                          ? 'Syncing with Google Sheets...'
-                          : sheetSync.lastError
-                            ? 'The last sync failed. Your local data is safe - try again below.'
-                            : sheetSync.dirty
-                              ? 'Saving to Google Sheets in a few seconds...'
-                              : 'Up to date. Changes save automatically a few seconds after you stop.'}
+                      {sheetBusy
+                        ? 'Syncing with Google Sheets...'
+                        : sheetSync.lastError
+                          ? 'The last sync failed. Your local data is safe - try again below.'
+                          : sheetSync.dirty
+                            ? 'Saving to Google Sheets in a few seconds...'
+                            : 'Up to date. Changes save automatically a few seconds after you stop.'}
                     </p>
 
-                    {sheetSync.lastError && !sheetMessage && !sheetSync.pendingDecision && (
+                    {sheetSync.lastError && !sheetMessage && (
                       <div className="inline-alert is-error" role="alert">
                         <AlertCircle size={15} aria-hidden="true" />
                         <span>{sheetSync.lastError}</span>
-                      </div>
-                    )}
-
-                    {sheetSync.pendingDecision && (
-                      <div className="sheet-decision">
-                        <div>
-                          <strong>Which copy should Wordloom keep?</strong>
-                          <p>
-                            This browser has {Object.keys(progress.cards).length}{' '}
-                            {pluralize(Object.keys(progress.cards).length, 'card')}. The sheet
-                            has{' '}
-                            {sheetSync.remoteSummary
-                              ? `${sheetSync.remoteSummary.cards} cards · ${sheetSync.remoteSummary.reviews} reviews`
-                              : 'saved data'}
-                            .
-                          </p>
-                        </div>
-                        <div className="sheet-decision-actions">
-                          <button
-                            type="button"
-                            className="button button-primary button-small"
-                            onClick={() => void handleSheetDecision('pull')}
-                            disabled={sheetBusy}
-                          >
-                            <Download size={14} aria-hidden="true" />
-                            Use the sheet version
-                          </button>
-                          <button
-                            type="button"
-                            className="button button-ghost button-small"
-                            onClick={() => void handleSheetDecision('push')}
-                            disabled={sheetBusy}
-                          >
-                            <Upload size={14} aria-hidden="true" />
-                            Use this browser's version
-                          </button>
-                        </div>
                       </div>
                     )}
 
@@ -1835,7 +1677,7 @@ export function Settings() {
                         type="button"
                         className="button button-primary button-small"
                         onClick={() => void handleSheetSyncNow()}
-                        disabled={sheetBusy || sheetSync.pendingDecision}
+                        disabled={sheetBusy}
                       >
                         {sheetBusy ? (
                           <Loader2 className="spin" size={14} aria-hidden="true" />
@@ -1877,42 +1719,6 @@ export function Settings() {
                         Sign in with Google
                       </button>
                     </div>
-
-                    <details className="sheet-details">
-                      <summary>More sync options</summary>
-                      <div className="data-actions">
-                        <div className="data-action">
-                          <div>
-                            <strong>Use the sheet version</strong>
-                            <span>Replace this browser's progress with the copy in the sheet.</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="button button-ghost button-small"
-                            onClick={handleSheetPull}
-                            disabled={sheetBusy || sheetSync.pendingDecision}
-                          >
-                            <Download size={14} aria-hidden="true" />
-                            Replace
-                          </button>
-                        </div>
-                        <div className="data-action">
-                          <div>
-                            <strong>Use this browser's version</strong>
-                            <span>Replace this email's rows with this browser's progress.</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="button button-ghost button-small"
-                            onClick={handleSheetPush}
-                            disabled={sheetBusy || sheetSync.pendingDecision}
-                          >
-                            <Upload size={14} aria-hidden="true" />
-                            Replace
-                          </button>
-                        </div>
-                      </div>
-                    </details>
 
                     <button
                       type="button"
@@ -1976,8 +1782,8 @@ export function Settings() {
                       <Check size={15} aria-hidden="true" />
                       <span>
                         <strong>Your progress is already safe in this browser.</strong> Sync is
-                        optional. If the sheet already has data, Wordloom asks before replacing
-                        anything.
+                        optional. Once a sheet is linked, its copy is the source of truth and
+                        replaces this browser's local data.
                       </span>
                     </div>
 
@@ -2046,7 +1852,7 @@ export function Settings() {
                   </>
                 )}
 
-                {sheetMessage && (!sheetSync.pendingDecision || sheetMessage.tone === 'error') && (
+                {sheetMessage && (
                   <div
                     className={cn(
                       'inline-alert',
@@ -2312,53 +2118,19 @@ export function Settings() {
         </div>
       </div>
 
-      {sheetConfirm && (
+      {sheetConfirm === 'legacy-import' && (
         <ConfirmDialog
-          title={
-            sheetConfirm === 'pull'
-              ? 'Replace this browser’s data with the sheet version?'
-              : sheetConfirm === 'legacy-import'
-                ? 'Import the old progress into your Google Sheet?'
-                : sheetConfirm === 'conflict-push'
-                  ? 'Replace the sheet with this browser’s version?'
-                  : 'Replace your Google Sheet with this browser’s data?'
-          }
+          title="Import the old progress into your Google Sheet?"
           description={
-            sheetConfirm === 'pull' ? (
-              <p>
-                This browser’s progress and saved settings will be replaced by the copy in{' '}
-                {sheetTargetLabel}. The sheet itself is not changed.
-              </p>
-            ) : sheetConfirm === 'legacy-import' ? (
-              <p>
-                Wordloom will copy the progress saved for{' '}
-                {(legacyEmailInput || sheetSync.email).trim() || 'that email'} in the old shared
-                sheet into {sheetTargetLabel}, then replace this browser’s data. The old shared
-                sheet is not changed.
-              </p>
-            ) : (
-              <p>
-                The rows for {sheetSync.email || 'this account'} in {sheetTargetLabel} will be
-                overwritten with this browser’s progress and saved settings. Any progress saved
-                there from another device will be lost. The spreadsheet and its other tabs are
-                kept.
-              </p>
-            )
+            <p>
+              Wordloom will copy the progress saved for{' '}
+              {(legacyEmailInput || sheetSync.email).trim() || 'that email'} in the old shared
+              sheet into {sheetTargetLabel}, then replace this browser’s data. The old shared
+              sheet is not changed.
+            </p>
           }
-          confirmLabel={
-            sheetConfirm === 'pull'
-              ? 'Use the sheet version'
-              : sheetConfirm === 'legacy-import'
-                ? 'Import into my sheet'
-                : 'Replace the sheet'
-          }
-          cancelLabel={
-            sheetConfirm === 'pull'
-              ? 'Keep this browser’s data'
-              : sheetConfirm === 'legacy-import'
-                ? 'Cancel'
-                : 'Keep the sheet'
-          }
+          confirmLabel="Import into my sheet"
+          cancelLabel="Cancel"
           onCancel={() => setSheetConfirm(null)}
           onConfirm={() => void runSheetConfirm()}
         />

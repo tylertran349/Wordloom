@@ -58,11 +58,8 @@ export interface SheetSyncState {
   lastError: string | null;
   /** Local changes exist that have not reached the sheet yet. */
   dirty: boolean;
-  /** Local edit time, used to settle a simultaneous-edit conflict. */
+  /** Local edit time, used to keep autosave in order. */
   localChangedAt: number;
-  /** Local and sheet both had data when the connection was made. */
-  pendingDecision: boolean;
-  remoteSummary: SheetSummary | null;
 }
 
 export interface SheetSummary {
@@ -196,8 +193,6 @@ function defaultSheetSync(): SheetSyncState {
     lastError: null,
     dirty: false,
     localChangedAt: 0,
-    pendingDecision: false,
-    remoteSummary: null,
   };
 }
 
@@ -261,9 +256,6 @@ export function loadSheetSync(): SheetSyncState {
       lastError: email && typeof source.lastError === 'string' ? source.lastError : null,
       dirty: Boolean(email) && source.dirty === true,
       localChangedAt: email ? numberOr(source.localChangedAt, 0) : 0,
-      pendingDecision: Boolean(email) && source.pendingDecision === true,
-      remoteSummary:
-        email && isSummary(source.remoteSummary) ? source.remoteSummary : null,
     };
   } catch {
     return base;
@@ -281,12 +273,6 @@ export function saveSheetSync(state: SheetSyncState): void {
 function numberOr(value: unknown, fallback: number): number {
   const numeric = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(numeric) ? numeric : fallback;
-}
-
-function isSummary(value: unknown): value is SheetSummary {
-  if (!value || typeof value !== 'object') return false;
-  const entry = value as Record<string, unknown>;
-  return typeof entry.cards === 'number' && typeof entry.reviews === 'number';
 }
 
 export function summarizeProgress(progress: ProgressState): SheetSummary {
