@@ -381,6 +381,8 @@ export interface ExerciseGenerationInput {
   count: number;
   exampleCount?: number;
   settings: Settings;
+  /** Restrict the request to a single content type. Defaults to both. */
+  only?: 'examples' | 'sentences';
 }
 
 export interface GeneratedExercises {
@@ -388,33 +390,69 @@ export interface GeneratedExercises {
   sentences: string[];
 }
 
+export interface ExampleGenerationInput {
+  word: VocabWord;
+  count?: number;
+  settings: Settings;
+}
+
+/** Generate example sentences only — no practice exercises are requested. */
+export async function generateExamples({
+  word,
+  count = 2,
+  settings,
+}: ExampleGenerationInput): Promise<ExampleSentence[]> {
+  const result = await generateExercises({
+    word,
+    count: 0,
+    exampleCount: count,
+    settings,
+    only: 'examples',
+  });
+  return result.examples;
+}
+
+/** Generate translation practice sentences only — no examples are requested. */
+export async function generatePracticeSentences({
+  word,
+  count,
+  settings,
+}: {
+  word: VocabWord;
+  count: number;
+  settings: Settings;
+}): Promise<string[]> {
+  const result = await generateExercises({ word, count, settings, only: 'sentences' });
+  return result.sentences;
+}
+
 /**
- * Ask the configured model for context sentences and translation prompts in a
- * single call. Solutions are deliberately left to Google Translate at reveal
- * time.
+ * Ask the configured model for context sentences and/or translation prompts in
+ * a single call. Solutions are deliberately left to Google Translate at reveal
+ * time. Callers can limit the request to one content type with `only`.
  */
 export async function generateExercises({
   word,
   count,
   exampleCount = 2,
   settings,
+  only,
 }: ExerciseGenerationInput): Promise<GeneratedExercises> {
   const target = getLanguage(settings.targetLanguage);
   const native = getLanguage(settings.nativeLanguage);
+  const wantExamples = only !== 'sentences';
+  const wantSentences = only !== 'examples';
 
   const system = `You are an expert ${target.label} teacher and assessment writer. You create clear, level-appropriate example sentences and translation exercises and always respond with valid JSON only.`;
-  const user = `Create ${exampleCount} example sentences and ${count} ${native.label} practice sentences for a ${word.level} (CEFR) learner of ${target.label}.
-
-Target vocabulary: "${word.term}" (${word.partOfSpeech ?? 'word'}) meaning "${word.definition}".
-Requirements:
-- Examples must naturally use "${word.term}" in a common, natural way.
-- Each practice sentence must be unambiguous: the only natural ${target.label} rendering must use exactly "${word.term}", never a common synonym. Add the context, collocation, or detail that rules out synonyms, because a machine translator will otherwise pick whichever wording is most frequent.
-- Match ${word.level} difficulty: vocabulary, grammar, and sentence length should fit that CEFR band.
-- Vary the grammar and context. Avoid repeating sentence openings.
-- Examples: write the sentence in ${target.label} ("target") and its natural ${native.label} translation ("native").
-- Practice: write only the ${native.label} sentences the learner should translate into ${target.label}.
-- Do not include notes, numbering, or anything besides the requested JSON.
-- Return strictly: {"examples":[{"target":"${target.label} sentence","native":"${native.label} translation"}],"sentences":["${native.label} sentence","..."]}`;
+  const user = buildGenerationPrompt({
+    word,
+    count,
+    exampleCount,
+    targetLabel: target.label,
+    nativeLabel: native.label,
+    wantExamples,
+    wantSentences,
+  });
 
   const raw = await requestText(system, user, settings, 3500);
   const parsed = extractJson(raw);
@@ -455,10 +493,64 @@ Requirements:
 
   const uniqueSentences = Array.from(new Set(sentences)).slice(0, count);
 
-  if (uniqueExamples.length === 0 && uniqueSentences.length === 0) {
+  if (wantExamples && !wantSentences && uniqueExamples.length === 0) {
+    throw new Error('The model did not return usable example sentences. Try again or adjust the model settings.');
+  }
+  if (wantSentences && !wantExamples && uniqueSentences.length === 0) {
+    throw new Error('The model did not return usable practice sentences. Try again or adjust the model settings.');
+  }
+  if (wantExamples && wantSentences && uniqueExamples.length === 0 && uniqueSentences.length === 0) {
     throw new Error('The model did not return usable exercises. Try again or adjust the model settings.');
   }
-  return { examples: uniqueExamples, sentences: uniqueSentences };
+  return {
+    examples: wantExamples ? uniqueExamples : [],
+    sentences: wantSentences ? uniqueSentences : [],
+  };
+}
+
+function buildGenerationPrompt({
+  word,
+  count,
+  exampleCount,
+  targetLabel,
+  nativeLabel,
+  wantExamples,
+  wantSentences,
+}: {
+  word: VocabWord;
+  count: number;
+  exampleCount: number;
+  targetLabel: string;
+  nativeLabel: string;
+  wantExamples: boolean;
+  wantSentences: boolean;
+}): string {
+  const shared = `Target vocabulary: "${word.term}" (${word.partOfSpeech ?? 'word'}) meaning "${word.definition}".
+Match ${word.level} difficulty: vocabulary, grammar, and sentence length should fit that CEFR band.
+Vary the grammar and context. Avoid repeating sentence openings.
+Do not include notes, numbering, or anything besides the requested JSON.
+Return strictly valid JSON with only the requested keys.`;
+
+  const exampleRules = `- Examples: write the sentence in ${targetLabel} ("target") and its natural ${nativeLabel} translation ("native"). Examples must naturally use "${word.term}" in a common, natural way.`;
+  const practiceRules = `- Practice: write only the ${nativeLabel} sentences the learner should translate into ${targetLabel}. Each practice sentence must be unambiguous: the only natural ${targetLabel} rendering must use exactly "${word.term}", never a common synonym. Add the context, collocation, or detail that rules out synonyms, because a machine translator will otherwise pick whichever wording is most frequent.`;
+
+  if (wantExamples && !wantSentences) {
+    return `Create ${exampleCount} example sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+${shared}
+${exampleRules}
+Strict JSON shape: {"examples":[{"target":"${targetLabel} sentence","native":"${nativeLabel} translation"}]}`;
+  }
+  if (wantSentences && !wantExamples) {
+    return `Create ${count} ${nativeLabel} practice sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+${shared}
+${practiceRules}
+Strict JSON shape: {"sentences":["${nativeLabel} sentence","..."]}`;
+  }
+  return `Create ${exampleCount} example sentences and ${count} ${nativeLabel} practice sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+${shared}
+${exampleRules}
+${practiceRules}
+Strict JSON shape: {"examples":[{"target":"${targetLabel} sentence","native":"${nativeLabel} translation"}],"sentences":["${nativeLabel} sentence","..."]}`;
 }
 
 export interface TranslationFeedbackInput {

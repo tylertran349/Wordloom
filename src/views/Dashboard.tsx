@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -5,6 +6,7 @@ import {
   Check,
   Cloud,
   Flame,
+  AlertCircle,
   RotateCcw,
   Settings2,
   Sparkles,
@@ -22,6 +24,7 @@ import {
   formatLongDate,
   getGreeting,
   percent,
+  pickNextNewWord,
   pluralize,
 } from '../lib/utils';
 import {
@@ -35,6 +38,8 @@ import {
   SpeakerButton,
   StatCard,
 } from '../components/ui';
+import { GenerateContentButtons } from '../components/GenerateContentButtons';
+import { useWordContentGeneration } from '../hooks/useWordContentGeneration';
 
 export function Dashboard() {
   const { settings, stats, progress, studiedWords, studyOrder, sheetSync } = useApp();
@@ -46,8 +51,12 @@ export function Dashboard() {
   const lastStudiedWord = progress.lastStudied
     ? WORD_BY_ID[progress.lastStudied.wordId]
     : undefined;
-  const nextNewWord = studyOrder.find(
-    (word) => !progress.cards[word.id] && !progress.seenWords[word.id],
+  // In a randomized study order each pick is a fresh random word instead of
+  // the next entry in a fixed shuffle.
+  const nextNewWord = useMemo(
+    () =>
+      pickNextNewWord(studyOrder, settings.newWordOrder, progress.cards, progress.seenWords),
+    [studyOrder, settings.newWordOrder, progress.cards, progress.seenWords],
   );
   const focusWord = nextNewWord ?? lastStudiedWord ?? studyOrder[0] ?? ALL_WORDS[0];
   const focusLabel = nextNewWord
@@ -61,6 +70,18 @@ export function Dashboard() {
     ? stats.levelStats.find((level) => level.level === focusWord.level)
     : undefined;
   const focusExample = focusWord ? progress.generatedExamples[focusWord.id]?.[0] : undefined;
+  const {
+    canGenerate,
+    generatingExamples,
+    generatingSentences,
+    error: generateError,
+    generateExamples,
+    generateSentences,
+    dismissError,
+  } = useWordContentGeneration(focusWord);
+  useEffect(() => {
+    dismissError();
+  }, [focusWord?.id, dismissError]);
   const weekTotal = Array.from({ length: 7 }, (_, index) => {
     const entry = progress.activity[dayKey(addDays(new Date(), -index))];
     return (entry?.studied ?? 0) + (entry?.reviews ?? 0);
@@ -314,8 +335,25 @@ export function Dashboard() {
               </>
             ) : (
               <p className="continue-example-native">
-                Examples appear here once you generate exercises with AI.
+                Examples appear here once you generate them with AI.
               </p>
+            )}
+            {canGenerate && (
+              <div className="continue-generate">
+                <GenerateContentButtons
+                  small
+                  onGenerateExamples={() => void generateExamples()}
+                  onGenerateSentences={() => void generateSentences()}
+                  generatingExamples={generatingExamples}
+                  generatingSentences={generatingSentences}
+                />
+              </div>
+            )}
+            {generateError && (
+              <div className="inline-alert is-error" role="alert">
+                <AlertCircle size={15} aria-hidden="true" />
+                <span>{generateError}</span>
+              </div>
             )}
             <div className="continue-side-footer">
               <TrendingUp size={14} aria-hidden="true" />

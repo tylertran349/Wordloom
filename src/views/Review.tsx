@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AlertCircle,
   ArrowRight,
   BookOpen,
   Check,
@@ -33,6 +34,8 @@ import {
   SpeakerButton,
 } from '../components/ui';
 import { TranslationExercise } from '../components/TranslationExercise';
+import { GenerateContentButtons } from '../components/GenerateContentButtons';
+import { useWordContentGeneration } from '../hooks/useWordContentGeneration';
 
 const GRADES: Array<{ grade: ReviewGrade; label: string; key: string }> = [
   { grade: 'again', label: 'Again', key: '1' },
@@ -92,6 +95,15 @@ export function Review({ practice = false }: { practice?: boolean }) {
   const termRef = useRef<HTMLHeadingElement>(null);
 
   const current = queue[index];
+  const {
+    canGenerate,
+    generatingExamples,
+    generatingSentences,
+    error: generateError,
+    generateExamples,
+    generateSentences,
+    dismissError,
+  } = useWordContentGeneration(current);
   const currentCard = current ? progress.cards[current.id] : undefined;
   const now = Date.now();
   const previewCard = currentCard ?? (current ? createCard(current.id, {
@@ -113,7 +125,8 @@ export function Review({ practice = false }: { practice?: boolean }) {
 
   useEffect(() => {
     setPicks({ example: Math.random(), exercise: Math.random() });
-  }, [current?.id, index, queue]);
+    dismissError();
+  }, [current?.id, index, queue, dismissError]);
 
   const exercise = useMemo(() => {
     if (!current || !settings.reviewExercise) return null;
@@ -466,6 +479,24 @@ export function Review({ practice = false }: { practice?: boolean }) {
                   <p className="review-definition-target lang-target" lang={target.code}>{current.definitionTarget}</p>
                 )}
               </div>
+
+              {canGenerate && (
+                <div className="review-generate-bar">
+                  <GenerateContentButtons
+                    small
+                    onGenerateExamples={() => void generateExamples()}
+                    onGenerateSentences={() => void generateSentences()}
+                    generatingExamples={generatingExamples}
+                    generatingSentences={generatingSentences}
+                  />
+                </div>
+              )}
+              {generateError && (
+                <div className="inline-alert is-error" role="alert">
+                  <AlertCircle size={15} aria-hidden="true" />
+                  <span>{generateError}</span>
+                </div>
+              )}
 
               {settings.reviewShowExample && reviewExample && (
                 <div className="review-example">

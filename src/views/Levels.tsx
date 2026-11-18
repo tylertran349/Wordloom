@@ -19,6 +19,8 @@ import {
   cn,
   formatDue,
   isCEFRLevel,
+  pickNextNewWord,
+  pickRandom,
   pluralize,
 } from '../lib/utils';
 import {
@@ -113,8 +115,14 @@ export function Levels({ level: levelProp }: { level: CEFRLevel }) {
 
   // A word counts as new only if it has never been opened and is not in the
   // review queue. Words seen earlier but skipped are not offered again.
-  const nextWord =
-    words.find((word) => !progress.cards[word.id] && !progress.seenWords[word.id]) ?? words[0];
+  // With a randomized study order a fresh random word is picked on every
+  // change instead of following the fixed deck sequence.
+  const nextWord = useMemo(
+    () =>
+      pickNextNewWord(words, settings.newWordOrder, progress.cards, progress.seenWords) ??
+      (settings.newWordOrder === 'random' ? pickRandom(words) : words[0]),
+    [words, settings.newWordOrder, progress.cards, progress.seenWords],
+  );
   const savedIndex = progress.levelPositions[level];
   // Positions are recorded in vocabulary-file order, so the saved word stays
   // valid when the visible deck is randomly ordered.

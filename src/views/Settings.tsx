@@ -1449,7 +1449,7 @@ export function Settings() {
               <Section title="AI features" description="Turn each optional feature on or off independently.">
                 <Toggle
                   label="Generate examples and practice sentences"
-                  description="Adds a “Generate with AI” button on word pages."
+                  description="Generates examples automatically for new words and adds separate example and exercise buttons where they are shown."
                   checked={settings.aiExercises}
                   onChange={(value) => updateSettings({ aiExercises: value })}
                 />

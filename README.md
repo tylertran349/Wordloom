@@ -33,9 +33,11 @@ configured with `base: './'` so subpath deployments work too.
 
 - **CEFR decks** for A1, A2, B1, and B2 — 3,000 northern Vietnamese words in total (800 / 800 /
   750 / 650). The C1 and C2 decks are present but intentionally empty.
-- **Randomized new-word order** — CEFR decks are shuffled across topics by default so you meet a
-  wider variety of words instead of one topic block at a time. Switch to deck order, or reshuffle,
-  from the level toolbar or Settings → Study. Words you have opened but chose not to add to the
+- **Randomized new-word order** — by default the next word you study is picked fresh at random from
+  the words you have not studied yet, so every pick feels like a new draw instead of a fixed
+  sequence. Deck order follows the vocabulary file instead; you can switch in the level toolbar or
+  Settings → Study, or reshuffle the list order at any time. Words you have opened but chose not to
+  add to the
   review queue are remembered as seen and are skipped when Wordloom picks your next new word, so
   you never get re-served a word you already passed over.
 - **Word pages** with audio pronunciation, part of speech, a native-language definition, an optional
@@ -140,9 +142,10 @@ them to keep the corpus compact. Every word page has a text-to-speech button, an
 definition is the primary gloss.
 
 The decks are vocabulary only. Example sentences and translation exercises are not stored in the
-data file: they are generated with AI the first time you ask for exercises on a word page, then
-cached in your browser's progress. A word you have never generated content for simply shows a
-**Generate with AI** button.
+data file: they are generated with AI and cached in your browser's progress. When AI features are
+enabled, opening a word you have not studied yet generates its example sentences automatically.
+Anywhere examples or exercises appear, a **Generate examples** button and a **Generate exercises**
+button let you create more of each kind independently.
 
 The built-in deck covers A1–B2 everyday northern Vietnamese, with extra weight on conversation,
 work, services, and texting shortcuts. C1 and C2 are left empty by design.
@@ -156,9 +159,9 @@ work, services, and texting shortcuts. C1 and C2 are left empty by design.
 1. Read the word, meaning, and AI-generated examples. Text-to-speech uses Google Translate's free
    web voice by default, so the pronunciation sounds consistent on every device; you can switch to
    your browser's built-in voice in Settings for offline use.
-2. Press **Generate with AI** on a word page to create a set of example sentences and
-   native-language practice prompts. Generation is cached, so the same exercises come back on
-   later visits.
+2. Example sentences are generated automatically for new words. Use **Generate examples** or
+   **Generate exercises** wherever they appear to add more of either kind; the two requests are
+   separate and cached, so existing content comes back on later visits.
 3. Write your translation for each prompt. Answers are never saved or pre-filled; they disappear
    when you leave the page.
 4. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,

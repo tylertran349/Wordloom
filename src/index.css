@@ -860,6 +860,17 @@ kbd {
   padding: 0.4rem 0.68rem;
   font-size: 0.68rem;
 }
+.generate-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.generate-buttons.is-small .button {
+  white-space: nowrap;
+}
+.generate-buttons.is-end {
+  justify-content: flex-end;
+}
 .button-wide {
   width: 100%;
   max-width: 320px;
@@ -1705,6 +1716,9 @@ html[data-theme='dark'] .status-due {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.continue-generate {
+  margin-top: 0.85rem;
+}
 .continue-side-footer {
   display: flex;
   align-items: center;
@@ -2404,6 +2418,12 @@ html[data-theme='dark'] .status-due {
 }
 .section-card-head > :last-child {
   margin-left: auto;
+}
+.section-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 .section-card-head .eyebrow {
   margin-bottom: 0.15rem;
@@ -3193,6 +3213,12 @@ html[data-theme='dark'] .status-due {
   padding: 0.65rem 0.75rem;
   border-radius: 10px;
   background: var(--surface-muted);
+}
+.review-generate-bar {
+  margin-bottom: 0.65rem;
+}
+.review-generate-bar:empty {
+  display: none;
 }
 .review-example-row {
   display: flex;

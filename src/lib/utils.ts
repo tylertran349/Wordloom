@@ -1,4 +1,4 @@
-import type { CEFRLevel } from '../types';
+import type { CEFRLevel, NewWordOrder, VocabWord } from '../types';
 import { CEFR_LEVELS } from '../types';
 
 export function cn(...values: Array<string | false | null | undefined>): string {
@@ -29,6 +29,31 @@ export function shuffle<T>(values: T[]): T[] {
     [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
   }
   return copy;
+}
+
+/** Pick a uniformly random element, or undefined for an empty list. */
+export function pickRandom<T>(values: T[]): T | undefined {
+  if (values.length === 0) return undefined;
+  return values[Math.floor(Math.random() * values.length)];
+}
+
+/**
+ * Choose which new word the learner studies next. Words already in the
+ * review queue or seen before are never offered. When `order` is 'random'
+ * a fresh random candidate is chosen on every call, so each "study next
+ * word" action is random instead of following a fixed shuffle.
+ */
+export function pickNextNewWord(
+  words: VocabWord[],
+  order: NewWordOrder,
+  cards: Record<string, unknown>,
+  seenWords: Record<string, unknown>,
+  excludeId?: string,
+): VocabWord | undefined {
+  const candidates = words.filter(
+    (word) => word.id !== excludeId && !cards[word.id] && !seenWords[word.id],
+  );
+  return order === 'random' ? pickRandom(candidates) : candidates[0];
 }
 
 /**

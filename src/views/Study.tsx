@@ -11,7 +11,6 @@ import {
   ChevronRight,
   CircleDashed,
   Eye,
-  Loader2,
   RotateCcw,
   Sparkles,
   Trash2,
@@ -30,10 +29,11 @@ import {
   getStudySentences,
   hashString,
   percent,
+  pickNextNewWord,
   pluralize,
 } from '../lib/utils';
-import { generateExercises, hasAiCredentials } from '../lib/ai';
 import { speakText } from '../lib/speech';
+import { useWordContentGeneration } from '../hooks/useWordContentGeneration';
 import {
   AppLink,
   ConfirmDialog,
@@ -43,6 +43,7 @@ import {
   ProgressRing,
   SpeakerButton,
 } from '../components/ui';
+import { GenerateContentButtons } from '../components/GenerateContentButtons';
 import { TranslationExercise } from '../components/TranslationExercise';
 
 function statusForCard(card: { status: string; due: number } | undefined, now: number) {
@@ -59,8 +60,6 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     progress,
     markStudied,
     removeStudied,
-    addGeneratedExercises,
-    notify,
     stats,
     recordLevelPosition,
     markSeen,
@@ -71,9 +70,17 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const word = WORD_BY_ID[wordId];
   const deck = word ? levelDecks[word.level] ?? [] : [];
   const index = word ? deck.findIndex((entry) => entry.id === word.id) : -1;
+  const {
+    canGenerate,
+    generatingExamples,
+    generatingSentences,
+    error: generateError,
+    generateExamples,
+    generateSentences,
+    autoGenerateExamples,
+    dismissError,
+  } = useWordContentGeneration(word);
   const [revealedExamples, setRevealedExamples] = useState<Set<number>>(new Set());
-  const [generating, setGenerating] = useState(false);
-  const [generateError, setGenerateError] = useState<string | null>(null);
   const [justAdded, setJustAdded] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [jumpValue, setJumpValue] = useState(() => String(index + 1));
@@ -95,6 +102,19 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   const generated = word ? progress.generatedPractice[word.id] ?? [] : [];
   const examples = word ? progress.generatedExamples[word.id] ?? [] : [];
   const sentences = useMemo(() => getStudySentences(generated), [generated]);
+  // With a randomized study order, every "next" navigation picks a fresh
+  // random unstudied word instead of following the fixed deck sequence.
+  const randomNext = useMemo(() => {
+    if (settings.newWordOrder !== 'random' || !word) return undefined;
+    return pickNextNewWord(
+      deck,
+      'random',
+      progress.cards,
+      progress.seenWords,
+      word.id,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [word?.id, settings.newWordOrder, deck, progress.cards, progress.seenWords]);
 
   useEffect(() => {
     if (word && settings.autoplayAudio) {
@@ -106,10 +126,10 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
 
   useEffect(() => {
     setRevealedExamples(new Set());
-    setGenerateError(null);
+    dismissError();
     setJustAdded(false);
     setConfirmRemove(false);
-  }, [wordId]);
+  }, [wordId, dismissError]);
 
   useEffect(() => {
     setJumpValue(String(index + 1));
@@ -121,6 +141,12 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
     if (!word) return;
     markSeen(word.id);
   }, [word?.id, markSeen]);
+
+  // A newly studied word gets its example sentences automatically. The hook
+  // attempts this once per word and only when no examples are saved yet.
+  useEffect(() => {
+    autoGenerateExamples();
+  }, [autoGenerateExamples]);
 
   // Remember where the learner stopped, per CEFR deck. Positions are stored in
   // vocabulary-file order so a randomized study order does not invalidate them.
@@ -158,58 +184,14 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
   }
 
   const previous = index > 0 ? deck[index - 1] : undefined;
-  const next = index >= 0 && index < deck.length - 1 ? deck[index + 1] : undefined;
+  const positionalNext = index >= 0 && index < deck.length - 1 ? deck[index + 1] : undefined;
+  const next = settings.newWordOrder === 'random' ? randomNext ?? positionalNext : positionalNext;
   const levelStat = stats.levelStats.find((entry) => entry.level === word.level);
   const status = statusForCard(card, Date.now());
   const filled = sentences.filter((sentence, exerciseIndex) =>
     draftedKeys.has(`${word.id}:study-${exerciseIndex}-${hashString(sentence)}`),
   ).length;
   const practicePercent = percent(filled, sentences.length);
-  const canUseAi = hasAiCredentials(settings);
-
-  async function generateMore() {
-    if (!word) return;
-    if (!canUseAi) {
-      notify('Connect an AI provider in Settings to generate examples and practice.', 'info');
-      return;
-    }
-    setGenerating(true);
-    setGenerateError(null);
-    try {
-      const result = await generateExercises({
-        word,
-        count: Math.max(3, settings.exercisesPerWord),
-        exampleCount: 2,
-        settings,
-      });
-      const freshSentences = result.sentences.filter((sentence) => !sentences.includes(sentence));
-      const existingExampleTargets = new Set(
-        examples.map((example) => example.target.trim().toLowerCase()),
-      );
-      const freshExamples = result.examples.filter(
-        (example) => !existingExampleTargets.has(example.target.trim().toLowerCase()),
-      );
-      if (freshSentences.length === 0 && freshExamples.length === 0) {
-        notify('The AI returned content you already have. Try again for a fresh set.', 'info');
-      } else {
-        addGeneratedExercises(word.id, freshExamples, freshSentences);
-        const parts: string[] = [];
-        if (freshExamples.length > 0) {
-          parts.push(`${freshExamples.length} example ${pluralize(freshExamples.length, 'sentence')}`);
-        }
-        if (freshSentences.length > 0) {
-          parts.push(`${freshSentences.length} practice ${pluralize(freshSentences.length, 'sentence')}`);
-        }
-        notify(`Added ${parts.join(' and ')}.`);
-      }
-    } catch (error) {
-      setGenerateError(
-        error instanceof Error ? error.message : 'The AI request failed. Check your provider settings.',
-      );
-    } finally {
-      setGenerating(false);
-    }
-  }
 
   function markWord() {
     if (!word) return;
@@ -364,35 +346,29 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                 <span className="eyebrow">In context</span>
                 <h2>Examples</h2>
               </div>
-              <span className="section-count">
-                {examples.length} {pluralize(examples.length, 'sentence')}
-              </span>
+              <div className="section-head-actions">
+                <span className="section-count">
+                  {examples.length} {pluralize(examples.length, 'sentence')}
+                </span>
+                {canGenerate && (
+                  <GenerateContentButtons
+                    small
+                    className="is-end"
+                    onGenerateExamples={() => void generateExamples()}
+                    onGenerateSentences={() => void generateSentences()}
+                    generatingExamples={generatingExamples}
+                    generatingSentences={generatingSentences}
+                  />
+                )}
+              </div>
             </div>
             {examples.length === 0 ? (
               <div className="examples-empty">
                 <p className="muted-copy">
-                  Examples are generated with AI together with your practice exercises.
+                  {canGenerate
+                    ? 'New words get examples automatically. Use the buttons above to generate more.'
+                    : 'Examples are generated with AI once you connect a provider in Settings.'}
                 </p>
-                {settings.aiExercises && (
-                  <button
-                    type="button"
-                    className="button button-ghost button-small"
-                    onClick={() => void generateMore()}
-                    disabled={generating || !canUseAi}
-                    title={
-                      canUseAi
-                        ? 'Generate example sentences and practice exercises'
-                        : 'Connect an AI provider in Settings to generate examples'
-                    }
-                  >
-                    {generating ? (
-                      <Loader2 size={14} className="spin" aria-hidden="true" />
-                    ) : (
-                      <Sparkles size={14} aria-hidden="true" />
-                    )}
-                    {generating ? 'Generating…' : 'Generate with AI'}
-                  </button>
-                )}
               </div>
             ) : (
               <div className="example-list">
@@ -457,30 +433,20 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
                     <span style={{ width: `${practicePercent}%` }} />
                   </div>
                 </div>
-                {settings.aiExercises && (
-                  <button
-                    type="button"
-                    className="button button-ghost button-small"
-                    onClick={() => void generateMore()}
-                    disabled={generating || !canUseAi}
-                    title={
-                      canUseAi
-                        ? 'Generate example sentences and more practice exercises'
-                        : 'Connect an AI provider in Settings to generate exercises'
-                    }
-                  >
-                    {generating ? (
-                      <Loader2 size={14} className="spin" aria-hidden="true" />
-                    ) : (
-                      <Sparkles size={14} aria-hidden="true" />
-                    )}
-                    {generating ? 'Generating…' : 'Generate with AI'}
-                  </button>
+                {canGenerate && (
+                  <GenerateContentButtons
+                    small
+                    className="is-end"
+                    onGenerateExamples={() => void generateExamples()}
+                    onGenerateSentences={() => void generateSentences()}
+                    generatingExamples={generatingExamples}
+                    generatingSentences={generatingSentences}
+                  />
                 )}
               </div>
             </div>
 
-            {settings.aiExercises && !canUseAi && (
+            {settings.aiExercises && !canGenerate && (
               <div className="inline-alert is-info">
                 <Sparkles size={15} aria-hidden="true" />
                 <span>
@@ -502,7 +468,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
 
             {sentences.length === 0 ? (
               <p className="muted-copy">
-                {canUseAi
+                {canGenerate
                   ? 'Generate a set of AI practice sentences to start translating.'
                   : 'Practice sentences are generated with AI. Connect a provider in Settings to get started.'}
               </p>

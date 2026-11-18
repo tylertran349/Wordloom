@@ -1481,8 +1481,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         return {
           ...current,
-          generatedExamples: { ...current.generatedExamples, [wordId]: mergedExamples },
-          generatedPractice: { ...current.generatedPractice, [wordId]: mergedSentences },
+          // Only touch the content type that was generated. Writing an empty
+          // array for the other type makes generated-content syncs fire for
+          // words that never had that kind of content.
+          generatedExamples:
+            examples.length > 0 || existingExamples.length > 0
+              ? { ...current.generatedExamples, [wordId]: mergedExamples }
+              : current.generatedExamples,
+          generatedPractice:
+            sentences.length > 0 || existingSentences.length > 0
+              ? { ...current.generatedPractice, [wordId]: mergedSentences }
+              : current.generatedPractice,
         };
       });
     },
