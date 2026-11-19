@@ -559,13 +559,14 @@ export function Review({ practice = false }: { practice?: boolean }) {
                   <div className="review-exercise-list">
                     {exerciseSentences.map((sentence, exerciseIndex) => (
                       <TranslationExercise
-                        key={`${current.id}-review-${exerciseIndex}-${hashString(sentence)}`}
+                        key={`${current.id}-review-${hashString(sentence)}`}
                         word={current}
                         sentence={sentence}
                         index={exerciseIndex}
                         total={exerciseSentences.length}
                         // Keyed by the sentence alone so cached Google Translate
-                        // solutions survive list reordering and regeneration.
+                        // solutions and typed drafts stay with their sentence
+                        // even if the saved list is replaced mid-card.
                         exerciseKey={`review-${hashString(sentence)}`}
                         compact
                         hideCounter={exerciseSentences.length === 1}

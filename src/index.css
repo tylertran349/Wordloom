@@ -3867,6 +3867,8 @@ html[data-theme='dark'] .status-due {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  max-height: min(38vh, 20rem);
+  overflow-y: auto;
 }
 .review-example {
   display: grid;
@@ -3919,6 +3921,8 @@ html[data-theme='dark'] .status-due {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  max-height: min(52vh, 32rem);
+  overflow-y: auto;
 }
 .review-grade {
   padding-top: 0.9rem;
