@@ -619,7 +619,8 @@ Do not include notes, numbering, or anything besides the requested JSON.
 Return strictly valid JSON with only the requested keys.`;
 
   // Without an explicit count the model decides how many sentences the word
-  // needs: one per distinct use, so the learner sees every way to apply it.
+  // needs: the fewest that cover one per distinct use, so the learner sees
+  // every way to apply it without filler.
   const exhaustive = exampleCount === undefined;
   const exampleClause = exhaustive
     ? `example sentences that illustrate every common use of "${word.term}"`
@@ -629,20 +630,26 @@ Return strictly valid JSON with only the requested keys.`;
 Never use the word the same way twice. Swapping only the subject, object, or time expression is repetition, not a new use.`;
   const exhaustiveRules = exhaustive
     ? `Cover the full range of uses: every distinct meaning, part of speech, typical collocation, and common set phrase or idiom a learner at ${word.level} is likely to meet.
-Write one sentence per use and keep going until the uses are exhausted — do not stop at a round number, and do not pad with sentences that repeat the same pattern.
-Most words need 4–8 sentences; a word with many senses needs more, and a word with one simple use needs fewer.`
+Use the fewest sentences that still illustrate all of them: one sentence for a word with a single use, and one extra sentence only for each genuinely different use.
+Write one sentence per use — never two for the same use, and never a sentence added just to reach a count.`
     : '';
   const exampleCoverage = [distinctUseRules, exhaustiveRules].filter(Boolean).join('\n');
 
   // Sentences the learner already has count as covered ground: the model is
   // told which usages they show so a second batch adds something new instead
   // of restating the same patterns.
-  const coveredSentences = Array.from(
-    new Set((existingExamples ?? []).map((example) => example.target.trim()).filter(Boolean)),
-  ).slice(-30);
+  const coveredSentences: string[] = [];
+  const coveredKeys = new Set<string>();
+  for (const example of existingExamples ?? []) {
+    const sentence = example.target.trim();
+    const key = sentence.toLowerCase();
+    if (!sentence || coveredKeys.has(key)) continue;
+    coveredKeys.add(key);
+    coveredSentences.push(sentence);
+  }
   const coveredRules = coveredSentences.length
     ? `The learner already has these sentences, so the uses they show are covered:
-${coveredSentences.map((sentence) => `- ${sentence}`).join('\n')}
+${coveredSentences.slice(-30).map((sentence) => `- ${sentence}`).join('\n')}
 Do not rephrase, lightly reword, or restate any of them. Only add sentences that use "${word.term}" in a way none of the sentences above demonstrate, and if every common use is already covered, return an empty examples array.`
     : '';
 
