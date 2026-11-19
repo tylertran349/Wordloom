@@ -194,6 +194,7 @@ async function callGemini(
   settings: Settings,
   maxOutputTokens: number,
   signal?: AbortSignal,
+  timeoutMs = 60_000,
 ): Promise<string> {
   const key = settings.geminiApiKey.trim();
   const model = settings.geminiModel.trim();
@@ -232,7 +233,7 @@ async function callGemini(
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      data = await postJson(url, headers, buildBody(includeThinking), 60_000, signal);
+      data = await postJson(url, headers, buildBody(includeThinking), timeoutMs, signal);
       lastError = undefined;
       break;
     } catch (error) {
@@ -290,6 +291,7 @@ async function callOpenAiCompatible(
   settings: Settings,
   maxOutputTokens: number,
   signal?: AbortSignal,
+  timeoutMs = 60_000,
 ): Promise<string> {
   const base = settings.openaiBaseUrl.trim().replace(/\/+$/, '') || 'https://api.openai.com/v1';
   const model = settings.openaiModel.trim();
@@ -325,7 +327,7 @@ async function callOpenAiCompatible(
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      data = await postJson(url, headers, body, 60_000, signal);
+      data = await postJson(url, headers, body, timeoutMs, signal);
       lastError = undefined;
       break;
     } catch (error) {
@@ -371,11 +373,12 @@ async function requestText(
   settings: Settings,
   maxOutputTokens = 1600,
   signal?: AbortSignal,
+  timeoutMs = 60_000,
 ): Promise<string> {
   if (settings.aiProvider === 'gemini') {
-    return callGemini(system, user, settings, maxOutputTokens, signal);
+    return callGemini(system, user, settings, maxOutputTokens, signal, timeoutMs);
   }
-  return callOpenAiCompatible(system, user, settings, maxOutputTokens, signal);
+  return callOpenAiCompatible(system, user, settings, maxOutputTokens, signal, timeoutMs);
 }
 
 function extractJson(raw: string): unknown {
@@ -517,9 +520,11 @@ export async function generateExercises({
   });
 
   // Exhaustive coverage produces a longer reply than a fixed two-sentence
-  // batch, so example requests get more room before the response is cut off.
+  // batch, so example requests get more room and more time before they are
+  // cut off.
   const maxTokens = wantExamples ? 4096 : 3500;
-  const raw = await requestText(system, user, settings, maxTokens, signal);
+  const timeoutMs = wantExamples ? 120_000 : 60_000;
+  const raw = await requestText(system, user, settings, maxTokens, signal, timeoutMs);
   const parsed = extractJson(raw);
   const record = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null;
 
@@ -606,7 +611,7 @@ Return strictly valid JSON with only the requested keys.`;
     ? `example sentences that illustrate every common use of "${word.term}"`
     : `${exampleCount} example sentences`;
   const exampleCoverage = exhaustive
-    ? `Cover the full range of uses: every distinct meaning, part of speech, and typical collocation a ${word.level} learner is likely to meet.
+    ? `Cover the full range of uses: every distinct meaning, part of speech, typical collocation, and common set phrase or idiom a learner at ${word.level} is likely to meet.
 Write one sentence per use and keep going until the uses are exhausted — do not stop at a round number, and do not pad with sentences that repeat the same pattern.
 Most words need 4–8 sentences; a word with many senses needs more, and a word with one simple use needs fewer.`
     : '';
@@ -615,18 +620,18 @@ Most words need 4–8 sentences; a word with many senses needs more, and a word 
   const practiceRules = `- Practice: write only the ${nativeLabel} sentences the learner should translate into ${targetLabel}. Each practice sentence must be unambiguous: the only natural ${targetLabel} rendering must use exactly "${word.term}", never a common synonym. Add the context, collocation, or detail that rules out synonyms, because a machine translator will otherwise pick whichever wording is most frequent.`;
 
   if (wantExamples && !wantSentences) {
-    return `Create ${exampleClause} for a ${word.level} (CEFR) learner of ${targetLabel}.
+    return `Create ${exampleClause} for a learner of ${targetLabel} at CEFR level ${word.level}.
 ${shared}
 ${exampleRules}
 Strict JSON shape: {"examples":[{"target":"${targetLabel} sentence","native":"${nativeLabel} translation"}]}`;
   }
   if (wantSentences && !wantExamples) {
-    return `Create ${count} ${nativeLabel} practice sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+    return `Create ${count} ${nativeLabel} practice sentences for a learner of ${targetLabel} at CEFR level ${word.level}.
 ${shared}
 ${practiceRules}
 Strict JSON shape: {"sentences":["${nativeLabel} sentence","..."]}`;
   }
-  return `Create ${exampleClause} and ${count} ${nativeLabel} practice sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+  return `Create ${exampleClause} and ${count} ${nativeLabel} practice sentences for a learner of ${targetLabel} at CEFR level ${word.level}.
 ${shared}
 ${exampleRules}
 ${practiceRules}
