@@ -160,8 +160,10 @@ kind of content, and both are available wherever examples or exercises appear.
 
 Example generation is exhaustive by default: the model writes one sentence for each distinct
 meaning, part of speech, and typical collocation, so a word with several uses gets several
-sentences while a word with one simple use gets only a handful. Practice exercises still follow the
-**Sentences per word** setting, so their count stays predictable.
+sentences while a word with one simple use gets only a handful. Each sentence is meant to show a
+different use — repeating the same sense with a new subject or object does not count — and asking
+again only adds uses that the saved sentences do not already cover. Practice exercises still follow
+the **Sentences per word** setting, so their count stays predictable.
 
 The built-in deck covers A1–B2 everyday northern Vietnamese, with extra weight on conversation,
 work, services, and texting shortcuts. C1 and C2 ship empty, ready for imported lists or new corpus

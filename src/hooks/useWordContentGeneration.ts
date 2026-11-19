@@ -110,8 +110,11 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
       await generateBatch({
         kind: 'examples',
         // No count: the model returns one sentence per distinct use, so the
-        // learner sees every common way to apply the word.
-        run: (signal) => requestExamples({ word, settings, signal }),
+        // learner sees every common way to apply the word. Saved examples are
+        // passed along so a second batch adds new uses instead of repeating
+        // the ones already on screen.
+        run: (signal) =>
+          requestExamples({ word, settings, existing: existingExamples, signal }),
         fresh: (generated) => {
           const known = new Set(
             existingExamples.map((example) => example.target.trim().toLowerCase()),
@@ -124,7 +127,7 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
           });
         },
         save: (fresh) => addGeneratedExercises(word.id, fresh, []),
-        noneMessage: 'No new examples — the model returned sentences you already have.',
+        noneMessage: 'No new examples added — the uses you have may already be covered.',
         addedMessage: (count) => `Added ${count} example ${pluralize(count, 'sentence')}.`,
       });
     },

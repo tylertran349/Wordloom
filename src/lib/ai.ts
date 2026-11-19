@@ -435,6 +435,8 @@ export interface ExerciseGenerationInput {
   count: number;
   /** Maximum examples. Omit to illustrate every common use of the word. */
   exampleCount?: number;
+  /** Example sentences the learner already has, whose usages should not repeat. */
+  existingExamples?: ExampleSentence[];
   settings: Settings;
   /** Restrict the request to a single content type. Defaults to both. */
   only?: 'examples' | 'sentences';
@@ -450,6 +452,8 @@ export interface GeneratedExercises {
 export interface ExampleGenerationInput {
   word: VocabWord;
   settings: Settings;
+  /** Example sentences the learner already has, whose usages should not repeat. */
+  existing?: ExampleSentence[];
   /** Cancels the request when the caller goes away. */
   signal?: AbortSignal;
 }
@@ -457,17 +461,20 @@ export interface ExampleGenerationInput {
 /**
  * Generate example sentences only — no practice exercises are requested. The
  * model is asked for as many sentences as it takes to illustrate every common
- * use of the word, not a fixed number.
+ * use of the word, not a fixed number, and to steer clear of usages that
+ * already have a sentence.
  */
 export async function generateExamples({
   word,
   settings,
+  existing,
   signal,
 }: ExampleGenerationInput): Promise<ExampleSentence[]> {
   const result = await generateExercises({
     word,
     count: 0,
     settings,
+    existingExamples: existing,
     only: 'examples',
     signal,
   });
@@ -499,6 +506,7 @@ export async function generateExercises({
   word,
   count,
   exampleCount,
+  existingExamples,
   settings,
   only,
   signal,
@@ -513,6 +521,7 @@ export async function generateExercises({
     word,
     count,
     exampleCount,
+    existingExamples,
     targetLabel: target.label,
     nativeLabel: native.label,
     wantExamples,
@@ -566,7 +575,10 @@ export async function generateExercises({
 
   const uniqueSentences = Array.from(new Set(sentences)).slice(0, count);
 
-  if (wantExamples && !wantSentences && uniqueExamples.length === 0) {
+  // With saved examples, an empty batch can legitimately mean every use is
+  // already covered; the caller reports that instead of an error.
+  const hasExistingExamples = (existingExamples ?? []).length > 0;
+  if (wantExamples && !wantSentences && uniqueExamples.length === 0 && !hasExistingExamples) {
     throw new Error('The model did not return usable example sentences. Try again or adjust the model settings.');
   }
   if (wantSentences && !wantExamples && uniqueSentences.length === 0) {
@@ -585,6 +597,7 @@ function buildGenerationPrompt({
   word,
   count,
   exampleCount,
+  existingExamples,
   targetLabel,
   nativeLabel,
   wantExamples,
@@ -593,6 +606,7 @@ function buildGenerationPrompt({
   word: VocabWord;
   count: number;
   exampleCount?: number;
+  existingExamples?: ExampleSentence[];
   targetLabel: string;
   nativeLabel: string;
   wantExamples: boolean;
@@ -610,13 +624,29 @@ Return strictly valid JSON with only the requested keys.`;
   const exampleClause = exhaustive
     ? `example sentences that illustrate every common use of "${word.term}"`
     : `${exampleCount} example sentences`;
-  const exampleCoverage = exhaustive
+  // Repetition guidance applies to every batch, not just exhaustive ones.
+  const distinctUseRules = `Every sentence must show a different use of "${word.term}": a different meaning, grammatical role, collocation, or set phrase.
+Never use the word the same way twice. Swapping only the subject, object, or time expression is repetition, not a new use.`;
+  const exhaustiveRules = exhaustive
     ? `Cover the full range of uses: every distinct meaning, part of speech, typical collocation, and common set phrase or idiom a learner at ${word.level} is likely to meet.
 Write one sentence per use and keep going until the uses are exhausted — do not stop at a round number, and do not pad with sentences that repeat the same pattern.
 Most words need 4–8 sentences; a word with many senses needs more, and a word with one simple use needs fewer.`
     : '';
+  const exampleCoverage = [distinctUseRules, exhaustiveRules].filter(Boolean).join('\n');
 
-  const exampleRules = `- Examples: write the sentence in ${targetLabel} ("target") and its natural ${nativeLabel} translation ("native"). Examples must naturally use "${word.term}" in a common, natural way.${exampleCoverage ? `\n${exampleCoverage}` : ''}`;
+  // Sentences the learner already has count as covered ground: the model is
+  // told which usages they show so a second batch adds something new instead
+  // of restating the same patterns.
+  const coveredSentences = Array.from(
+    new Set((existingExamples ?? []).map((example) => example.target.trim()).filter(Boolean)),
+  ).slice(-30);
+  const coveredRules = coveredSentences.length
+    ? `The learner already has these sentences, so the uses they show are covered:
+${coveredSentences.map((sentence) => `- ${sentence}`).join('\n')}
+Do not rephrase, lightly reword, or restate any of them. Only add sentences that use "${word.term}" in a way none of the sentences above demonstrate, and if every common use is already covered, return an empty examples array.`
+    : '';
+
+  const exampleRules = `- Examples: write the sentence in ${targetLabel} ("target") and its natural ${nativeLabel} translation ("native"). Examples must naturally use "${word.term}" in a common, natural way.${exampleCoverage ? `\n${exampleCoverage}` : ''}${coveredRules ? `\n${coveredRules}` : ''}`;
   const practiceRules = `- Practice: write only the ${nativeLabel} sentences the learner should translate into ${targetLabel}. Each practice sentence must be unambiguous: the only natural ${targetLabel} rendering must use exactly "${word.term}", never a common synonym. Add the context, collocation, or detail that rules out synonyms, because a machine translator will otherwise pick whichever wording is most frequent.`;
 
   if (wantExamples && !wantSentences) {
