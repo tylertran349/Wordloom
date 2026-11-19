@@ -3858,7 +3858,20 @@ html[data-theme='dark'] .status-due {
   color: var(--muted) !important;
   font-size: 0.74rem !important;
 }
+.review-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.review-example-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
 .review-example {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  gap: 0.65rem;
   padding: 0.65rem 0.75rem;
   border-radius: 10px;
   background: var(--surface-muted);
@@ -3876,6 +3889,8 @@ html[data-theme='dark'] .status-due {
   gap: 0.5rem;
 }
 .review-example-row p {
+  flex: 1;
+  min-width: 0;
   font-size: 0.82rem;
   font-weight: 550;
   line-height: 1.55;
@@ -3899,6 +3914,11 @@ html[data-theme='dark'] .status-due {
   color: var(--faint);
   font-size: 0.54rem;
   text-align: right;
+}
+.review-exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 .review-grade {
   padding-top: 0.9rem;

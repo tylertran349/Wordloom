@@ -56,12 +56,6 @@ interface SessionSummary {
 
 const emptyCounts: GradeCounts = { again: 0, hard: 0, good: 0, easy: 0 };
 
-/** Pick an item from the list using a stable value in the range [0, 1). */
-function pickWithSeed<T>(values: T[], seed: number): T | undefined {
-  if (values.length === 0) return undefined;
-  return values[Math.min(values.length - 1, Math.floor(seed * values.length))];
-}
-
 export function Review({ practice = false }: { practice?: boolean }) {
   const {
     settings,
@@ -90,12 +84,6 @@ export function Review({ practice = false }: { practice?: boolean }) {
   const [counts, setCounts] = useState<GradeCounts>(emptyCounts);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
-  // A fresh random seed per card, so the example and exercise vary between
-  // reviews but stay fixed while the learner works through this card.
-  const [picks, setPicks] = useState(() => ({
-    example: Math.random(),
-    exercise: Math.random(),
-  }));
   const gradeLock = useRef(false);
   const termRef = useRef<HTMLHeadingElement>(null);
 
@@ -118,26 +106,27 @@ export function Review({ practice = false }: { practice?: boolean }) {
     : null;
 
   useEffect(() => {
-    setPicks({ example: Math.random(), exercise: Math.random() });
     dismissError();
     setConfirmRemove(false);
   }, [current?.id, index, queue, dismissError]);
 
-  const exercise = useMemo(() => {
-    if (!current || !settings.reviewExercise) return null;
-    const sentences = getStudySentences(progress.generatedPractice[current.id] ?? []);
-    const sentence = pickWithSeed(sentences, picks.exercise);
-    if (!sentence) return null;
-    return { sentence, index: sentences.indexOf(sentence) };
-  }, [
-    current,
-    picks.exercise,
-    settings.reviewExercise,
-    progress.generatedPractice,
-  ]);
+  const exerciseSentences: string[] = useMemo(() => {
+    if (!current || !settings.reviewExercise) return [];
+    return getStudySentences(progress.generatedPractice[current.id] ?? []);
+  }, [current, settings.reviewExercise, progress.generatedPractice]);
 
-  const examples = current ? progress.generatedExamples[current.id] ?? [] : [];
-  const reviewExample = pickWithSeed(examples, picks.example);
+  const reviewExamples = useMemo(() => {
+    if (!current) return [];
+    // Saved data can contain the same sentence twice after a sync or restore.
+    // Show each saved sentence once, and skip any entry with no target text.
+    const seen = new Set<string>();
+    return (progress.generatedExamples[current.id] ?? []).filter((example) => {
+      const key = example.target.trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [current, progress.generatedExamples]);
 
   function startSession(words: VocabWord[]) {
     setQueue(words.slice(0, settings.maxReviewsPerDay));
@@ -399,7 +388,6 @@ export function Review({ practice = false }: { practice?: boolean }) {
   if (!current) return null;
 
   const card = currentCard;
-  const exerciseKey = exercise ? `review-${hashString(exercise.sentence)}` : 'review';
 
   return (
     <div className="view review-view">
@@ -525,39 +513,65 @@ export function Review({ practice = false }: { practice?: boolean }) {
                 </div>
               )}
 
-              {settings.reviewShowExample && reviewExample && (
-                <div className="review-example">
-                  <span className="definition-label">Example</span>
-                  <div className="review-example-row">
-                    <p className="lang-target" lang={target.code}>{reviewExample.target}</p>
-                    <SpeakerButton
-                      text={reviewExample.target}
-                      lang={target.tts}
-                      label="Hear the example"
-                    />
+              {settings.reviewShowExample && reviewExamples.length > 0 && (
+                <div className="review-examples">
+                  <span className="definition-label">
+                    {reviewExamples.length === 1 ? 'Example' : `Examples · ${reviewExamples.length}`}
+                  </span>
+                  <div className="review-example-list">
+                    {reviewExamples.map((reviewExample, exampleIndex) => (
+                      <div
+                        className="review-example"
+                        key={`${reviewExample.target}-${exampleIndex}`}
+                      >
+                        <span className="example-index">
+                          {String(exampleIndex + 1).padStart(2, '0')}
+                        </span>
+                        <div className="example-copy">
+                          <div className="review-example-row">
+                            <p className="lang-target" lang={target.code}>{reviewExample.target}</p>
+                            <SpeakerButton
+                              text={reviewExample.target}
+                              lang={target.tts}
+                              label={`Hear example ${exampleIndex + 1}`}
+                            />
+                          </div>
+                          {settings.showExampleTranslations && reviewExample.native && (
+                            <p className="review-example-native" lang={native.code}>{reviewExample.native}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  {settings.showExampleTranslations && reviewExample.native && (
-                    <p className="review-example-native" lang={native.code}>{reviewExample.native}</p>
-                  )}
                 </div>
               )}
 
-              {exercise && (
+              {exerciseSentences.length > 0 && (
                 <div className="review-exercise">
                   <div className="review-exercise-head">
-                    <span className="definition-label">Quick production practice</span>
+                    <span className="definition-label">
+                      {exerciseSentences.length === 1
+                        ? 'Quick production practice'
+                        : `Production practice · ${exerciseSentences.length} sentences`}
+                    </span>
                     <span>Optional output before grading</span>
                   </div>
-                  <TranslationExercise
-                    key={`${current.id}-${exerciseKey}`}
-                    word={current}
-                    sentence={exercise.sentence}
-                    index={0}
-                    total={1}
-                    exerciseKey={exerciseKey}
-                    compact
-                    hideCounter
-                  />
+                  <div className="review-exercise-list">
+                    {exerciseSentences.map((sentence, exerciseIndex) => (
+                      <TranslationExercise
+                        key={`${current.id}-review-${exerciseIndex}-${hashString(sentence)}`}
+                        word={current}
+                        sentence={sentence}
+                        index={exerciseIndex}
+                        total={exerciseSentences.length}
+                        // Keyed by the sentence alone so cached Google Translate
+                        // solutions survive list reordering and regeneration.
+                        exerciseKey={`review-${hashString(sentence)}`}
+                        compact
+                        hideCounter={exerciseSentences.length === 1}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 
