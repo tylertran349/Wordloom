@@ -385,7 +385,7 @@ export function Study({ level, wordId }: { level: VocabWord['level']; wordId: st
               <div className="examples-empty">
                 <p className="muted-copy">
                   {canGenerate
-                    ? 'Use Generate examples above to create example sentences with AI.'
+                    ? 'Use Generate examples above to create sentences covering every way this word is used.'
                     : 'Examples are generated with AI once you connect a provider in Settings.'}
                 </p>
               </div>

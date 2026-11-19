@@ -930,7 +930,7 @@ export function Settings() {
               >
                 <RangeSetting
                   label="Sentences per word"
-                  hint="Sets how many practice sentences AI generates per batch. Examples are generated alongside the exercises."
+                  hint="Sets how many practice sentences AI generates per batch. Examples are separate and always cover every common use of the word, so their count varies."
                   min={3}
                   max={10}
                   value={settings.exercisesPerWord}

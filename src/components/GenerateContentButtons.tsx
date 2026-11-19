@@ -38,7 +38,7 @@ export function GenerateContentButtons({
           className={cn('button button-ghost', small && 'button-small')}
           onClick={onGenerateExamples}
           disabled={disabled || generatingExamples}
-          title="Generate example sentences only with AI"
+          title="Generate example sentences covering every use of the word"
         >
           {generatingExamples ? (
             <Loader2 size={14} className="spin" aria-hidden="true" />

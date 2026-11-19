@@ -400,9 +400,37 @@ function extractJson(raw: string): unknown {
   }
 }
 
+/**
+ * Recover complete example objects from a reply whose JSON was cut off or
+ * wrapped in extra prose, so a long batch is not lost to one stray character.
+ */
+function salvageExamples(raw: string): ExampleSentence[] {
+  const recovered: ExampleSentence[] = [];
+  for (const chunk of raw.match(/\{[^{}]*\}/g) ?? []) {
+    try {
+      const item = JSON.parse(chunk) as Record<string, unknown>;
+      const target = typeof item.target === 'string' ? item.target.trim() : '';
+      if (!target) continue;
+      const native = typeof item.native === 'string' ? item.native.trim() : '';
+      recovered.push({ target, native });
+    } catch {
+      // Skip a partial or malformed object and keep the rest.
+    }
+  }
+  return recovered;
+}
+
+/**
+ * Safety net for pathological responses. Example generation is exhaustive, but
+ * the prompt asks for every common use rather than a number, so only a runaway
+ * reply is trimmed.
+ */
+const MAX_GENERATED_EXAMPLES = 40;
+
 export interface ExerciseGenerationInput {
   word: VocabWord;
   count: number;
+  /** Maximum examples. Omit to illustrate every common use of the word. */
   exampleCount?: number;
   settings: Settings;
   /** Restrict the request to a single content type. Defaults to both. */
@@ -418,23 +446,24 @@ export interface GeneratedExercises {
 
 export interface ExampleGenerationInput {
   word: VocabWord;
-  count?: number;
   settings: Settings;
   /** Cancels the request when the caller goes away. */
   signal?: AbortSignal;
 }
 
-/** Generate example sentences only — no practice exercises are requested. */
+/**
+ * Generate example sentences only — no practice exercises are requested. The
+ * model is asked for as many sentences as it takes to illustrate every common
+ * use of the word, not a fixed number.
+ */
 export async function generateExamples({
   word,
-  count = 2,
   settings,
   signal,
 }: ExampleGenerationInput): Promise<ExampleSentence[]> {
   const result = await generateExercises({
     word,
     count: 0,
-    exampleCount: count,
     settings,
     only: 'examples',
     signal,
@@ -466,7 +495,7 @@ export async function generatePracticeSentences({
 export async function generateExercises({
   word,
   count,
-  exampleCount = 2,
+  exampleCount,
   settings,
   only,
   signal,
@@ -487,7 +516,10 @@ export async function generateExercises({
     wantSentences,
   });
 
-  const raw = await requestText(system, user, settings, 3500, signal);
+  // Exhaustive coverage produces a longer reply than a fixed two-sentence
+  // batch, so example requests get more room before the response is cut off.
+  const maxTokens = wantExamples ? 4096 : 3500;
+  const raw = await requestText(system, user, settings, maxTokens, signal);
   const parsed = extractJson(raw);
   const record = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null;
 
@@ -507,6 +539,9 @@ export async function generateExercises({
       examples.push({ target: targetSentence, native: nativeSentence });
     });
   }
+  // A long reply can be truncated mid-JSON or wrapped in prose. Keep every
+  // complete example object instead of discarding the whole batch.
+  if (wantExamples && examples.length === 0) examples.push(...salvageExamples(raw));
 
   const rawSentences = record && Array.isArray(record.sentences) ? record.sentences : [];
   const sentences = rawSentences
@@ -522,7 +557,7 @@ export async function generateExercises({
       seenTargets.add(key);
       return true;
     })
-    .slice(0, exampleCount);
+    .slice(0, exampleCount ?? MAX_GENERATED_EXAMPLES);
 
   const uniqueSentences = Array.from(new Set(sentences)).slice(0, count);
 
@@ -552,7 +587,7 @@ function buildGenerationPrompt({
 }: {
   word: VocabWord;
   count: number;
-  exampleCount: number;
+  exampleCount?: number;
   targetLabel: string;
   nativeLabel: string;
   wantExamples: boolean;
@@ -564,11 +599,23 @@ Vary the grammar and context. Avoid repeating sentence openings.
 Do not include notes, numbering, or anything besides the requested JSON.
 Return strictly valid JSON with only the requested keys.`;
 
-  const exampleRules = `- Examples: write the sentence in ${targetLabel} ("target") and its natural ${nativeLabel} translation ("native"). Examples must naturally use "${word.term}" in a common, natural way.`;
+  // Without an explicit count the model decides how many sentences the word
+  // needs: one per distinct use, so the learner sees every way to apply it.
+  const exhaustive = exampleCount === undefined;
+  const exampleClause = exhaustive
+    ? `example sentences that illustrate every common use of "${word.term}"`
+    : `${exampleCount} example sentences`;
+  const exampleCoverage = exhaustive
+    ? `Cover the full range of uses: every distinct meaning, part of speech, and typical collocation a ${word.level} learner is likely to meet.
+Write one sentence per use and keep going until the uses are exhausted — do not stop at a round number, and do not pad with sentences that repeat the same pattern.
+Most words need 4–8 sentences; a word with many senses needs more, and a word with one simple use needs fewer.`
+    : '';
+
+  const exampleRules = `- Examples: write the sentence in ${targetLabel} ("target") and its natural ${nativeLabel} translation ("native"). Examples must naturally use "${word.term}" in a common, natural way.${exampleCoverage ? `\n${exampleCoverage}` : ''}`;
   const practiceRules = `- Practice: write only the ${nativeLabel} sentences the learner should translate into ${targetLabel}. Each practice sentence must be unambiguous: the only natural ${targetLabel} rendering must use exactly "${word.term}", never a common synonym. Add the context, collocation, or detail that rules out synonyms, because a machine translator will otherwise pick whichever wording is most frequent.`;
 
   if (wantExamples && !wantSentences) {
-    return `Create ${exampleCount} example sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+    return `Create ${exampleClause} for a ${word.level} (CEFR) learner of ${targetLabel}.
 ${shared}
 ${exampleRules}
 Strict JSON shape: {"examples":[{"target":"${targetLabel} sentence","native":"${nativeLabel} translation"}]}`;
@@ -579,7 +626,7 @@ ${shared}
 ${practiceRules}
 Strict JSON shape: {"sentences":["${nativeLabel} sentence","..."]}`;
   }
-  return `Create ${exampleCount} example sentences and ${count} ${nativeLabel} practice sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
+  return `Create ${exampleClause} and ${count} ${nativeLabel} practice sentences for a ${word.level} (CEFR) learner of ${targetLabel}.
 ${shared}
 ${exampleRules}
 ${practiceRules}

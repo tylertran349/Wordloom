@@ -9,8 +9,6 @@ import {
 } from '../lib/ai';
 import { pluralize } from '../lib/utils';
 
-const EXAMPLE_COUNT = 2;
-
 type GenerationKind = 'examples' | 'sentences';
 
 /**
@@ -111,7 +109,9 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
       if (!word) return;
       await generateBatch({
         kind: 'examples',
-        run: (signal) => requestExamples({ word, count: EXAMPLE_COUNT, settings, signal }),
+        // No count: the model returns one sentence per distinct use, so the
+        // learner sees every common way to apply the word.
+        run: (signal) => requestExamples({ word, settings, signal }),
         fresh: (generated) => {
           const known = new Set(
             existingExamples.map((example) => example.target.trim().toLowerCase()),
@@ -124,7 +124,7 @@ export function useWordContentGeneration(word: VocabWord | undefined): WordConte
           });
         },
         save: (fresh) => addGeneratedExercises(word.id, fresh, []),
-        noneMessage: 'The AI returned examples you already have. Try again for a fresh set.',
+        noneMessage: 'No new examples — the model returned sentences you already have.',
         addedMessage: (count) => `Added ${count} example ${pluralize(count, 'sentence')}.`,
       });
     },

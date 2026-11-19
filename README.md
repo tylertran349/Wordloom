@@ -48,7 +48,8 @@ configured with `base: './'` so subpath deployments work too.
   review queue are remembered as seen and are skipped when Wordloom picks your next new word, so
   you never get re-served a word you already passed over.
 - **Word pages** with audio pronunciation, part of speech, a native-language definition, an optional
-  target-language definition, and AI-generated examples with native-language translations.
+  target-language definition, and AI-generated examples with native-language translations. Example
+  generation covers every common use of the word, so the list is as long as that word needs.
 - **Translation exercises generated with AI** — example sentences and practice prompts are created
   for each word on demand, with free-text inputs (your typed answers are never saved, synced, or
   pre-filled — they live only on screen), and a **Reveal with Google Translate** button on every
@@ -157,6 +158,11 @@ only when you ask for them — use the **Generate examples** button to create th
 **Generate exercises** button to create translation exercises. Each button generates only its own
 kind of content, and both are available wherever examples or exercises appear.
 
+Example generation is exhaustive by default: the model writes one sentence for each distinct
+meaning, part of speech, and typical collocation, so a word with several uses gets several
+sentences while a word with one simple use gets only a handful. Practice exercises still follow the
+**Sentences per word** setting, so their count stays predictable.
+
 The built-in deck covers A1–B2 everyday northern Vietnamese, with extra weight on conversation,
 work, services, and texting shortcuts. C1 and C2 ship empty, ready for imported lists or new corpus
 entries.
@@ -229,9 +235,10 @@ term; a renamed built-in word also reserves its original term until the edit is 
 1. Read the word, meaning, and AI-generated examples. Text-to-speech uses Google Translate's free
    web voice by default, so the pronunciation sounds consistent on every device; you can switch to
    your browser's built-in voice in Settings for offline use.
-2. Click **Generate examples** in the Examples card to create example sentences, and
-   **Generate exercises** in the translation card to create practice sentences. The two requests
-   are separate and cached, so existing content comes back on later visits.
+2. Click **Generate examples** in the Examples card to create example sentences covering every
+   common use of the word, and **Generate exercises** in the translation card to create practice
+   sentences. The two requests are separate and cached, so existing content comes back on later
+   visits.
 3. Write your translation for each prompt. Answers are never saved or pre-filled; they disappear
    when you leave the page.
 4. Press **Reveal with Google Translate** to fetch the target-language solution. You can copy it,
